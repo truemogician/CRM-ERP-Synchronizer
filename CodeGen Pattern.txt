@@ -1,0 +1,5 @@
+纷享销客请求：^(?<name>\S+)\t(?<type>\w+)\t(?<required>\S+)\t(?<desc>.*)	\t\t/// <summary>\r\n\t\t/// $<desc>\r\n\t\t/// </summary>\r\n\t\t[JsonProperty("$<name>")]\r\n\t\t[Required]//$<required>\r\n\t\tpublic $<type> $<name> { get; set; }\r\n
+
+纷享销客响应：^data\.(?<name>\w+)\t(?<required>\S+)\t(?<desc>.*)	\t\t/// <summary>\r\n\t\t/// $<desc>\r\n\t\t/// </summary>\r\n\t\t[JsonProperty("$<name>")]\r\n\t\t[Required]//$<required>\r\n\t\tpublic T $<name> { get; set; }\r\n
+
+纷享销客对象：^(?<name>\S+)\t(?<pName>\w+)	\t\t/// <summary>\r\n\t\t/// $<name>\r\n\t\t/// </summary>\r\n\t\t[JsonProperty("$<pName>")]\r\n\t\tpublic string $<name> { get; set; }\r\n

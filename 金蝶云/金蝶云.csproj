@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net5.0</TargetFramework>
+    <RootNamespace>KingdeeCloud</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Folder Include="Utilities\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="Kingdee.BOS.WebApi.Client">
+      <HintPath>Libraries\Kingdee.BOS.WebApi.Client.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+</Project>
