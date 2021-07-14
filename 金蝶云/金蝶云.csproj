@@ -6,6 +6,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Libraries\**" />
+    <EmbeddedResource Remove="Libraries\**" />
+    <None Remove="Libraries\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Api\" />
     <Folder Include="Utilities\" />
   </ItemGroup>
 
@@ -16,6 +23,9 @@
   <ItemGroup>
     <Reference Include="Kingdee.BOS.WebApi.Client">
       <HintPath>Libraries\Kingdee.BOS.WebApi.Client.dll</HintPath>
+    </Reference>
+    <Reference Include="Newtonsoft.Json">
+      <HintPath>Libraries\Newtonsoft.Json.dll</HintPath>
     </Reference>
   </ItemGroup>
 
