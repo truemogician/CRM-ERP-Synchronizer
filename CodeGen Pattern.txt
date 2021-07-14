@@ -2,4 +2,13 @@
 
 纷享销客响应：^data\.(?<name>\w+)\t(?<required>\S+)\t(?<desc>.*)	\t\t/// <summary>\r\n\t\t/// $<desc>\r\n\t\t/// </summary>\r\n\t\t[JsonProperty("$<name>")]\r\n\t\t[Required]//$<required>\r\n\t\tpublic T $<name> { get; set; }\r\n
 
-纷享销客对象：^(?<name>\S+)\t(?<pName>\w+)	\t\t/// <summary>\r\n\t\t/// $<name>\r\n\t\t/// </summary>\r\n\t\t[JsonProperty("$<pName>")]\r\n\t\tpublic string $<name> { get; set; }\r\n
+纷享销客对象：^(?<name>\S+)\s+\S+\s+(?<prop>\w+)\s+(?:\S+\s*)??(?<required>\S+)$	\t\t/// <summary>\r\n\t\t/// $<name>\r\n\t\t/// </summary>\r\n\t\t[JsonProperty("$<prop>")]\r\n\t\t[Required]//$<required>\r\n\t\tpublic string $<name> { get; set; }\r\n
+
+纷享销客枚举：
+function codegen(options){
+	let result = "";
+    options.forEach(option => 
+		result+=`\t\t/// <summary>\r\n\t\t/// ${option.label}\r\n\t\t/// </summary>\r\n\t\t[EnumMember(Value = "${option.value}")]\r\n\t\t${option.label},\r\n\r\n`
+	);
+	console.log(result);
+}

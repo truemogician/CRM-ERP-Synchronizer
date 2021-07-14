@@ -1,16 +1,17 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net5.0</TargetFramework>
-    <RootNamespace>FXiaoKe</RootNamespace>
+	<TargetFramework>net5.0</TargetFramework>
+	<RootNamespace>FXiaoKe</RootNamespace>
+	  <LangVersion>latest</LangVersion>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
+	<PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Shared\Shared.csproj" />
+	<ProjectReference Include="..\Shared\Shared.csproj" />
   </ItemGroup>
 
 </Project>

@@ -1,13 +1,15 @@
-﻿using System.Collections.Generic;
+﻿// ReSharper disable StringLiteralTypo
+using System.Collections.Generic;
 using Newtonsoft.Json;
 
 namespace FXiaoKe.Models {
-	public class Staff {
+	public class Staff : ModelBase {
+		[JsonProperty("openUserId")]
+		[PrimaryKey]
+		public string Id { get; set; }
+
 		[JsonProperty("enterpriseId")]
 		public int EnterpriseId { get; set; }
-
-		[JsonProperty("openUserId")]
-		public string OpenUserId { get; set; }
 
 		[JsonProperty("account")]
 		public string Account { get; set; }
