@@ -1,4 +1,7 @@
 ﻿// ReSharper disable StringLiteralTypo
+// ReSharper disable InconsistentNaming
+using System.ComponentModel.DataAnnotations;
+using System.Runtime.Serialization;
 using FXiaoKe.Models;
 using Newtonsoft.Json;
 
@@ -13,12 +16,16 @@ namespace TheFirstFarm.Models.FXiaoKe {
 		/// </summary>
 
 		[JsonProperty("account_no")]
+		[Required]
+		[RegularExpression(@"CUST\d{4,}")]
 		public string Id { get; set; }
 
 		/// <summary>
 		///     客户名称
 		/// </summary>
 		[JsonProperty("name")]
+		[Required]
+		[PrimaryKey]
 		public string Name { get; set; }
 
 		/// <summary>
@@ -26,6 +33,8 @@ namespace TheFirstFarm.Models.FXiaoKe {
 		/// </summary>
 
 		[JsonProperty("owner")]
+		[Required]
+		[ForeignKey(typeof(Staff))]
 		public string Contact { get; set; }
 
 		/// <summary>
@@ -33,35 +42,40 @@ namespace TheFirstFarm.Models.FXiaoKe {
 		/// </summary>
 
 		[JsonProperty("field_Nx4Oo__c")]
-		public string Currency { get; set; } = "人民币";
+		[Required]
+		public Currency SettlementCurrency { get; set; } = Currency.RMB;
 
 		/// <summary>
 		///     创建组织编码
 		/// </summary>
 
 		[JsonProperty("field_U8k97__c")]
-		public string CreatorOrgId { get; set; } = "100";
+		[Required]
+		public Organization CreatorOrg { get; set; } = Organization.TheFirstFarm;
 
 		/// <summary>
 		///     创建组织名称
 		/// </summary>
 
 		[JsonProperty("field_Qbln5__c")]
-		public string CreatorOrgName { get; set; } = "江苏一号农场科技股份有限公司";
+		[Required]
+		public OrganizationName CreatorOrgName { get; set; } = OrganizationName.TheFirstFarm;
 
 		/// <summary>
 		///     使用组织编码
 		/// </summary>
 
 		[JsonProperty("field_f267J__c")]
-		public string UserOrgId { get; set; } = "100";
+		[Required]
+		public Organization UserOrg { get; set; } = Organization.TheFirstFarm;
 
 		/// <summary>
 		///     使用组织名称
 		/// </summary>
 
 		[JsonProperty("field_7v1a2__c")]
-		public string UserOrgName { get; set; } = "江苏一号农场科技股份有限公司";
+		[Required]
+		public OrganizationName UserOrgName { get; set; } = OrganizationName.TheFirstFarm;
 
 		/// <summary>
 		///     是否需要同步到金蝶
@@ -83,5 +97,107 @@ namespace TheFirstFarm.Models.FXiaoKe {
 
 		[JsonProperty("sync_TorF__c")]
 		public bool SyncSuccess { get; set; }
+	}
+
+	public enum Currency {
+		/// <summary>
+		///     PRE001
+		/// </summary>
+		[EnumMember(Value = "cJoS42Bvj")]
+		RMB,
+
+		/// <summary>
+		///     PRE002
+		/// </summary>
+		[EnumMember(Value = "9budk8Qg6")]
+		PRE002,
+
+		/// <summary>
+		///     PRE003
+		/// </summary>
+		[EnumMember(Value = "0bg2lP3iC")]
+		PRE003,
+
+		/// <summary>
+		///     PRE004
+		/// </summary>
+		[EnumMember(Value = "oxfswvKPO")]
+		PRE004,
+
+		/// <summary>
+		///     PRE005
+		/// </summary>
+		[EnumMember(Value = "PWs5iRCd6")]
+		PRE005,
+
+		/// <summary>
+		///     PRE006
+		/// </summary>
+		[EnumMember(Value = "63b132wdN")]
+		PRE006,
+
+		/// <summary>
+		///     PRE007
+		/// </summary>
+		[EnumMember(Value = "0cg1IM59y")]
+		PRE007,
+
+		/// <summary>
+		///     其他
+		/// </summary>
+		[EnumMember(Value = "other")]
+		Other
+	}
+
+	public enum Organization {
+		/// <summary>
+		///     江苏一号农场科技股份有限公司
+		/// </summary>
+		[EnumMember(Value = "823li72l1")]
+		TheFirstFarm,
+
+		/// <summary>
+		///     旅游酒店BD
+		/// </summary>
+		[EnumMember(Value = "0461V10u4")]
+		TourHotelBD,
+
+		/// <summary>
+		///     江苏海威科网络科技有限公司
+		/// </summary>
+		[EnumMember(Value = "option1")]
+		Hiwico,
+
+		/// <summary>
+		///     其他
+		/// </summary>
+		[EnumMember(Value = "other")]
+		Other
+	}
+
+	public enum OrganizationName {
+		/// <summary>
+		///     江苏一号农场科技股份有限公司
+		/// </summary>
+		[EnumMember(Value = "jO1vcYL3g")]
+		TheFirstFarm,
+
+		/// <summary>
+		///     江苏海威科网络科技有限公司
+		/// </summary>
+		[EnumMember(Value = "g5ySNf9e5")]
+		Hiwico,
+
+		/// <summary>
+		///     旅游酒店BD
+		/// </summary>
+		[EnumMember(Value = "option1")]
+		TourHotelBD,
+
+		/// <summary>
+		///     其他
+		/// </summary>
+		[EnumMember(Value = "other")]
+		Other
 	}
 }
