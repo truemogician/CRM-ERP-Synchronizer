@@ -5,10 +5,11 @@
 纷享销客对象：^(?<name>\S+)\s+\S+\s+(?<prop>\w+)\s+(?:\S+\s*)??(?<required>\S+)$	\t\t/// <summary>\r\n\t\t/// $<name>\r\n\t\t/// </summary>\r\n\t\t[JsonProperty("$<prop>")]\r\n\t\t[Required]//$<required>\r\n\t\tpublic string $<name> { get; set; }\r\n
 
 纷享销客枚举：
-function codegen(options){
-	let result = "";
+function generateEnum(name, options){
+	let result = `public enum ${name} {\r\n`;
     options.forEach(option => 
 		result+=`\t\t/// <summary>\r\n\t\t/// ${option.label}\r\n\t\t/// </summary>\r\n\t\t[EnumMember(Value = "${option.value}")]\r\n\t\t${option.label},\r\n\r\n`
 	);
+	result+=`}`
 	console.log(result);
 }

@@ -5,11 +5,15 @@ VisualStudioVersion = 16.0.31424.327
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "一号农场", "一号农场\一号农场.csproj", "{72EEDD3F-7566-41C2-AC78-0266104849CF}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "纷享销客", "纷享销客\纷享销客.csproj", "{F6F71067-DBE3-4918-A8D8-6430EB1D6855}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FXiaoKe", "纷享销客\FXiaoKe.csproj", "{F6F71067-DBE3-4918-A8D8-6430EB1D6855}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "金蝶云", "金蝶云\金蝶云.csproj", "{4244C673-BFC0-405E-805A-94307CEBDFB1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Kingdee", "金蝶云\Kingdee.csproj", "{4244C673-BFC0-405E-805A-94307CEBDFB1}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Shared", "Shared\Shared.csproj", "{20505952-C266-4DA8-A192-AE9F51329CBF}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FXiaoKe.Test", "FXiaoKe.Test\FXiaoKe.Test.csproj", "{B44CF3DF-20FC-45CE-88AF-78DF11631F69}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Shared.Test", "Shared.Test\Shared.Test.csproj", "{8664EDC4-F083-4988-80F0-AB0962607BA7}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,6 +37,14 @@ Global
 		{20505952-C266-4DA8-A192-AE9F51329CBF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{20505952-C266-4DA8-A192-AE9F51329CBF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{20505952-C266-4DA8-A192-AE9F51329CBF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B44CF3DF-20FC-45CE-88AF-78DF11631F69}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B44CF3DF-20FC-45CE-88AF-78DF11631F69}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B44CF3DF-20FC-45CE-88AF-78DF11631F69}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B44CF3DF-20FC-45CE-88AF-78DF11631F69}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8664EDC4-F083-4988-80F0-AB0962607BA7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8664EDC4-F083-4988-80F0-AB0962607BA7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8664EDC4-F083-4988-80F0-AB0962607BA7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8664EDC4-F083-4988-80F0-AB0962607BA7}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
