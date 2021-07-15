@@ -2,10 +2,10 @@
 // ReSharper disable StringLiteralTypo
 // ReSharper disable InconsistentNaming
 using System.Collections.Generic;
-using KingdeeCloud.Utilities;
+using Kingdee.Utilities;
 using Newtonsoft.Json;
 
-namespace KingdeeCloud.Models {
+namespace Kingdee.Models {
 	public class FNumberConverter : StringIdConverter {
 		protected override string IdName => "FNumber";
 	}

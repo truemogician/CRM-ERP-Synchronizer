@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
-    <RootNamespace>KingdeeCloud</RootNamespace>
+    <RootNamespace>Kingdee</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
@@ -12,7 +12,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Api\" />
+    <Folder Include="Response\" />
+    <Folder Include="Request\" />
     <Folder Include="Utilities\" />
   </ItemGroup>
 

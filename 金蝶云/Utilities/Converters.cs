@@ -2,7 +2,7 @@
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
-namespace KingdeeCloud.Utilities {
+namespace Kingdee.Utilities {
 	public abstract class StringIdConverter : JsonConverter<string> {
 		protected abstract string IdName { get; }
 
