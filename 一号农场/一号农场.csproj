@@ -24,9 +24,4 @@
     <Folder Include="Models\Kingdee\" />
   </ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\纷享销客\FXiaoKe.csproj" />
-    <ProjectReference Include="..\金蝶云\Kingdee.csproj" />
-  </ItemGroup>
-
 </Project>
