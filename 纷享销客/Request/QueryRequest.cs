@@ -7,17 +7,18 @@ using System.Runtime.Serialization;
 using FXiaoKe.Models;
 using FXiaoKe.Response;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 using Shared.Utilities;
 
 namespace FXiaoKe.Request {
-	[Request("/cgi/crm/custom/v2/data/get", ResponseType = typeof(QueryByConditionResponse))]
+	[Request("/cgi/crm/custom/v2/data/get", typeof(QueryByConditionResponse))]
 	public class QueryCustomByIdRequest<T> : QueryByIdRequest<T> where T : ModelBase {
 		public QueryCustomByIdRequest() { }
 		public QueryCustomByIdRequest(Client client) : base(client) { }
 		public QueryCustomByIdRequest(string id, Client client) : base(id, client) { }
 	}
 
-	[Request("/cgi/crm/v2/data/get", ResponseType = typeof(QueryByConditionResponse))]
+	[Request("/cgi/crm/v2/data/get", typeof(QueryByConditionResponse))]
 	public class QueryByIdRequest<T> : CrmRequest<IdInfo<T>> where T : ModelBase {
 		public QueryByIdRequest() { }
 		public QueryByIdRequest(Client client) : base(client) { }
@@ -35,13 +36,13 @@ namespace FXiaoKe.Request {
 		public string Id { get; set; }
 	}
 
-	[Request("/cgi/crm/custom/v2/data/query", ResponseType = typeof(QueryByConditionResponse))]
+	[Request("/cgi/crm/custom/v2/data/query", typeof(QueryByConditionResponse))]
 	public class QueryCustomByConditionRequest<T> : QueryByConditionRequest<T> where T : ModelBase {
 		public QueryCustomByConditionRequest() { }
 		public QueryCustomByConditionRequest(Client client) : base(client) { }
 	}
 
-	[Request("/cgi/crm/v2/data/query", ResponseType = typeof(QueryByConditionResponse))]
+	[Request("/cgi/crm/v2/data/query", typeof(QueryByConditionResponse))]
 	public class QueryByConditionRequest<T> : CrmRequest<ConditionInfo<T>> where T : ModelBase {
 		public QueryByConditionRequest() { }
 		public QueryByConditionRequest(Client client) : base(client) { }
@@ -191,6 +192,7 @@ namespace FXiaoKe.Request {
 		public DescendingModelOrder(string propertyName) : base(propertyName, false) { }
 	}
 
+	[JsonConverter(typeof(StringEnumConverter))]
 	public enum QueryOperator {
 		/// <summary>
 		///     =

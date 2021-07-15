@@ -6,7 +6,7 @@ namespace FXiaoKe.Request {
 	/// <summary>
 	///     获取应用及授权请求
 	/// </summary>
-	[Request("/cgi/corpAccessToken/get/V2", HttpMethod.Post, typeof(AuthorizationResponse))]
+	[Request("/cgi/corpAccessToken/get/V2", typeof(AuthorizationResponse))]
 	public class AuthorizationRequest : RequestBase {
 		/// <summary>
 		///     企业应用ID

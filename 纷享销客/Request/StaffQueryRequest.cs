@@ -3,7 +3,7 @@ using FXiaoKe.Response;
 using Newtonsoft.Json;
 
 namespace FXiaoKe.Request {
-	[Request("/cgi/user/getByMobile", HttpMethod.Post, typeof(StaffQueryResponse))]
+	[Request("/cgi/user/getByMobile", typeof(StaffQueryResponse))]
 	public class StaffQueryRequest : RequestWithBasicAuth {
 		public StaffQueryRequest() { }
 		public StaffQueryRequest(Client client) : base(client) { }

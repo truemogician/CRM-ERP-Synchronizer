@@ -2,6 +2,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.Runtime.Serialization;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 
 namespace FXiaoKe.Request.Message {
 	public class ArticlesMessageRequest : MessageRequest {
@@ -65,6 +66,7 @@ namespace FXiaoKe.Request.Message {
 		public string Content { get; set; }
 	}
 
+	[JsonConverter(typeof(StringEnumConverter))]
 	public enum ArticleType : byte {
 		[EnumMember(Value = "TEXT")]
 		Text,

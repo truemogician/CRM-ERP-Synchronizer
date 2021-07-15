@@ -14,7 +14,7 @@ namespace FXiaoKe.Request {
 
 	public class CreationRequest<T, TDetail> : CreationRequestBase<CreationData<T, TDetail>> where T : ModelBase where TDetail : ModelBase { }
 
-	[Request("/cgi/crm/v2/data/create", ResponseType = typeof(CreationResponse))]
+	[Request("/cgi/crm/v2/data/create", typeof(CreationResponse))]
 	public abstract class CreationRequestBase<T> : CrmRequest<T> {
 		/// <summary>
 		///     是否触发工作流（不传时默认为true, 表示触发），该参数对所有对象均有效
