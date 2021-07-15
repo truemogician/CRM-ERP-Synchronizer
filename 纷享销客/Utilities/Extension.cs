@@ -34,13 +34,11 @@ namespace FXiaoKe.Utilities {
 				VerifyInheritance(type, typeof(ModelBase));
 			MemberInfo result = null;
 			var members = (type.GetProperties() as MemberInfo[]).Concat(type.GetFields()).ToList();
-			foreach (var member in members)
-				if (member.GetCustomAttribute<PrimaryKeyAttribute>() is { } attr) {
-					if (result is null)
-						result = member;
-					else
-						throw new DuplicatePrimaryKeyException(type);
-				}
+			foreach (var member in members.Where(member => member.GetCustomAttribute<PrimaryKeyAttribute>() is { }))
+				if (result is null)
+					result = member;
+				else
+					throw new DuplicatePrimaryKeyException(type);
 			if (result is not null)
 				return result;
 			result = members.FirstOrDefault(member => member.Name.Equals("Id", StringComparison.OrdinalIgnoreCase));
