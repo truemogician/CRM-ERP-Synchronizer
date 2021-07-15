@@ -4,7 +4,7 @@ using Newtonsoft.Json.Linq;
 using Shared.Exceptions;
 
 namespace Shared.JsonConverters {
-	public abstract class TimeSpanConverter<T> : JsonConverter<TimeSpan> where T : unmanaged {
+	public abstract class TimeSpanConverter<T> : JsonConverter<TimeSpan> where T : IConvertible {
 		protected abstract Func<TimeSpan, T> ToNumber { get; }
 		protected abstract Func<T, TimeSpan> FromNumber { get; }
 
@@ -20,13 +20,62 @@ namespace Shared.JsonConverters {
 		}
 	}
 
-	public sealed class TimeSpanSecondIntegerConverter : TimeSpanConverter<int> {
-		protected override Func<TimeSpan, int> ToNumber => timeSpan => (int)Math.Round(timeSpan.TotalSeconds);
-		protected override Func<int, TimeSpan> FromNumber => seconds => TimeSpan.FromSeconds(seconds);
+	public class TimeSpanUnitConverter<T> : TimeSpanConverter<T> where T : IConvertible {
+		public TimeSpanUnitConverter(TimeSpanUnit unit) => Unit = unit;
+		public TimeSpanUnit Unit { get; }
+
+		protected virtual T FromDouble(double time) {
+			return Type.GetTypeCode(typeof(T)) switch {
+				TypeCode.Double => (dynamic)time,
+				TypeCode.Single => Convert.ToSingle(time),
+				TypeCode.Int64  => Convert.ToInt64(time),
+				TypeCode.Int32  => Convert.ToInt32(time),
+				TypeCode.Int16  => Convert.ToInt16(time),
+				TypeCode.UInt64 => Convert.ToUInt64(time),
+				TypeCode.UInt32 => Convert.ToUInt32(time),
+				TypeCode.UInt16 => Convert.ToUInt16(time),
+				TypeCode.Byte   => Convert.ToByte(time),
+				TypeCode.SByte  => Convert.ToSByte(time),
+				TypeCode.Char   => Convert.ToChar(time),
+				TypeCode.String => Convert.ToString(time),
+				_               => throw new NotImplementedException()
+			};
+		}
+
+		protected override Func<TimeSpan, T> ToNumber
+			=> timeSpan => FromDouble(
+				Unit switch {
+					TimeSpanUnit.Tick        => timeSpan.Ticks,
+					TimeSpanUnit.Millisecond => timeSpan.TotalMilliseconds,
+					TimeSpanUnit.Second      => timeSpan.TotalSeconds,
+					TimeSpanUnit.Minute      => timeSpan.TotalMinutes,
+					TimeSpanUnit.Hour        => timeSpan.TotalHours,
+					TimeSpanUnit.Day         => timeSpan.TotalDays,
+					_                        => throw new EnumValueOutOfRangeException<TimeSpanUnit>(Unit)
+				}
+			);
+
+		protected override Func<T, TimeSpan> FromNumber
+			=> value => {
+				double db = value.ToDouble(null);
+				return Unit switch {
+					TimeSpanUnit.Tick        => TimeSpan.FromTicks(Convert.ToInt64(db)),
+					TimeSpanUnit.Millisecond => TimeSpan.FromMilliseconds(db),
+					TimeSpanUnit.Second      => TimeSpan.FromSeconds(db),
+					TimeSpanUnit.Minute      => TimeSpan.FromMinutes(db),
+					TimeSpanUnit.Hour        => TimeSpan.FromHours(db),
+					TimeSpanUnit.Day         => TimeSpan.FromDays(db),
+					_                        => throw new EnumValueOutOfRangeException<TimeSpanUnit>(Unit)
+				};
+			};
 	}
 
-	public sealed class TimeSpanSecondDoubleConverter : TimeSpanConverter<double> {
-		protected override Func<TimeSpan, double> ToNumber => timeSpan => timeSpan.TotalSeconds;
-		protected override Func<double, TimeSpan> FromNumber => TimeSpan.FromSeconds;
+	public enum TimeSpanUnit {
+		Tick,
+		Millisecond,
+		Second,
+		Minute,
+		Hour,
+		Day
 	}
 }
