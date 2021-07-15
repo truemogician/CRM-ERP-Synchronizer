@@ -8,11 +8,12 @@ namespace TheFirstFarm.Models.FXiaoKe {
 	///     客户财务信息
 	/// </summary>
 	[Model("AccountFinInfoObj")]
-	public class FinancialInfo : ModelBase {
+	public class CustomerFinancialInfo : ModelBase {
 		/// <summary>
 		///     发票抬头
 		/// </summary>
 		[JsonProperty("name")]
+		[PrimaryKey]
 		[Required]
 		public string Title { get; set; }
 

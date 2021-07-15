@@ -8,11 +8,13 @@ namespace TheFirstFarm.Models.FXiaoKe {
 	///     客户地址
 	/// </summary>
 	[Model("AccountAddrObj")]
-	public class Address : ModelBase {
+	public class CustomerAddress : ModelBase {
 		/// <summary>
 		///     地址编号
 		/// </summary>
 		[JsonProperty("name")]
+		[PrimaryKey]
+		[RegularExpression(@"Addr\.\d{4}-\d{2}-\d{2}_\d{6,}")]
 		[Required]
 		public string Id { get; set; }
 
@@ -35,6 +37,6 @@ namespace TheFirstFarm.Models.FXiaoKe {
 		/// </summary>
 		[JsonProperty("contact_way")]
 		[Required]
-		public string Contact { get; set; }
+		public string ContactWay { get; set; }
 	}
 }

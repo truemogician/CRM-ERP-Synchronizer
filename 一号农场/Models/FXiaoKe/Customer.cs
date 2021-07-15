@@ -4,6 +4,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Runtime.Serialization;
 using FXiaoKe.Models;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 
 namespace TheFirstFarm.Models.FXiaoKe {
 	/// <summary>
@@ -99,6 +100,7 @@ namespace TheFirstFarm.Models.FXiaoKe {
 		public bool SyncSuccess { get; set; }
 	}
 
+	[JsonConverter(typeof(StringEnumConverter))]
 	public enum Currency {
 		/// <summary>
 		///     PRE001
@@ -149,6 +151,7 @@ namespace TheFirstFarm.Models.FXiaoKe {
 		Other
 	}
 
+	[JsonConverter(typeof(StringEnumConverter))]
 	public enum Organization {
 		/// <summary>
 		///     江苏一号农场科技股份有限公司
@@ -175,6 +178,7 @@ namespace TheFirstFarm.Models.FXiaoKe {
 		Other
 	}
 
+	[JsonConverter(typeof(StringEnumConverter))]
 	public enum OrganizationName {
 		/// <summary>
 		///     江苏一号农场科技股份有限公司

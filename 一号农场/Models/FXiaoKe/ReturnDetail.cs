@@ -2,6 +2,7 @@
 using System.Runtime.Serialization;
 using FXiaoKe.Models;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 
 namespace TheFirstFarm.Models.FXiaoKe {
 	[Model("object_wVB1X__c", true)]
@@ -79,6 +80,7 @@ namespace TheFirstFarm.Models.FXiaoKe {
 		public string Contact { get; set; }
 	}
 
+	[JsonConverter(typeof(StringEnumConverter))]
 	public enum ReturnType {
 		/// <summary>
 		/// 退货（指退货不补货）

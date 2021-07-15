@@ -3,6 +3,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Runtime.Serialization;
 using FXiaoKe.Models;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 
 namespace TheFirstFarm.Models.FXiaoKe {
 	[Model("object_4qZkc__c", true)]
@@ -50,6 +51,7 @@ namespace TheFirstFarm.Models.FXiaoKe {
 		public string Reason { get; set; }
 	}
 
+	[JsonConverter(typeof(StringEnumConverter))]
 	public enum BusinessType {
 		/// <summary>
 		/// 普通销售
