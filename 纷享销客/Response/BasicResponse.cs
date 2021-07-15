@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
+using Microsoft.VisualBasic.CompilerServices;
 using Newtonsoft.Json;
 
 namespace FXiaoKe.Response {
@@ -11,6 +12,7 @@ namespace FXiaoKe.Response {
 		[Required]
 		public int RawErrorCode { get; set; }
 
+		[JsonIgnore]
 		public ErrorCode ErrorCode {
 			get {
 				try {
@@ -28,6 +30,12 @@ namespace FXiaoKe.Response {
 		/// </summary>
 		[JsonProperty("errorMessage")]
 		[Required]
-		public ErrorCode ErrorMessage { get; set; }
+		public string ErrorMessage { get; set; }
+
+		public static bool operator true(BasicResponse resp) => resp;
+
+		public static bool operator false(BasicResponse resp) => !(bool)resp;
+
+		public static implicit operator bool(BasicResponse resp) => resp is not null && resp.ErrorCode == ErrorCode.Success;
 	}
 }

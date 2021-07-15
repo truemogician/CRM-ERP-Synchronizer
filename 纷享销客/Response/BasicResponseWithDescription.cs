@@ -3,6 +3,6 @@
 namespace FXiaoKe.Response {
 	public class BasicResponseWithDescription : BasicResponse {
 		[JsonProperty("errorDescription")]
-		public ErrorCode ErrorDescription { get; set; }
+		public string ErrorDescription { get; set; }
 	}
 }
