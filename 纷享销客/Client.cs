@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Net.Http;
 using System.Reflection;
@@ -9,6 +11,7 @@ using FXiaoKe.Request.Message;
 using FXiaoKe.Response;
 using FXiaoKe.Utilities;
 using Newtonsoft.Json;
+using Shared.Exceptions;
 
 namespace FXiaoKe {
 	public class Client {
@@ -28,28 +31,31 @@ namespace FXiaoKe {
 		public AuthorizationRequest AuthorizationInfo { get; } = new();
 
 		public string CorpId { get; private set; }
-		public string CorpAccessToken { get; private set; }
-		public string OperatorId { get; private set; }
 
-		public async Task<string> ReceiveJson<T>(T request) where T : RequestBase {
-			var respMessage = await HttpClient.SendAsync(request);
-			return await respMessage.Content.ReadAsStringAsync();
-		}
+		public string CorpAccessToken { get; private set; }
+
+		protected DateTime? ExpireAt { get; private set; }
+
+		public string OperatorId { get; private set; }
 
 		public async Task<dynamic> ReceiveResponse<T>(T request) where T : RequestBase {
 			var attrs = typeof(T).GetRequestAttributes();
-			string json = await ReceiveJson(request);
+			string json = await ValidateAndSend(request);
 			return typeof(JsonConvert).GetMethod("DeserializeObject", BindingFlags.Static | BindingFlags.Public)!.MakeGenericMethod(attrs.First(attr => attr.ResponseType is not null).ResponseType).Invoke(null, new object[] {json});
 		}
 
-		public async Task<TResponse> ReceiveResponse<TResponse, TRequest>(TRequest request) where TRequest : RequestBase => JsonConvert.DeserializeObject<TResponse>(await ReceiveJson(request));
+		public async Task<TResponse> ReceiveResponse<TResponse, TRequest>(TRequest request) where TRequest : RequestBase => JsonConvert.DeserializeObject<TResponse>(await ValidateAndSend(request));
 
-		public async Task<bool> Authorize(string staffPhoneNumber) {
+		public async Task<AuthorizationResponse> Authorize() {
 			var authResp = await ReceiveResponse<AuthorizationResponse, AuthorizationRequest>(AuthorizationInfo);
 			if (authResp.ErrorCode != ErrorCode.Success)
-				return false;
+				return authResp;
 			CorpId = authResp.CorpId;
 			CorpAccessToken = authResp.CorpAccessToken;
+			return authResp;
+		}
+
+		public async Task<bool> SetOperator(string staffPhoneNumber) {
 			var staffResp = await ReceiveResponse<StaffQueryResponse, StaffQueryRequest>(
 				new StaffQueryRequest {
 					CorpId = CorpId,
@@ -87,7 +93,7 @@ namespace FXiaoKe {
 			return response.Data;
 		}
 
-		public Task<BasicResponse> SendMessage<T>(T request) where T : MessageRequest => SendRequestWithAuth<BasicResponse, T>(request);
+		public Task<BasicResponse> SendMessage<T>(T request) where T : MessageRequest => ReceiveResponse<BasicResponse, T>(request);
 
 		public Task<BasicResponse> SendTextMessage(string text, params string[] receiversIds) {
 			var receiversIdsList = receiversIds.ToList();
@@ -100,9 +106,26 @@ namespace FXiaoKe {
 			);
 		}
 
-		private Task<TResponse> SendRequestWithAuth<TResponse, TRequest>(TRequest request) where TRequest : RequestWithBasicAuth {
-			request.UseClient(this);
-			return ReceiveResponse<TResponse, TRequest>(request);
+		protected async Task AuthenticateRequest<T>(T request) where T : RequestBase {
+			if (request is RequestWithBasicAuth req) {
+				if (ExpireAt.HasValue && DateTime.Now < ExpireAt.Value)
+					return;
+				var resp = await Authorize();
+				if (!resp)
+					throw new GenericException<AuthorizationResponse>(resp, "Authorization failed");
+				ExpireAt = DateTime.Now + resp.ExpiresIn;
+				req.UseClient(this);
+			}
+		}
+
+		private async Task<string> ValidateAndSend<T>(T request) where T : RequestBase {
+			await AuthenticateRequest(request);
+			var validationResults = request.Validate();
+			if (validationResults?.Count > 0)
+				throw new GenericException<List<ValidationResult>>(validationResults, "Request validation failed");
+			var respMessage = await HttpClient.SendAsync(request);
+			string json = await respMessage.Content.ReadAsStringAsync();
+			return json;
 		}
 	}
 }
