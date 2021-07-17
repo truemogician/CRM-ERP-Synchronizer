@@ -2,32 +2,18 @@
 
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
-    <RootNamespace>Kingdee</RootNamespace>
+	  <LangVersion>latest</LangVersion>
+	  <Copyright></Copyright>
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="Libraries\**" />
-    <EmbeddedResource Remove="Libraries\**" />
-    <None Remove="Libraries\**" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Response\" />
-    <Folder Include="Request\" />
-    <Folder Include="Utilities\" />
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
+    <PackageReference Include="OneOf" Version="3.0.190" />
+    <PackageReference Include="System.Configuration.ConfigurationManager" Version="5.0.0" />
   </ItemGroup>
 
   <ItemGroup>
-    <Reference Include="Kingdee.BOS.WebApi.Client">
-      <HintPath>Libraries\Kingdee.BOS.WebApi.Client.dll</HintPath>
-    </Reference>
-    <Reference Include="Newtonsoft.Json">
-      <HintPath>Libraries\Newtonsoft.Json.dll</HintPath>
-    </Reference>
+    <ProjectReference Include="..\Shared\Shared.csproj" />
   </ItemGroup>
 
 </Project>
