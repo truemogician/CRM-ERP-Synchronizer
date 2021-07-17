@@ -1,9 +1,11 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using OneOf;
 
 namespace Kingdee.Requests.Query {
 	public class Expression : ExpressionBase<ExpressionBody, Expression, ArithmeticOperator> {
-		private Expression(OneOf<Function, Column, Literal> body) : base(body) { }
+		private Expression(OneOf<ArgumentCollection, Column, Literal> body) : base(body) { }
 
 		private Expression(Expression left, ArithmeticOperator @operator, Expression right) : base(left, @operator, right) { }
 
@@ -17,10 +19,22 @@ namespace Kingdee.Requests.Query {
 
 		public override int GetHashCode() => HashCode.Combine(Body, Operator, Left, Right);
 
+		public Clause Like(string pattern) => new(this, ComparisonOperator.Like, pattern);
+
+		public Clause NotLike(string pattern) => new(this, ComparisonOperator.NotLike, pattern);
+
+		public Clause Between(Expression from, Expression to) => new(this, ComparisonOperator.Between, new BetweenPair(from, to));
+
+		public Clause NotBetween(Expression from, Expression to) => new(this, ComparisonOperator.NotBetween, new BetweenPair(from, to));
+
+		public Clause In(params Expression[] expressions) => new(this, ComparisonOperator.In, new InList(expressions));
+
+		public Clause NotIn(params Expression[] expressions) => new(this, ComparisonOperator.NotIn, new InList(expressions));
+
 		protected bool Equals(Expression other) => Equals(Body, other.Body) && Equals(Operator, other.Operator) && Equals(Left, other.Left) && Equals(Right, other.Right);
 
 		#region Conversion Operators
-		public static implicit operator Expression(Function value) => new(value);
+		public static implicit operator Expression(ArgumentCollection value) => new(value);
 		public static implicit operator Expression(Column value) => new(value);
 		public static implicit operator Expression(Literal value) => new(value);
 		public static implicit operator Expression(string value) => (Literal)value;
@@ -43,7 +57,7 @@ namespace Kingdee.Requests.Query {
 		public static Expression operator ^(Expression left, Expression right) => new(left, ArithmeticOperator.ExclusiveOr, right);
 		#endregion
 
-		#region Logical Operators
+		#region Comparison Operators
 		public static Clause operator ==(Expression left, Expression right) => new(left, ComparisonOperator.Equal, right);
 		public static Clause operator !=(Expression left, Expression right) => new(left, ComparisonOperator.NotEqual, right);
 		public static Clause operator >(Expression left, Expression right) => new(left, ComparisonOperator.Greater, right);
@@ -54,8 +68,8 @@ namespace Kingdee.Requests.Query {
 	}
 
 	public class ExpressionBody : IFormType {
-		private readonly OneOf<Function, Column, Literal> _content;
-		public ExpressionBody(OneOf<Function, Column, Literal> content) => _content = content;
+		private readonly OneOf<ArgumentCollection, Column, Literal> _content;
+		public ExpressionBody(OneOf<ArgumentCollection, Column, Literal> content) => _content = content;
 
 		public Type FormType {
 			get {
@@ -71,11 +85,11 @@ namespace Kingdee.Requests.Query {
 			}
 		}
 
-		public static implicit operator ExpressionBody(OneOf<Function, Column, Literal> oneOf) => new(oneOf);
+		public static implicit operator ExpressionBody(OneOf<ArgumentCollection, Column, Literal> oneOf) => new(oneOf);
 		public static implicit operator ExpressionBody(Function function) => new(function);
 		public static implicit operator ExpressionBody(Column column) => new(column);
 		public static implicit operator ExpressionBody(Literal literal) => new(literal);
-		public static implicit operator OneOf<Function, Column, Literal>(ExpressionBody exp) => exp._content;
+		public static implicit operator OneOf<ArgumentCollection, Column, Literal>(ExpressionBody exp) => exp._content;
 
 		public override string ToString()
 			=> _content.Index switch {
@@ -86,7 +100,7 @@ namespace Kingdee.Requests.Query {
 			};
 	}
 
-	public class ExpressionBase<TBody, TOperand, TOperator> : IFormType where TBody : IFormType where TOperand : ExpressionBase<TBody, TOperand, TOperator> where TOperator : Operator {
+	public class ExpressionBase<TBody, TOperand, TOperator> : IFormType where TBody : class, IFormType where TOperand : ExpressionBase<TBody, TOperand, TOperator> where TOperator : Operator {
 		protected ExpressionBase(TBody body) => Body = body;
 
 		protected ExpressionBase(TOperand left, TOperator @operator, TOperand right) {
