@@ -1,9 +1,13 @@
 ﻿using System;
+using FXiaoKe.Response;
+using Shared.Exceptions;
 using SystemHttpMethod = System.Net.Http.HttpMethod;
 
 namespace FXiaoKe.Request {
 	[AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
 	public class RequestAttribute : Attribute {
+		private readonly Type _responseType;
+
 		public RequestAttribute(string path = null) => Path = path;
 
 		public RequestAttribute(string path, HttpMethod method) : this(path) {
@@ -48,7 +52,14 @@ namespace FXiaoKe.Request {
 
 		public SystemHttpMethod Method { get; init; }
 
-		public Type ResponseType { get; init; }
+		public Type ResponseType {
+			get => _responseType;
+			init {
+				if (!value.IsSubclassOf(typeof(ResponseBase)))
+					throw new TypeReflectionException(value, $"{nameof(ResponseType)} must derive from {nameof(ResponseBase)}");
+				_responseType = value;
+			}
+		}
 	}
 
 	public enum HttpMethod {
