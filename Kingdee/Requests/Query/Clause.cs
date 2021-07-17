@@ -14,8 +14,6 @@ namespace Kingdee.Requests.Query {
 
 		public ComparisonOperator Operator { get; init; }
 
-		public override string ToString() => $"({Left} {Operator} {Right})";
-
 		public Type FormType {
 			get {
 				var (left, right) = (Left.FormType, Right.FormType);
@@ -26,5 +24,7 @@ namespace Kingdee.Requests.Query {
 				Right.FormType = value;
 			}
 		}
+
+		public override string ToString() => $"({Left} {Operator} {Right})";
 	}
 }

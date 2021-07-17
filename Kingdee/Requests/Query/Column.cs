@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Text;
-using Newtonsoft.Json;
 using Shared.Exceptions;
 using Shared.Utilities;
 
@@ -12,8 +11,6 @@ namespace Kingdee.Requests.Query {
 		public Column(string propertyName) => PropertyNameChain.Add(propertyName);
 
 		public Column(params string[] propertyNameChain) => PropertyNameChain.AddRange(propertyNameChain);
-
-		public Type FormType { get; set; }
 
 		protected List<string> PropertyNameChain { get; } = new();
 
@@ -44,6 +41,8 @@ namespace Kingdee.Requests.Query {
 				TypeCode.Object                                                                                                                                => Type.IsSubclassOf(typeof(IEnumerable<byte>)) ? DataType.Bit : throw new TypeReflectionException(Type, $"Can't be mapped to {nameof(DataType)}"),
 				_                                                                                                                                              => throw new TypeReflectionException(Type, $"Can't be mapped to {nameof(DataType)}")
 			};
+
+		public Type FormType { get; set; }
 
 		public override string ToString()
 			=> PropertyChain.Aggregate(
