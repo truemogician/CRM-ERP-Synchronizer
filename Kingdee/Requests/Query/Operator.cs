@@ -33,7 +33,7 @@ namespace Kingdee.Requests.Query {
 
 		public static readonly ComparisonOperator NotBetween = !Between;
 
-		public static readonly ComparisonOperator In = new("In");
+		public static readonly ComparisonOperator In = new("IN");
 
 		public static readonly ComparisonOperator NotIn = !In;
 		private ComparisonOperator(string symbol) : base(symbol) { }
