@@ -8,9 +8,13 @@ namespace Shared.JsonConverters {
 		public ObjectWrapperConverter(string propertyName) : base(propertyName) { }
 	}
 
-	public class ObjectWrapperConverter<T> : JsonConverter<T> {
+	public class ObjectWrapperConverter<T> : ObjectWrapperConverterBase<T> {
 		public ObjectWrapperConverter(string propertyName) => PropertyName = propertyName;
-		public string PropertyName { get; }
+		public override string PropertyName { get; }
+	}
+
+	public abstract class ObjectWrapperConverterBase<T> : JsonConverter<T> {
+		public abstract string PropertyName { get; }
 
 		public sealed override void WriteJson(JsonWriter writer, T value, JsonSerializer serializer) {
 			writer.WriteStartObject();
