@@ -13,6 +13,11 @@ namespace Kingdee.Requests {
 
 		public Field(params string[] propertyNameChain) => PropertyNameChain.AddRange(propertyNameChain);
 
+		public Field(Field src) {
+			FormType = src.FormType;
+			PropertyNameChain = new List<string>(src.PropertyNameChain);
+		}
+
 		public List<string> PropertyNameChain { get; } = new();
 
 		protected IEnumerable<PropertyInfo> PropertyChain {
@@ -44,6 +49,20 @@ namespace Kingdee.Requests {
 			};
 
 		public Type FormType { get; set; }
+
+		public Field Concat(Field field) {
+			if (Type != field.FormType)
+				throw new Exception($"{nameof(Type)} of the preceding field must equals to {nameof(FormType)} of the succeeding field");
+			var result = new Field(this);
+			result.PropertyNameChain.AddRange(field.PropertyNameChain);
+			return result;
+		}
+
+		public Field Concat(string propertyName) {
+			var result = new Field(this);
+			result.PropertyNameChain.Add(propertyName);
+			return result;
+		}
 
 		public override string ToString()
 			=> PropertyChain.Aggregate(
