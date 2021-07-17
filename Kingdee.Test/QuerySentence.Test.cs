@@ -7,23 +7,38 @@ using Shared.JsonConverters;
 
 namespace Kingdee.Test {
 	public class QuerySentenceTests {
-		public Sentence<Foo> Sentence { get; set; }
+		public List<Column> Columns { get; } = new();
 
 		[SetUp]
 		public void SetUp() {
-			var column = new Column(nameof(Foo.Prop3), nameof(Foo.Prop3.Prop2));
-			Sentence = column * 2 > 4;
+			Columns.Add(new Column(nameof(Foo.Prop1)));
+			Columns.Add(new Column(nameof(Foo.Prop2)));
+			Columns.Add(new Column(nameof(Foo.Prop3), nameof(Foo.Prop3.Prop1)));
+			Columns.Add(new Column(nameof(Foo.Prop3), nameof(Foo.Prop3.Prop2)));
 		}
 
 		[Test]
-		public void ToStringTest() {
-			Assert.AreEqual("((C.E * 2) > 4)", Sentence.ToString());
+		public void OperatorTest() {
+			Sentence<Foo> sentence = Columns[3] * 2 > 4;
+			Assert.AreEqual("((C.E * 2) > 4)", sentence.ToString());
 		}
 
 		[Test]
-		public void ConverterTest() {
+		public void BetweenTest() {
+			Sentence<Foo> sentence = (Columns[0] * 2).Between(3, 4);
+			Assert.AreEqual("((A * 2) BETWEEN 3 AND 4)", sentence.ToString());
+		}
+
+		[Test]
+		public void InTest() {
+			Sentence<Foo> sentence = (Columns[0] ^ 8).In("a", "b", Columns[2]);
+			Assert.AreEqual("((A ^ 8) IN ('a', 'b', C.D))", sentence.ToString());
+		}
+
+		[Test]
+		public void SerializeTest() {
 			var foo = new FooFoo<Foo>() {
-				Sentence = Sentence
+				Sentence = Columns[3] * 2 > 4
 			};
 			Assert.AreEqual("{\"sentence\":\"((C.E * 2) > 4)\"}", JsonConvert.SerializeObject(foo));
 		}
