@@ -6,14 +6,10 @@ using FXiaoKe.Exceptions;
 using FXiaoKe.Models;
 using FXiaoKe.Request;
 using Shared.Exceptions;
+using static Shared.Utilities.Extension;
 
 namespace FXiaoKe.Utilities {
 	public static class Extension {
-		private static void VerifyInheritance(Type derived, Type super) {
-			if (!derived.IsSubclassOf(super))
-				throw new TypeReflectionException(derived, $"Type \"{derived.FullName}\" should derive from \"{super.FullName}\"");
-		}
-
 		public static ModelAttribute GetModelAttribute(this Type type, bool verify = true) {
 			if (verify)
 				VerifyInheritance(type, typeof(ModelBase));

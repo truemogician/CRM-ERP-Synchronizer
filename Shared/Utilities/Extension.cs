@@ -7,6 +7,11 @@ using Shared.Exceptions;
 
 namespace Shared.Utilities {
 	public static class Extension {
+		public static void VerifyInheritance(Type derived, Type super) {
+			if (!derived.IsSubclassOf(super))
+				throw new TypeReflectionException(derived, $"Type \"{derived.FullName}\" should derive from \"{super.FullName}\"");
+		}
+
 		public static List<T> GetAttributes<T>(this PropertyInfo property) where T : Attribute => property.GetCustomAttributes(typeof(T), true).Cast<T>().ToList();
 
 		public static T GetAttribute<T>(this PropertyInfo property) where T : Attribute => property.GetAttributes<T>().FirstOrDefault();
@@ -16,13 +21,12 @@ namespace Shared.Utilities {
 			return properties.Select(p => selector(p.GetAttribute<TAttribute>())).ToList();
 		}
 
+		public static Type GetPropertyType(this Type type, string propertyName) => type.GetProperty(propertyName)?.PropertyType;
+
 		public static List<string> GetJsonPropertyNames(this Type type) {
 			var properties = type.GetProperties(BindingFlags.Public);
 			return properties.Select(
-					prop => {
-						var attr = prop.GetJsonProperty();
-						return attr is null ? prop.Name : attr.PropertyName;
-					}
+					prop => prop.GetJsonPropertyName()
 				)
 				.ToList();
 		}
@@ -34,21 +38,15 @@ namespace Shared.Utilities {
 			return prop.GetCustomAttribute<JsonPropertyAttribute>();
 		}
 
+		public static string GetJsonPropertyName(this Type type, string propertyName) => type.GetProperty(propertyName).GetJsonPropertyName();
+
 		public static JsonPropertyAttribute GetJsonProperty(this PropertyInfo property) => property.GetCustomAttribute<JsonPropertyAttribute>();
 
-		public static string GetJsonPropertyName(this Type type, string propertyName) {
-			var attr = type.GetJsonProperty(propertyName);
-			return attr is null ? propertyName : attr.PropertyName;
-		}
+		public static string GetJsonPropertyName(this PropertyInfo property) => property.GetJsonProperty() is { } attr ? attr.PropertyName : property.Name;
 
 		public static PropertyInfo GetPropertyFromJsonPropertyName(this Type type, string jsonPropertyName) {
 			var props = type.GetProperties(BindingFlags.Public);
-			return props.FirstOrDefault(
-				prop => {
-					var attr = prop.GetJsonProperty();
-					return (attr is null ? prop.Name : attr.PropertyName) == jsonPropertyName;
-				}
-			);
+			return props.FirstOrDefault(prop => prop.GetJsonPropertyName() == jsonPropertyName);
 		}
 	}
 }
