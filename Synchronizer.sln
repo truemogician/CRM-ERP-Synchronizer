@@ -3,8 +3,6 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.31424.327
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TheFirstFarm", "一号农场\TheFirstFarm.csproj", "{72EEDD3F-7566-41C2-AC78-0266104849CF}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Shared", "Shared\Shared.csproj", "{20505952-C266-4DA8-A192-AE9F51329CBF}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FXiaoKe.Test", "FXiaoKe.Test\FXiaoKe.Test.csproj", "{B44CF3DF-20FC-45CE-88AF-78DF11631F69}"
@@ -22,7 +20,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		.editorconfig = .editorconfig
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TheFirstFarm.Test", "TheFirstFarm.Test\TheFirstFarm.Test.csproj", "{F2F57FCD-CAE4-4166-A618-ED915F600424}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TheFirstFarm.Test", "TheFirstFarm.Test\TheFirstFarm.Test.csproj", "{F2F57FCD-CAE4-4166-A618-ED915F600424}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TheFirstFarm", "TheFirstFarm\TheFirstFarm.csproj", "{72DD74F4-83ED-46BF-8A20-6D8A2CE8E31D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -30,10 +30,6 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{72EEDD3F-7566-41C2-AC78-0266104849CF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{72EEDD3F-7566-41C2-AC78-0266104849CF}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{72EEDD3F-7566-41C2-AC78-0266104849CF}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{72EEDD3F-7566-41C2-AC78-0266104849CF}.Release|Any CPU.Build.0 = Release|Any CPU
 		{20505952-C266-4DA8-A192-AE9F51329CBF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{20505952-C266-4DA8-A192-AE9F51329CBF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{20505952-C266-4DA8-A192-AE9F51329CBF}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -62,6 +58,10 @@ Global
 		{F2F57FCD-CAE4-4166-A618-ED915F600424}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F2F57FCD-CAE4-4166-A618-ED915F600424}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F2F57FCD-CAE4-4166-A618-ED915F600424}.Release|Any CPU.Build.0 = Release|Any CPU
+		{72DD74F4-83ED-46BF-8A20-6D8A2CE8E31D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{72DD74F4-83ED-46BF-8A20-6D8A2CE8E31D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{72DD74F4-83ED-46BF-8A20-6D8A2CE8E31D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{72DD74F4-83ED-46BF-8A20-6D8A2CE8E31D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
