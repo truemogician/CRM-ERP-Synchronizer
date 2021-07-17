@@ -1,11 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using OneOf;
 
 namespace Kingdee.Requests.Query {
 	public class Expression : ExpressionBase<ExpressionBody, Expression, ArithmeticOperator> {
-		private Expression(OneOf<ArgumentCollection, Column, Literal> body) : base(body) { }
+		private Expression(OneOf<ArgumentCollection, Field, Literal> body) : base(body) { }
 
 		private Expression(Expression left, ArithmeticOperator @operator, Expression right) : base(left, @operator, right) { }
 
@@ -35,7 +33,7 @@ namespace Kingdee.Requests.Query {
 
 		#region Conversion Operators
 		public static implicit operator Expression(ArgumentCollection value) => new(value);
-		public static implicit operator Expression(Column value) => new(value);
+		public static implicit operator Expression(Field value) => new(value);
 		public static implicit operator Expression(Literal value) => new(value);
 		public static implicit operator Expression(string value) => (Literal)value;
 		public static implicit operator Expression(long value) => (Literal)value;
@@ -68,8 +66,8 @@ namespace Kingdee.Requests.Query {
 	}
 
 	public class ExpressionBody : IFormType {
-		private readonly OneOf<ArgumentCollection, Column, Literal> _content;
-		public ExpressionBody(OneOf<ArgumentCollection, Column, Literal> content) => _content = content;
+		private readonly OneOf<ArgumentCollection, Field, Literal> _content;
+		public ExpressionBody(OneOf<ArgumentCollection, Field, Literal> content) => _content = content;
 
 		public Type FormType {
 			get {
@@ -85,11 +83,11 @@ namespace Kingdee.Requests.Query {
 			}
 		}
 
-		public static implicit operator ExpressionBody(OneOf<ArgumentCollection, Column, Literal> oneOf) => new(oneOf);
+		public static implicit operator ExpressionBody(OneOf<ArgumentCollection, Field, Literal> oneOf) => new(oneOf);
 		public static implicit operator ExpressionBody(Function function) => new(function);
-		public static implicit operator ExpressionBody(Column column) => new(column);
+		public static implicit operator ExpressionBody(Field column) => new(column);
 		public static implicit operator ExpressionBody(Literal literal) => new(literal);
-		public static implicit operator OneOf<ArgumentCollection, Column, Literal>(ExpressionBody exp) => exp._content;
+		public static implicit operator OneOf<ArgumentCollection, Field, Literal>(ExpressionBody exp) => exp._content;
 
 		public override string ToString()
 			=> _content.Index switch {

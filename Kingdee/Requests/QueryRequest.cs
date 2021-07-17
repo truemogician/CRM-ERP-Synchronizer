@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Kingdee.Forms;
+using Kingdee.Requests.Query;
 using Kingdee.Utilities;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -9,7 +10,7 @@ using Shared.Exceptions;
 using Shared.JsonConverters;
 using Shared.Utilities;
 
-namespace Kingdee.Requests.Query {
+namespace Kingdee.Requests {
 	public class QueryRequest<T> : RequestBase where T : FormBase {
 		public QueryRequest() : this(typeof(T).GetJsonPropertyNames()) { }
 

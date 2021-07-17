@@ -3,16 +3,17 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using Kingdee.Requests.Query;
 using Shared.Exceptions;
 using Shared.Utilities;
 
-namespace Kingdee.Requests.Query {
-	public class Column : IFormType {
-		public Column(string propertyName) => PropertyNameChain.Add(propertyName);
+namespace Kingdee.Requests {
+	public class Field : IFormType {
+		public Field(string propertyName) => PropertyNameChain.Add(propertyName);
 
-		public Column(params string[] propertyNameChain) => PropertyNameChain.AddRange(propertyNameChain);
+		public Field(params string[] propertyNameChain) => PropertyNameChain.AddRange(propertyNameChain);
 
-		protected List<string> PropertyNameChain { get; } = new();
+		public List<string> PropertyNameChain { get; } = new();
 
 		protected IEnumerable<PropertyInfo> PropertyChain {
 			get {
@@ -61,27 +62,35 @@ namespace Kingdee.Requests.Query {
 			throw new NotImplementedException();
 		}
 
-		protected bool Equals(Column other) => Equals(PropertyNameChain, other.PropertyNameChain);
+		protected bool Equals(Field other) => Equals(PropertyNameChain, other.PropertyNameChain);
 
 		#region Arithmetic Operators
-		public static Expression operator +(Column left, Expression right) => (Expression)left + right;
-		public static Expression operator -(Column left, Expression right) => (Expression)left - right;
-		public static Expression operator *(Column left, Expression right) => (Expression)left * right;
-		public static Expression operator /(Column left, Expression right) => (Expression)left / right;
-		public static Expression operator %(Column left, Expression right) => (Expression)left % right;
-		public static Expression operator &(Column left, Expression right) => (Expression)left & right;
-		public static Expression operator |(Column left, Expression right) => (Expression)left | right;
-		public static Expression operator ^(Column left, Expression right) => (Expression)left ^ right;
+		public static Expression operator +(Field left, Expression right) => (Expression)left + right;
+		public static Expression operator -(Field left, Expression right) => (Expression)left - right;
+		public static Expression operator *(Field left, Expression right) => (Expression)left * right;
+		public static Expression operator /(Field left, Expression right) => (Expression)left / right;
+		public static Expression operator %(Field left, Expression right) => (Expression)left % right;
+		public static Expression operator &(Field left, Expression right) => (Expression)left & right;
+		public static Expression operator |(Field left, Expression right) => (Expression)left | right;
+		public static Expression operator ^(Field left, Expression right) => (Expression)left ^ right;
 		#endregion
 
 		#region Comparison Operators
-		public static Clause operator ==(Column left, Expression right) => (Expression)left == right;
-		public static Clause operator !=(Column left, Expression right) => (Expression)left != right;
-		public static Clause operator >(Column left, Expression right) => (Expression)left > right;
-		public static Clause operator <=(Column left, Expression right) => (Expression)left <= right;
-		public static Clause operator <(Column left, Expression right) => (Expression)left < right;
-		public static Clause operator >=(Column left, Expression right) => (Expression)left >= right;
+		public static Clause operator ==(Field left, Expression right) => (Expression)left == right;
+		public static Clause operator !=(Field left, Expression right) => (Expression)left != right;
+		public static Clause operator >(Field left, Expression right) => (Expression)left > right;
+		public static Clause operator <=(Field left, Expression right) => (Expression)left <= right;
+		public static Clause operator <(Field left, Expression right) => (Expression)left < right;
+		public static Clause operator >=(Field left, Expression right) => (Expression)left >= right;
 		#endregion
+	}
+
+	public class Field<T> : Field {
+		public Field(string propertyName) : base(propertyName) => FormType = typeof(T);
+
+		public Field(params string[] propertyNameChain) : base(propertyNameChain) => FormType = typeof(T);
+
+		public Field(Field field) : base(field.PropertyNameChain.ToArray()) => FormType = typeof(T);
 	}
 
 	public interface IFormType {

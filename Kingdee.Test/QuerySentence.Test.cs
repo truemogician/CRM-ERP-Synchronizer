@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Kingdee.Requests;
 using NUnit.Framework;
 using Kingdee.Requests.Query;
 using Newtonsoft.Json;
@@ -7,14 +8,14 @@ using Shared.JsonConverters;
 
 namespace Kingdee.Test {
 	public class QuerySentenceTests {
-		public List<Column> Columns { get; } = new();
+		public List<Field> Columns { get; } = new();
 
 		[SetUp]
 		public void SetUp() {
-			Columns.Add(new Column(nameof(Foo.Prop1)));
-			Columns.Add(new Column(nameof(Foo.Prop2)));
-			Columns.Add(new Column(nameof(Foo.Prop3), nameof(Foo.Prop3.Prop1)));
-			Columns.Add(new Column(nameof(Foo.Prop3), nameof(Foo.Prop3.Prop2)));
+			Columns.Add(new Field(nameof(Foo.Prop1)));
+			Columns.Add(new Field(nameof(Foo.Prop2)));
+			Columns.Add(new Field(nameof(Foo.Prop3), nameof(Foo.Prop3.Prop1)));
+			Columns.Add(new Field(nameof(Foo.Prop3), nameof(Foo.Prop3.Prop2)));
 		}
 
 		[Test]
