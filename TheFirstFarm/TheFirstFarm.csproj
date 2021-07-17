@@ -1,32 +1,32 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <OutputType>WinExe</OutputType>
-    <TargetFramework>net5.0-windows</TargetFramework>
-    <UseWindowsForms>true</UseWindowsForms>
-    <RootNamespace>TheFirstFarm</RootNamespace>
-  </PropertyGroup>
+	<PropertyGroup>
+		<OutputType>WinExe</OutputType>
+		<TargetFramework>net5.0-windows</TargetFramework>
+		<UseWindowsForms>true</UseWindowsForms>
+		<RootNamespace>TheFirstFarm</RootNamespace>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <Compile Remove="Libs\**" />
-    <Compile Remove="Requirement\**" />
-    <EmbeddedResource Remove="Libs\**" />
-    <EmbeddedResource Remove="Requirement\**" />
-    <None Remove="Libs\**" />
-    <None Remove="Requirement\**" />
-  </ItemGroup>
+	<ItemGroup>
+		<Compile Remove="Libs\**" />
+		<Compile Remove="Requirement\**" />
+		<EmbeddedResource Remove="Libs\**" />
+		<EmbeddedResource Remove="Requirement\**" />
+		<None Remove="Libs\**" />
+		<None Remove="Requirement\**" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
-  </ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <None Include="..\.editorconfig" Link=".editorconfig" />
-  </ItemGroup>
+	<ItemGroup>
+		<None Include="..\.editorconfig" Link=".editorconfig" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\FXiaoKe\FXiaoKe.csproj" />
-    <ProjectReference Include="..\Kingdee\Kingdee.csproj" />
-  </ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\FXiaoKe\FXiaoKe.csproj" />
+		<ProjectReference Include="..\Kingdee\Kingdee.csproj" />
+	</ItemGroup>
 
 </Project>
