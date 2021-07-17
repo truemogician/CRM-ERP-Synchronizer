@@ -5,6 +5,7 @@ using System.Linq;
 using System.Net.Http;
 using System.Reflection;
 using System.Threading.Tasks;
+using FXiaoKe.Exceptions;
 using FXiaoKe.Models;
 using FXiaoKe.Request;
 using FXiaoKe.Request.Message;
@@ -15,6 +16,10 @@ using Shared.Exceptions;
 
 namespace FXiaoKe {
 	public class Client {
+		private static readonly MethodInfo DeserializeObject = typeof(JsonConvert)
+			.GetMethods(BindingFlags.Static | BindingFlags.Public)
+			.Single(method => method.Name == nameof(JsonConvert.DeserializeObject) && method.IsGenericMethod);
+
 		public const string Origin = "https://open.fxiaoke.com";
 
 		public Client() { }
@@ -40,11 +45,20 @@ namespace FXiaoKe {
 
 		public async Task<dynamic> ReceiveResponse<T>(T request) where T : RequestBase {
 			var attrs = typeof(T).GetRequestAttributes();
+			var responseType = attrs.FirstOrDefault(attr => attr.ResponseType is not null)?.ResponseType;
+			if (responseType is null)
+				throw new RequestException<T>(request, "Response type not specified");
 			string json = await ValidateAndSend(request);
-			return typeof(JsonConvert).GetMethod("DeserializeObject", BindingFlags.Static | BindingFlags.Public)!.MakeGenericMethod(attrs.First(attr => attr.ResponseType is not null).ResponseType).Invoke(null, new object[] {json});
+			var response = DeserializeObject.MakeGenericMethod(responseType).Invoke(null, new object[] {json}) as ResponseBase;
+			ValidateResponse(response);
+			return response;
 		}
 
-		public async Task<TResponse> ReceiveResponse<TResponse, TRequest>(TRequest request) where TRequest : RequestBase => JsonConvert.DeserializeObject<TResponse>(await ValidateAndSend(request));
+		public async Task<TResponse> ReceiveResponse<TResponse, TRequest>(TRequest request) where TRequest : RequestBase where TResponse : ResponseBase {
+			var response = JsonConvert.DeserializeObject<TResponse>(await ValidateAndSend(request));
+			ValidateResponse(response);
+			return response;
+		}
 
 		public async Task<AuthorizationResponse> Authorize() {
 			var authResp = await ReceiveResponse<AuthorizationResponse, AuthorizationRequest>(AuthorizationInfo);
@@ -126,6 +140,12 @@ namespace FXiaoKe {
 			var respMessage = await HttpClient.SendAsync(request);
 			string json = await respMessage.Content.ReadAsStringAsync();
 			return json;
+		}
+
+		private static void ValidateResponse(ResponseBase response) {
+			var result = response.Validate();
+			if (result?.Count > 0)
+				throw new GenericException<List<ValidationResult>>(result, "Response validation failed");
 		}
 	}
 }
