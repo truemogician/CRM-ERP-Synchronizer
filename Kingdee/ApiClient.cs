@@ -77,7 +77,7 @@ namespace Kingdee {
 
 		public string LoginByRsaAuth(string json) => Execute<string>("Kingdee.BOS.WebApi.ServicesStub.AuthService.LoginByRSAAuth", json);
 
-		public TResponse Execute<TResponse, TForm>(string serviceName, RequestBase request) => Execute<TResponse>(serviceName, typeof(TForm).GetFormName(), JsonConvert.SerializeObject(request));
+		public TResponse Execute<TResponse, TForm>(string serviceName, RequestBase request) where TForm : FormBase => Execute<TResponse>(serviceName, FormMeta<TForm>.Name, JsonConvert.SerializeObject(request));
 
 		public T Execute<T>(string serviceName, params object[] parameters) => Execute<T>(serviceName, parameters, timeout: _defaultTimeout);
 
@@ -104,7 +104,7 @@ namespace Kingdee {
 			=> ExecuteAsync(
 				serviceName,
 				onSucceed,
-				new object[] {typeof(TForm).GetFormName(), JsonConvert.SerializeObject(request)},
+				new object[] {FormMeta<TForm>.Name, JsonConvert.SerializeObject(request)},
 				onProgressChange,
 				onFail,
 				timeout,

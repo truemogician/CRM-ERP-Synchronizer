@@ -12,10 +12,10 @@ using Shared.Utilities;
 
 namespace Kingdee.Requests {
 	public class QueryRequest<T> : RequestBase where T : FormBase {
-		public QueryRequest() : this(typeof(T).GetJsonPropertyNames()) { }
+		public QueryRequest() : this(FormMeta<T>.QueryFields) { }
 
-		public QueryRequest(IEnumerable<string> fields) {
-			FormName = typeof(T).GetFormName();
+		public QueryRequest(IEnumerable<Field<T>> fields) {
+			FormName = FormMeta<T>.Name;
 			Fields = fields;
 		}
 
@@ -28,7 +28,7 @@ namespace Kingdee.Requests {
 		/// </summary>
 		[JsonProperty("FieldKeys")]
 		[JsonConverter(typeof(FieldsConverter))]
-		public IEnumerable<string> Fields { get; set; }
+		public IEnumerable<Field> Fields { get; set; }
 
 		/// <summary>
 		/// </summary>
@@ -57,19 +57,15 @@ namespace Kingdee.Requests {
 		public int Limit { get; set; }
 	}
 
-	public class FieldsConverter : JsonConverter<IEnumerable<string>> {
-		public override void WriteJson(JsonWriter writer, IEnumerable<string> value, JsonSerializer serializer) {
-			writer.WriteValue(string.Join(',', value));
+	public class FieldsConverter : JsonConverter<IEnumerable<Field>> {
+		public static readonly StringCollectionConverter CollectionConverter = new(',');
+
+		public override void WriteJson(JsonWriter writer, IEnumerable<Field> value, JsonSerializer serializer) {
+			serializer.Converters.Add(CollectionConverter);
+			serializer.Serialize(writer, value.Select(field => field.ToString()));
+			serializer.Converters.Remove(CollectionConverter);
 		}
 
-		public override IEnumerable<string> ReadJson(JsonReader reader, Type objectType, IEnumerable<string> existingValue, bool hasExistingValue, JsonSerializer serializer) {
-			var token = JToken.Load(reader);
-			if (token.Type is JTokenType.Null or JTokenType.Undefined)
-				return null;
-			if (token.Type != JTokenType.String)
-				throw new JTokenTypeException(token, JTokenType.String);
-			string str = token.Value<string>();
-			return str?.Split(',').Select(field => field.Trim());
-		}
+		public override IEnumerable<Field> ReadJson(JsonReader reader, Type objectType, IEnumerable<Field> existingValue, bool hasExistingValue, JsonSerializer serializer) => throw new NotImplementedException();
 	}
 }
