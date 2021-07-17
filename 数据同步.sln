@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.31424.327
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "一号农场", "一号农场\一号农场.csproj", "{72EEDD3F-7566-41C2-AC78-0266104849CF}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TheFirstFarm", "一号农场\TheFirstFarm.csproj", "{72EEDD3F-7566-41C2-AC78-0266104849CF}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Shared", "Shared\Shared.csproj", "{20505952-C266-4DA8-A192-AE9F51329CBF}"
 EndProject
@@ -13,7 +13,16 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Shared.Test", "Shared.Test\
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FXiaoKe", "FXiaoKe\FXiaoKe.csproj", "{4CF9B8DB-0512-4073-8711-30ACC1AA9F0D}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Kingdee", "Kingdee\Kingdee.csproj", "{324AD43B-08BA-4FAC-A555-1390B7B341BD}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Kingdee", "Kingdee\Kingdee.csproj", "{CC61A33F-FB04-4909-817E-831C80602C84}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Kingdee.Test", "Kingdee.Test\Kingdee.Test.csproj", "{26E1C16A-DD60-44D5-91C6-68F53A435B56}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{C8241793-0363-4C96-AF64-C6EAB0E87D98}"
+	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TheFirstFarm.Test", "TheFirstFarm.Test\TheFirstFarm.Test.csproj", "{F2F57FCD-CAE4-4166-A618-ED915F600424}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -41,10 +50,18 @@ Global
 		{4CF9B8DB-0512-4073-8711-30ACC1AA9F0D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4CF9B8DB-0512-4073-8711-30ACC1AA9F0D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4CF9B8DB-0512-4073-8711-30ACC1AA9F0D}.Release|Any CPU.Build.0 = Release|Any CPU
-		{324AD43B-08BA-4FAC-A555-1390B7B341BD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{324AD43B-08BA-4FAC-A555-1390B7B341BD}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{324AD43B-08BA-4FAC-A555-1390B7B341BD}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{324AD43B-08BA-4FAC-A555-1390B7B341BD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CC61A33F-FB04-4909-817E-831C80602C84}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CC61A33F-FB04-4909-817E-831C80602C84}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CC61A33F-FB04-4909-817E-831C80602C84}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CC61A33F-FB04-4909-817E-831C80602C84}.Release|Any CPU.Build.0 = Release|Any CPU
+		{26E1C16A-DD60-44D5-91C6-68F53A435B56}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{26E1C16A-DD60-44D5-91C6-68F53A435B56}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{26E1C16A-DD60-44D5-91C6-68F53A435B56}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{26E1C16A-DD60-44D5-91C6-68F53A435B56}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F2F57FCD-CAE4-4166-A618-ED915F600424}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F2F57FCD-CAE4-4166-A618-ED915F600424}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F2F57FCD-CAE4-4166-A618-ED915F600424}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F2F57FCD-CAE4-4166-A618-ED915F600424}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
