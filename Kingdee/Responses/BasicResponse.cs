@@ -13,11 +13,10 @@ namespace Kingdee.Responses {
 
 	public class ResponseStatus {
 		[JsonProperty("ErrorCode")]
-		public string ErrorCode { get; set; }
+		public int ErrorCode { get; set; }
 
 		[JsonProperty("IsSuccess")]
-		[JsonConverter(typeof(BoolConverter))]
-		public bool? IsSuccess { get; set; }
+		public bool Success { get; set; }
 
 		[JsonProperty("Errors")]
 		public List<Error> Errors { get; set; }
@@ -29,7 +28,7 @@ namespace Kingdee.Responses {
 		public List<SuccessMessage> SuccessMessages { get; set; }
 
 		[JsonProperty("MsgCode")]
-		public string MessageCode { get; set; }
+		public int MessageCode { get; set; }
 	}
 
 	public class Error {
