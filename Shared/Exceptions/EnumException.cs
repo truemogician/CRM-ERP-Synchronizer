@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel;
 
 namespace Shared.Exceptions {
 	public class EnumException<T> : Exception where T : Enum {
