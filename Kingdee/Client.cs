@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using Kingdee.Forms;
 using Kingdee.Requests;
+using Kingdee.Responses;
 using Newtonsoft.Json;
 
 namespace Kingdee {
@@ -30,37 +31,37 @@ namespace Kingdee {
 		///     保存
 		/// </summary>
 		/// <returns></returns>
-		public string Save<T>(SaveRequest<T> request) where T : FormBase => Execute<string, T>("Kingdee.BOS.WebApi.ServicesStub.DynamicFormService.Save", request);
+		public SaveResponse Save<T>(SaveRequest<T> request) where T : FormBase => Execute<SaveResponse, T>("Kingdee.BOS.WebApi.ServicesStub.DynamicFormService.Save", request);
 
 		/// <summary>
 		///     批量保存
 		/// </summary>
 		/// <returns></returns>
-		public string BatchSave<T>(BatchSaveRequest<T> request) where T : FormBase => Execute<string, T>("Kingdee.BOS.WebApi.ServicesStub.DynamicFormService.BatchSave", request);
+		public BatchSaveResponse BatchSave<T>(BatchSaveRequest<T> request) where T : FormBase => Execute<BatchSaveResponse, T>("Kingdee.BOS.WebApi.ServicesStub.DynamicFormService.BatchSave", request);
 
 		/// <summary>
 		///     暂存
 		/// </summary>
 		/// <returns></returns>
-		public string Draft<T>(SaveRequest<T> request) where T : FormBase => Execute<string, T>("Kingdee.BOS.WebApi.ServicesStub.DynamicFormService.Draft", request);
+		public SaveResponse Draft<T>(SaveRequest<T> request) where T : FormBase => Execute<SaveResponse, T>("Kingdee.BOS.WebApi.ServicesStub.DynamicFormService.Draft", request);
 
 		/// <summary>
 		///     审核
 		/// </summary>
 		/// <returns></returns>
-		public string Audit<T>(AuditRequest<T> request) where T : FormBase => Execute<string, T>("Kingdee.BOS.WebApi.ServicesStub.DynamicFormService.Audit", request);
+		public BasicResponse Audit<T>(AuditRequest<T> request) where T : FormBase => Execute<BasicResponse, T>("Kingdee.BOS.WebApi.ServicesStub.DynamicFormService.Audit", request);
 
 		/// <summary>
 		///     反审核
 		/// </summary>
 		/// <returns></returns>
-		public string Unaudit<T>(AuditRequest<T> request) where T : FormBase => Execute<string, T>("Kingdee.BOS.WebApi.ServicesStub.DynamicFormService.UnAudit", request);
+		public BasicResponse Unaudit<T>(AuditRequest<T> request) where T : FormBase => Execute<BasicResponse, T>("Kingdee.BOS.WebApi.ServicesStub.DynamicFormService.UnAudit", request);
 
 		/// <summary>
 		///     删除
 		/// </summary>
 		/// <returns></returns>
-		public string Delete<T>(DeleteRequest<T> request) where T : FormBase => Execute<string, T>("Kingdee.BOS.WebApi.ServicesStub.DynamicFormService.Delete", request);
+		public BasicResponse Delete<T>(DeleteRequest<T> request) where T : FormBase => Execute<BasicResponse, T>("Kingdee.BOS.WebApi.ServicesStub.DynamicFormService.Delete", request);
 
 		/// <summary>
 		///     提交
@@ -137,12 +138,12 @@ namespace Kingdee {
 
 		public void SaveAsync<T>(
 			SaveRequest<T> request,
-			Action<string> onSucceed,
+			Action<SaveResponse> onSucceed,
 			FailCallbackHandler onFail = null,
 			ProgressChangedHandler onProgressChange = null,
 			int reportInterval = 5
 		) where T : FormBase {
-			ExecuteAsync<string, T>(
+			ExecuteAsync<SaveResponse, T>(
 				"Kingdee.BOS.WebApi.ServicesStub.DynamicFormService.Save",
 				request,
 				onSucceed,
@@ -155,12 +156,12 @@ namespace Kingdee {
 
 		public void BatchSaveAsync<T>(
 			BatchSaveRequest<T> request,
-			Action<string> onSucceed,
+			Action<BatchSaveResponse> onSucceed,
 			FailCallbackHandler onFail = null,
 			ProgressChangedHandler onProgressChange = null,
 			int reportInterval = 5
 		) where T : FormBase {
-			ExecuteAsync<string, T>(
+			ExecuteAsync<BatchSaveResponse, T>(
 				"Kingdee.BOS.WebApi.ServicesStub.DynamicFormService.BatchSave",
 				request,
 				onSucceed,
@@ -173,12 +174,12 @@ namespace Kingdee {
 
 		public void DraftAsync<T>(
 			SaveRequest<T> request,
-			Action<string> onSucceed,
+			Action<SaveResponse> onSucceed,
 			FailCallbackHandler onFail = null,
 			ProgressChangedHandler onProgressChange = null,
 			int reportInterval = 5
 		) where T : FormBase {
-			ExecuteAsync<string, T>(
+			ExecuteAsync<SaveResponse, T>(
 				"Kingdee.BOS.WebApi.ServicesStub.DynamicFormService.Draft",
 				request,
 				onSucceed,
@@ -191,12 +192,12 @@ namespace Kingdee {
 
 		public void AuditAsync<T>(
 			AuditRequest<T> request,
-			Action<string> onSucceed,
+			Action<BasicResponse> onSucceed,
 			FailCallbackHandler onFail = null,
 			ProgressChangedHandler onProgressChange = null,
 			int reportInterval = 5
 		) where T : FormBase {
-			ExecuteAsync<string, T>(
+			ExecuteAsync<BasicResponse, T>(
 				"Kingdee.BOS.WebApi.ServicesStub.DynamicFormService.Audit",
 				request,
 				onSucceed,
@@ -209,12 +210,12 @@ namespace Kingdee {
 
 		public void UnauditAsync<T>(
 			AuditRequest<T> request,
-			Action<string> onSucceed,
+			Action<BasicResponse> onSucceed,
 			FailCallbackHandler onFail = null,
 			ProgressChangedHandler onProgressChange = null,
 			int reportInterval = 5
 		) where T : FormBase {
-			ExecuteAsync<string, T>(
+			ExecuteAsync<BasicResponse, T>(
 				"Kingdee.BOS.WebApi.ServicesStub.DynamicFormService.UnAudit",
 				request,
 				onSucceed,
@@ -227,12 +228,12 @@ namespace Kingdee {
 
 		public void DeleteAsync<T>(
 			DeleteRequest<T> request,
-			Action<string> onSucceed,
+			Action<BasicResponse> onSucceed,
 			FailCallbackHandler onFail = null,
 			ProgressChangedHandler onProgressChange = null,
 			int reportInterval = 5
 		) where T : FormBase {
-			ExecuteAsync<string, T>(
+			ExecuteAsync<BasicResponse, T>(
 				"Kingdee.BOS.WebApi.ServicesStub.DynamicFormService.Delete",
 				request,
 				onSucceed,
