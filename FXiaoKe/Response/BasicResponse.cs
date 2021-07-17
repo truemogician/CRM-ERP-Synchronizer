@@ -1,6 +1,5 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
-using Microsoft.VisualBasic.CompilerServices;
 using Newtonsoft.Json;
 
 namespace FXiaoKe.Response {

@@ -5,6 +5,5 @@ namespace TheFirstFarm {
 		public MainForm() {
 			InitializeComponent();
 		}
-
 	}
 }

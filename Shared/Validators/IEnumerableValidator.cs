@@ -1,14 +1,12 @@
 ﻿// ReSharper disable InconsistentNaming
 using System;
 using System.Collections;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 
 namespace Shared.Validators {
 	[AttributeUsage(
-		AttributeTargets.Property | AttributeTargets.Field | AttributeTargets.Parameter,
-		AllowMultiple = false
+		AttributeTargets.Property | AttributeTargets.Field | AttributeTargets.Parameter
 	)]
 	public class IEnumerableLengthAttribute : ValidationAttribute {
 		public IEnumerableLengthAttribute(int minLength, int maxLength) {

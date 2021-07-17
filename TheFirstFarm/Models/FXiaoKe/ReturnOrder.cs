@@ -9,13 +9,13 @@ namespace TheFirstFarm.Models.FXiaoKe {
 	[Model("object_4qZkc__c", true)]
 	public class ReturnOrder {
 		/// <summary>
-		/// 业务类型（erp）
+		///     业务类型（erp）
 		/// </summary>
 		[JsonProperty("field_2imfP__c")]
 		public BusinessType BusinessType { get; set; }
 
 		/// <summary>
-		/// 单据编号
+		///     单据编号
 		/// </summary>
 		[JsonProperty("name")]
 		[PrimaryKey]
@@ -23,13 +23,13 @@ namespace TheFirstFarm.Models.FXiaoKe {
 		public string Id { get; set; }
 
 		/// <summary>
-		/// 日期
+		///     日期
 		/// </summary>
 		[JsonProperty("field_6V5Ls__c")]
 		public DateTime Date { get; set; }
 
 		/// <summary>
-		/// 退货客户
+		///     退货客户
 		/// </summary>
 		[JsonProperty("field_nlvAs__c")]
 		[ForeignKey(typeof(Customer))]
@@ -37,7 +37,7 @@ namespace TheFirstFarm.Models.FXiaoKe {
 		public string CustomerId { get; set; }
 
 		/// <summary>
-		/// 负责人
+		///     负责人
 		/// </summary>
 		[JsonProperty("owner")]
 		[ForeignKey(typeof(Staff))]
@@ -45,7 +45,7 @@ namespace TheFirstFarm.Models.FXiaoKe {
 		public string ContactId { get; set; }
 
 		/// <summary>
-		/// 退货原因
+		///     退货原因
 		/// </summary>
 		[JsonProperty("field_S1QH2__c")]
 		public string Reason { get; set; }
@@ -54,25 +54,25 @@ namespace TheFirstFarm.Models.FXiaoKe {
 	[JsonConverter(typeof(StringEnumConverter))]
 	public enum BusinessType {
 		/// <summary>
-		/// 普通销售
+		///     普通销售
 		/// </summary>
 		[EnumMember(Value = "5n22nRQ2s")]
 		General,
 
 		/// <summary>
-		/// 寄售
+		///     寄售
 		/// </summary>
 		[EnumMember(Value = "cruFbEeF0")]
 		Consignment,
 
 		/// <summary>
-		/// 直运
+		///     直运
 		/// </summary>
 		[EnumMember(Value = "1xt283wXn")]
 		DirectShipment,
 
 		/// <summary>
-		/// 其他
+		///     其他
 		/// </summary>
 		[EnumMember(Value = "other")]
 		Other

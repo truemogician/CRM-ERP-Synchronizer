@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 
 namespace Kingdee.Responses {
 	public class SaveResponse : BatchSaveResponse {

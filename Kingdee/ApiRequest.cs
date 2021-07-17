@@ -24,8 +24,6 @@ namespace Kingdee {
 
 		public bool IsAsync { get; }
 
-		private void SetFormat(int value) => SetValue(FmtProp, value);
-
 		public CookieContainer CookiesContainer { get; }
 
 		public Encoding Encoder { get; }
@@ -46,6 +44,8 @@ namespace Kingdee {
 					return _httpRequest ??= CreateRequest();
 			}
 		}
+
+		private void SetFormat(int value) => SetValue(FmtProp, value);
 
 		public static void SetSecurityProtocol(Uri uri) {
 			if (!HasSetSecurityProtocol)

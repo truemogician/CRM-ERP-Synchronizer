@@ -1,8 +1,5 @@
-using System.Collections;
 using System.Threading.Tasks;
-using Newtonsoft.Json;
 using NUnit.Framework;
-using FXiaoKe.Request.Message;
 
 namespace FXiaoKe.Test {
 	public class ClientTests {
@@ -33,7 +30,6 @@ namespace FXiaoKe.Test {
 		[Test]
 		public async Task QueryByConditionTest() {
 			await Client.SetOperator("18118359138");
-
 		}
 	}
 }

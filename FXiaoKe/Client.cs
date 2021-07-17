@@ -16,11 +16,11 @@ using Shared.Exceptions;
 
 namespace FXiaoKe {
 	public class Client {
+		public const string Origin = "https://open.fxiaoke.com";
+
 		private static readonly MethodInfo DeserializeObject = typeof(JsonConvert)
 			.GetMethods(BindingFlags.Static | BindingFlags.Public)
 			.Single(method => method.Name == nameof(JsonConvert.DeserializeObject) && method.IsGenericMethod);
-
-		public const string Origin = "https://open.fxiaoke.com";
 
 		public Client() { }
 

@@ -234,7 +234,7 @@ namespace Kingdee {
 			bool isKickOff,
 			int lcid
 		) {
-			return Execute<string>("Kingdee.BOS.WebApi.ServicesStub.AuthService.ValidateUser2", new object[] {dbId, username, password, isKickOff, lcid});
+			return Execute<string>("Kingdee.BOS.WebApi.ServicesStub.AuthService.ValidateUser2", dbId, username, password, isKickOff, lcid);
 		}
 
 		public string LoginByAppSecret2(
@@ -245,7 +245,7 @@ namespace Kingdee {
 			bool isKickOff,
 			int lcid = 2052
 		) {
-			return Execute<string>("Kingdee.BOS.WebApi.ServicesStub.AuthService.LoginByAppSecret2", new object[] {dbId, userName, appId, appSecret, isKickOff, lcid});
+			return Execute<string>("Kingdee.BOS.WebApi.ServicesStub.AuthService.LoginByAppSecret2", dbId, userName, appId, appSecret, isKickOff, lcid);
 		}
 
 		public string LoginBySign2(
@@ -257,9 +257,9 @@ namespace Kingdee {
 			bool isKickOff,
 			int lcid = 2052
 		) {
-			return Execute<string>("Kingdee.BOS.WebApi.ServicesStub.AuthService.LoginBySign2", new object[] {dbId, userName, appId, timestamp, sign, isKickOff, lcid});
+			return Execute<string>("Kingdee.BOS.WebApi.ServicesStub.AuthService.LoginBySign2", dbId, userName, appId, timestamp, sign, isKickOff, lcid);
 		}
 
-		public string LoginBySimplePassport2(string passportForBase64, bool isKickOff, int lcid = 2052) => Execute<string>("Kingdee.BOS.WebApi.ServicesStub.AuthService.LoginBySimplePassport2", new object[] {passportForBase64, isKickOff, lcid});
+		public string LoginBySimplePassport2(string passportForBase64, bool isKickOff, int lcid = 2052) => Execute<string>("Kingdee.BOS.WebApi.ServicesStub.AuthService.LoginBySimplePassport2", passportForBase64, isKickOff, lcid);
 	}
 }

@@ -12,7 +12,7 @@ namespace Kingdee.Test {
 
 		[Test]
 		public void ValidateLoginTest() {
-			var json = Client.ValidateLogin("60b86b4a9ade83", "Administrator", "888888", 2052);
+			string json = Client.ValidateLogin("60b86b4a9ade83", "Administrator", "888888", 2052);
 			Console.WriteLine(json);
 			Assert.Pass();
 		}

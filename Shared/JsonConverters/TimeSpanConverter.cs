@@ -24,24 +24,6 @@ namespace Shared.JsonConverters {
 		public TimeSpanUnitConverter(TimeSpanUnit unit) => Unit = unit;
 		public TimeSpanUnit Unit { get; }
 
-		protected virtual T FromDouble(double time) {
-			return Type.GetTypeCode(typeof(T)) switch {
-				TypeCode.Double => (dynamic)time,
-				TypeCode.Single => Convert.ToSingle(time),
-				TypeCode.Int64  => Convert.ToInt64(time),
-				TypeCode.Int32  => Convert.ToInt32(time),
-				TypeCode.Int16  => Convert.ToInt16(time),
-				TypeCode.UInt64 => Convert.ToUInt64(time),
-				TypeCode.UInt32 => Convert.ToUInt32(time),
-				TypeCode.UInt16 => Convert.ToUInt16(time),
-				TypeCode.Byte   => Convert.ToByte(time),
-				TypeCode.SByte  => Convert.ToSByte(time),
-				TypeCode.Char   => Convert.ToChar(time),
-				TypeCode.String => Convert.ToString(time),
-				_               => throw new NotImplementedException()
-			};
-		}
-
 		protected override Func<TimeSpan, T> ToNumber
 			=> timeSpan => FromDouble(
 				Unit switch {
@@ -68,6 +50,24 @@ namespace Shared.JsonConverters {
 					_                        => throw new EnumValueOutOfRangeException<TimeSpanUnit>(Unit)
 				};
 			};
+
+		protected virtual T FromDouble(double time) {
+			return Type.GetTypeCode(typeof(T)) switch {
+				TypeCode.Double => (dynamic)time,
+				TypeCode.Single => Convert.ToSingle(time),
+				TypeCode.Int64  => Convert.ToInt64(time),
+				TypeCode.Int32  => Convert.ToInt32(time),
+				TypeCode.Int16  => Convert.ToInt16(time),
+				TypeCode.UInt64 => Convert.ToUInt64(time),
+				TypeCode.UInt32 => Convert.ToUInt32(time),
+				TypeCode.UInt16 => Convert.ToUInt16(time),
+				TypeCode.Byte   => Convert.ToByte(time),
+				TypeCode.SByte  => Convert.ToSByte(time),
+				TypeCode.Char   => Convert.ToChar(time),
+				TypeCode.String => Convert.ToString(time),
+				_               => throw new NotImplementedException()
+			};
+		}
 	}
 
 	public enum TimeSpanUnit {

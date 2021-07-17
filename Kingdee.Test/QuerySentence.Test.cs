@@ -1,9 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Kingdee.Requests;
-using NUnit.Framework;
 using Kingdee.Requests.Query;
 using Newtonsoft.Json;
+using NUnit.Framework;
 using Shared.JsonConverters;
 
 namespace Kingdee.Test {
@@ -38,7 +37,7 @@ namespace Kingdee.Test {
 
 		[Test]
 		public void SerializeTest() {
-			var foo = new FooFoo<Foo>() {
+			var foo = new FooFoo<Foo> {
 				Sentence = Columns[3] * 2 > 4
 			};
 			Assert.AreEqual("{\"sentence\":\"((C.E * 2) > 4)\"}", JsonConvert.SerializeObject(foo));
