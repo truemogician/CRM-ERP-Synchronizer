@@ -6,6 +6,7 @@ using System.Net.Http.Headers;
 using System.Text;
 using FXiaoKe.Utilities;
 using Newtonsoft.Json;
+using Shared.Utilities;
 
 namespace FXiaoKe.Request {
 	[Request(null, HttpMethod.Post)]
@@ -22,11 +23,6 @@ namespace FXiaoKe.Request {
 			return request;
 		}
 
-		public virtual List<ValidationResult> Validate() {
-			var valContext = new ValidationContext(this, null, null);
-			var result = new List<ValidationResult>();
-			Validator.TryValidateObject(this, valContext, result, true);
-			return result;
-		}
+		public virtual List<ValidationResult> Validate() => Utility.Validate(this);
 	}
 }

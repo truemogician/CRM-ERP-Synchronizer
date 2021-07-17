@@ -7,11 +7,6 @@ using Shared.Exceptions;
 
 namespace Shared.Utilities {
 	public static class Extension {
-		public static void VerifyInheritance(Type derived, Type super) {
-			if (!derived.IsSubclassOf(super))
-				throw new TypeReflectionException(derived, $"Type \"{derived.FullName}\" should derive from \"{super.FullName}\"");
-		}
-
 		public static List<T> GetAttributes<T>(this PropertyInfo property) where T : Attribute => property.GetCustomAttributes(typeof(T), true).Cast<T>().ToList();
 
 		public static T GetAttribute<T>(this PropertyInfo property) where T : Attribute => property.GetAttributes<T>().FirstOrDefault();

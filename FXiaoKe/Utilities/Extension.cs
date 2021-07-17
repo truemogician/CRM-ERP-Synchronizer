@@ -6,13 +6,13 @@ using FXiaoKe.Exceptions;
 using FXiaoKe.Models;
 using FXiaoKe.Request;
 using Shared.Exceptions;
-using static Shared.Utilities.Extension;
+using Shared.Utilities;
 
 namespace FXiaoKe.Utilities {
 	public static class Extension {
 		public static ModelAttribute GetModelAttribute(this Type type, bool verify = true) {
 			if (verify)
-				VerifyInheritance(type, typeof(ModelBase));
+				Utility.VerifyInheritance(type, typeof(ModelBase));
 			return type.GetCustomAttribute<ModelAttribute>();
 		}
 
@@ -27,7 +27,7 @@ namespace FXiaoKe.Utilities {
 
 		public static MemberInfo GetPrimaryKey(this Type type, bool verify = true) {
 			if (verify)
-				VerifyInheritance(type, typeof(ModelBase));
+				Utility.VerifyInheritance(type, typeof(ModelBase));
 			MemberInfo result = null;
 			var members = (type.GetProperties() as MemberInfo[]).Concat(type.GetFields()).ToList();
 			foreach (var member in members.Where(member => member.GetCustomAttribute<PrimaryKeyAttribute>() is { }))
