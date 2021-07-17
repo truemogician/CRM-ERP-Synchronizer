@@ -44,7 +44,7 @@ namespace TheFirstFarm.Models.FXiaoKe {
 
 		[JsonProperty("field_Nx4Oo__c")]
 		[Required]
-		public Currency SettlementCurrency { get; set; } = Currency.RMB;
+		public Currency SettlementCurrency { get; set; } = Currency.CNY;
 
 		/// <summary>
 		///     创建组织编码
@@ -106,43 +106,43 @@ namespace TheFirstFarm.Models.FXiaoKe {
 		///     PRE001
 		/// </summary>
 		[EnumMember(Value = "cJoS42Bvj")]
-		RMB,
+		CNY,
 
 		/// <summary>
 		///     PRE002
 		/// </summary>
 		[EnumMember(Value = "9budk8Qg6")]
-		PRE002,
+		HKD,
 
 		/// <summary>
 		///     PRE003
 		/// </summary>
 		[EnumMember(Value = "0bg2lP3iC")]
-		PRE003,
+		EUR,
 
 		/// <summary>
 		///     PRE004
 		/// </summary>
 		[EnumMember(Value = "oxfswvKPO")]
-		PRE004,
+		JPY,
 
 		/// <summary>
 		///     PRE005
 		/// </summary>
 		[EnumMember(Value = "PWs5iRCd6")]
-		PRE005,
+		TWD,
 
 		/// <summary>
 		///     PRE006
 		/// </summary>
 		[EnumMember(Value = "63b132wdN")]
-		PRE006,
+		GBP,
 
 		/// <summary>
 		///     PRE007
 		/// </summary>
 		[EnumMember(Value = "0cg1IM59y")]
-		PRE007,
+		USD,
 
 		/// <summary>
 		///     其他
