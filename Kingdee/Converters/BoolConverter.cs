@@ -1,11 +1,13 @@
 ﻿using System;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using Shared.Exceptions;
 
 namespace Kingdee.Converters {
 	public class BoolConverter : JsonConverter<bool?> {
 		protected virtual string TrueString => "true";
 		protected virtual string FalseString => "false";
+		protected virtual StringComparison ComparisonOption => StringComparison.OrdinalIgnoreCase;
 
 		public sealed override void WriteJson(JsonWriter writer, bool? value, JsonSerializer serializer) {
 			if (value.HasValue)
@@ -19,15 +21,15 @@ namespace Kingdee.Converters {
 			if (token.Type is JTokenType.Null or JTokenType.Undefined)
 				return null;
 			if (token.Type != JTokenType.String)
-				throw new JsonReaderException($"Wrong token type: {nameof(JTokenType.String)} expected, but {token.Type} received");
+				throw new JTokenTypeException(token, JTokenType.String);
 			string value = token.Value<string>();
 			if (string.IsNullOrEmpty(value))
 				return null;
-			if (value == TrueString)
+			if (value.Equals(TrueString, ComparisonOption))
 				return true;
-			if (value == FalseString)
+			if (value.Equals(TrueString, ComparisonOption))
 				return false;
-			throw new JsonReaderException($"Value is neither true nor false string: {value}");
+			throw new JTokenException(token, $"Value is neither true nor false string: {value}");
 		}
 	}
 }
