@@ -28,7 +28,6 @@ namespace TheFirstFarm.Models.FXiaoKe {
 		/// </summary>
 		[JsonProperty("mobile1")]
 		[Required]
-
 		public string PhoneNumber { get; set; }
 
 		/// <summary>
@@ -36,7 +35,6 @@ namespace TheFirstFarm.Models.FXiaoKe {
 		/// </summary>
 		[JsonProperty("add")]
 		[Required]
-
 		public string Address { get; set; }
 	}
 }

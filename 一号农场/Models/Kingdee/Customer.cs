@@ -2,16 +2,189 @@
 // ReSharper disable StringLiteralTypo
 // ReSharper disable InconsistentNaming
 using System.Collections.Generic;
-using Kingdee.Utilities;
+using Kingdee.Converters;
+using Kingdee.Forms;
 using Newtonsoft.Json;
 
-namespace Kingdee.Models {
-	public class FNumberConverter : StringIdConverter {
-		protected override string IdName => "FNumber";
-	}
+namespace TheFirstFarm.Models.Kingdee {
+	[Form("BD_Customer")]
+	public class Customer : FormBase {
+		[JsonProperty("FCUSTID")]
+		public int CUSTID { get; set; }
 
-	public class FNUMBERConverter : StringIdConverter {
-		protected override string IdName => "FNUMBER";
+		[JsonProperty("FCreateOrgId")]
+		[JsonConverter(typeof(FNumberConverter))]
+		public string CreatorOrgId { get; set; }
+
+		[JsonProperty("FNumber")]
+		public string Id { get; set; }
+
+		[JsonProperty("FUseOrgId")]
+		[JsonConverter(typeof(FNumberConverter))]
+		public string UserOrgId { get; set; }
+
+		[JsonProperty("FName")]
+		public string Name { get; set; }
+
+		[JsonProperty("FShortName")]
+		public string ShortName { get; set; }
+
+		[JsonProperty("FSELLER")]
+		[JsonConverter(typeof(FNumberConverter))]
+		public string Seller { get; set; }
+
+		[JsonProperty("FCOUNTRY")]
+		[JsonConverter(typeof(FNumberConverter))]
+		public string Country { get; set; }
+
+		[JsonProperty("FPROVINCIAL")]
+		[JsonConverter(typeof(FNumberConverter))]
+		public string Province { get; set; }
+
+		[JsonProperty("FADDRESS")]
+		public string Address { get; set; }
+
+		[JsonProperty("FZIP")]
+		public string ZipCode { get; set; }
+
+		[JsonProperty("FWEBSITE")]
+		public string Website { get; set; }
+
+		[JsonProperty("FTEL")]
+		public string Tel { get; set; }
+
+		[JsonProperty("FFAX")]
+		public string Fax { get; set; }
+
+		[JsonProperty("FCompanyClassify")]
+		[JsonConverter(typeof(FNumberConverter))]
+		public string CompanyClassify { get; set; }
+
+		[JsonProperty("FCompanyNature")]
+		[JsonConverter(typeof(FNumberConverter))]
+		public string CompanyNature { get; set; }
+
+		[JsonProperty("FCompanyScale")]
+		[JsonConverter(typeof(FNumberConverter))]
+		public string CompanyScale { get; set; }
+
+		[JsonProperty("FINVOICETITLE")]
+		public string InvoiceTitle { get; set; }
+
+		[JsonProperty("FTAXREGISTERCODE")]
+		public string TAXREGISTERCODE { get; set; }
+
+		[JsonProperty("FINVOICEBANKNAME")]
+		public string INVOICEBANKNAME { get; set; }
+
+		[JsonProperty("FINVOICETEL")]
+		public string INVOICETEL { get; set; }
+
+		[JsonProperty("FINVOICEBANKACCOUNT")]
+		public string INVOICEBANKACCOUNT { get; set; }
+
+		[JsonProperty("FINVOICEADDRESS")]
+		public string INVOICEADDRESS { get; set; }
+
+		[JsonProperty("FSUPPLIERID")]
+		[JsonConverter(typeof(FNumberConverter))]
+		public string SUPPLIERID { get; set; }
+
+		[JsonProperty("FIsGroup")]
+		public string IsGroup { get; set; }
+
+		[JsonProperty("FIsDefPayer")]
+		public string IsDefPayer { get; set; }
+
+		[JsonProperty("FCustTypeId")]
+		[JsonConverter(typeof(FNumberConverter))]
+		public string CustTypeId { get; set; }
+
+		[JsonProperty("FGROUPCUSTID")]
+		[JsonConverter(typeof(FNumberConverter))]
+		public string GROUPCUSTID { get; set; }
+
+		[JsonProperty("FGroup")]
+		[JsonConverter(typeof(FNUMBERConverter))]
+		public string Group { get; set; }
+
+		[JsonProperty("FTRADINGCURRID")]
+		[JsonConverter(typeof(FNumberConverter))]
+		public string TRADINGCURRID { get; set; }
+
+		[JsonProperty("FCorrespondOrgId")]
+		[JsonConverter(typeof(FNumberConverter))]
+		public string CorrespondOrgId { get; set; }
+
+		[JsonProperty("FDescription")]
+		public string Description { get; set; }
+
+		[JsonProperty("FSETTLETYPEID")]
+		[JsonConverter(typeof(FNumberConverter))]
+		public string SETTLETYPEID { get; set; }
+
+		[JsonProperty("FRECCONDITIONID")]
+		[JsonConverter(typeof(FNumberConverter))]
+		public string RECCONDITIONID { get; set; }
+
+		[JsonProperty("FDISCOUNTLISTID")]
+		[JsonConverter(typeof(FNumberConverter))]
+		public string DISCOUNTLISTID { get; set; }
+
+		[JsonProperty("FPRICELISTID")]
+		[JsonConverter(typeof(FNumberConverter))]
+		public string PRICELISTID { get; set; }
+
+		[JsonProperty("FTRANSLEADTIME")]
+		public int TRANSLEADTIME { get; set; }
+
+		[JsonProperty("FInvoiceType")]
+		public string InvoiceType { get; set; }
+
+		[JsonProperty("FTaxType")]
+		[JsonConverter(typeof(FNumberConverter))]
+		public string TaxType { get; set; }
+
+		[JsonProperty("FRECEIVECURRID")]
+		[JsonConverter(typeof(FNumberConverter))]
+		public string Currency { get; set; }
+
+		[JsonProperty("FPriority")]
+		public int Priority { get; set; }
+
+		[JsonProperty("FTaxRate")]
+		[JsonConverter(typeof(FNumberConverter))]
+		public string TaxRate { get; set; }
+
+		[JsonProperty("FISCREDITCHECK")]
+		public string ISCREDITCHECK { get; set; }
+
+		[JsonProperty("FIsTrade")]
+		public string IsTrade { get; set; }
+
+		[JsonProperty("FT_BD_CUSTOMEREXT")]
+		public FTBDCUSTOMEREXT TBDCUSTOMEREXT { get; set; }
+
+		[JsonProperty("FCRMCustomer")]
+		public FCRMCustomer CRMCustomer { get; set; }
+
+		[JsonProperty("FT_BD_CUSTLOCATION")]
+		public List<FTBDCUSTLOCATION> FTBDCUSTLOCATION { get; set; }
+
+		[JsonProperty("FT_BD_CUSTBANK")]
+		public List<FTBDCUSTBANK> FTBDCUSTBANK { get; set; }
+
+		[JsonProperty("FT_BD_CUSTCONTACT")]
+		public List<FTBDCUSTCONTACT> FTBDCUSTCONTACT { get; set; }
+
+		[JsonProperty("FT_BD_CUSTORDERORG")]
+		public List<FTBDCUSTORDERORG> FTBDCUSTORDERORG { get; set; }
+
+		[JsonProperty("FCRMAllocation")]
+		public List<FCRMAllocation> FCRMAllocation { get; set; }
+
+		[JsonProperty("FReleventCUST")]
+		public List<FReleventCUST> FReleventCUST { get; set; }
 	}
 
 	public class FFreezeOperator {
@@ -312,184 +485,5 @@ namespace Kingdee.Models {
 
 		[JsonProperty("FRelaRemark")]
 		public string RelaRemark { get; set; }
-	}
-
-	public class Customer {
-		[JsonProperty("FCUSTID")]
-		public int CUSTID { get; set; }
-
-		[JsonProperty("FCreateOrgId")]
-		[JsonConverter(typeof(FNumberConverter))]
-		public string CreatorOrgId { get; set; }
-
-		[JsonProperty("FNumber")]
-		public string Id { get; set; }
-
-		[JsonProperty("FUseOrgId")]
-		[JsonConverter(typeof(FNumberConverter))]
-		public string UserOrgId { get; set; }
-
-		[JsonProperty("FName")]
-		public string Name { get; set; }
-
-		[JsonProperty("FShortName")]
-		public string ShortName { get; set; }
-
-		[JsonProperty("FSELLER")]
-		[JsonConverter(typeof(FNumberConverter))]
-		public string Seller { get; set; }
-
-		[JsonProperty("FCOUNTRY")]
-		[JsonConverter(typeof(FNumberConverter))]
-		public string COUNTRY { get; set; }
-
-		[JsonProperty("FPROVINCIAL")]
-		[JsonConverter(typeof(FNumberConverter))]
-		public string PROVINCIAL { get; set; }
-
-		[JsonProperty("FADDRESS")]
-		public string ADDRESS { get; set; }
-
-		[JsonProperty("FZIP")]
-		public string ZIP { get; set; }
-
-		[JsonProperty("FWEBSITE")]
-		public string WEBSITE { get; set; }
-
-		[JsonProperty("FTEL")]
-		public string TEL { get; set; }
-
-		[JsonProperty("FFAX")]
-		public string FAX { get; set; }
-
-		[JsonProperty("FCompanyClassify")]
-		[JsonConverter(typeof(FNumberConverter))]
-		public string CompanyClassify { get; set; }
-
-		[JsonProperty("FCompanyNature")]
-		[JsonConverter(typeof(FNumberConverter))]
-		public string CompanyNature { get; set; }
-
-		[JsonProperty("FCompanyScale")]
-		[JsonConverter(typeof(FNumberConverter))]
-		public string CompanyScale { get; set; }
-
-		[JsonProperty("FINVOICETITLE")]
-		public string INVOICETITLE { get; set; }
-
-		[JsonProperty("FTAXREGISTERCODE")]
-		public string TAXREGISTERCODE { get; set; }
-
-		[JsonProperty("FINVOICEBANKNAME")]
-		public string INVOICEBANKNAME { get; set; }
-
-		[JsonProperty("FINVOICETEL")]
-		public string INVOICETEL { get; set; }
-
-		[JsonProperty("FINVOICEBANKACCOUNT")]
-		public string INVOICEBANKACCOUNT { get; set; }
-
-		[JsonProperty("FINVOICEADDRESS")]
-		public string INVOICEADDRESS { get; set; }
-
-		[JsonProperty("FSUPPLIERID")]
-		[JsonConverter(typeof(FNumberConverter))]
-		public string SUPPLIERID { get; set; }
-
-		[JsonProperty("FIsGroup")]
-		public string IsGroup { get; set; }
-
-		[JsonProperty("FIsDefPayer")]
-		public string IsDefPayer { get; set; }
-
-		[JsonProperty("FCustTypeId")]
-		[JsonConverter(typeof(FNumberConverter))]
-		public string CustTypeId { get; set; }
-
-		[JsonProperty("FGROUPCUSTID")]
-		[JsonConverter(typeof(FNumberConverter))]
-		public string GROUPCUSTID { get; set; }
-
-		[JsonProperty("FGroup")]
-		[JsonConverter(typeof(FNUMBERConverter))]
-		public string Group { get; set; }
-
-		[JsonProperty("FTRADINGCURRID")]
-		[JsonConverter(typeof(FNumberConverter))]
-		public string TRADINGCURRID { get; set; }
-
-		[JsonProperty("FCorrespondOrgId")]
-		[JsonConverter(typeof(FNumberConverter))]
-		public string CorrespondOrgId { get; set; }
-
-		[JsonProperty("FDescription")]
-		public string Description { get; set; }
-
-		[JsonProperty("FSETTLETYPEID")]
-		[JsonConverter(typeof(FNumberConverter))]
-		public string SETTLETYPEID { get; set; }
-
-		[JsonProperty("FRECCONDITIONID")]
-		[JsonConverter(typeof(FNumberConverter))]
-		public string RECCONDITIONID { get; set; }
-
-		[JsonProperty("FDISCOUNTLISTID")]
-		[JsonConverter(typeof(FNumberConverter))]
-		public string DISCOUNTLISTID { get; set; }
-
-		[JsonProperty("FPRICELISTID")]
-		[JsonConverter(typeof(FNumberConverter))]
-		public string PRICELISTID { get; set; }
-
-		[JsonProperty("FTRANSLEADTIME")]
-		public int TRANSLEADTIME { get; set; }
-
-		[JsonProperty("FInvoiceType")]
-		public string InvoiceType { get; set; }
-
-		[JsonProperty("FTaxType")]
-		[JsonConverter(typeof(FNumberConverter))]
-		public string TaxType { get; set; }
-
-		[JsonProperty("FRECEIVECURRID")]
-		[JsonConverter(typeof(FNumberConverter))]
-		public string Currency { get; set; }
-
-		[JsonProperty("FPriority")]
-		public int Priority { get; set; }
-
-		[JsonProperty("FTaxRate")]
-		[JsonConverter(typeof(FNumberConverter))]
-		public string TaxRate { get; set; }
-
-		[JsonProperty("FISCREDITCHECK")]
-		public string ISCREDITCHECK { get; set; }
-
-		[JsonProperty("FIsTrade")]
-		public string IsTrade { get; set; }
-
-		[JsonProperty("FT_BD_CUSTOMEREXT")]
-		public FTBDCUSTOMEREXT TBDCUSTOMEREXT { get; set; }
-
-		[JsonProperty("FCRMCustomer")]
-		public FCRMCustomer CRMCustomer { get; set; }
-
-		[JsonProperty("FT_BD_CUSTLOCATION")]
-		public List<FTBDCUSTLOCATION> FTBDCUSTLOCATION { get; set; }
-
-		[JsonProperty("FT_BD_CUSTBANK")]
-		public List<FTBDCUSTBANK> FTBDCUSTBANK { get; set; }
-
-		[JsonProperty("FT_BD_CUSTCONTACT")]
-		public List<FTBDCUSTCONTACT> FTBDCUSTCONTACT { get; set; }
-
-		[JsonProperty("FT_BD_CUSTORDERORG")]
-		public List<FTBDCUSTORDERORG> FTBDCUSTORDERORG { get; set; }
-
-		[JsonProperty("FCRMAllocation")]
-		public List<FCRMAllocation> FCRMAllocation { get; set; }
-
-		[JsonProperty("FReleventCUST")]
-		public List<FReleventCUST> FReleventCUST { get; set; }
 	}
 }

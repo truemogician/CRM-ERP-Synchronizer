@@ -24,4 +24,13 @@
     <Folder Include="Models\Kingdee\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Include="..\.editorconfig" Link=".editorconfig" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\FXiaoKe\FXiaoKe.csproj" />
+    <ProjectReference Include="..\Kingdee\Kingdee.csproj" />
+  </ItemGroup>
+
 </Project>
