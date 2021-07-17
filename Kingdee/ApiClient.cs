@@ -1,7 +1,10 @@
 ﻿using System;
 using System.Net;
 using System.Text;
+using Kingdee.Forms;
+using Kingdee.Requests;
 using Kingdee.Utilities;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 namespace Kingdee {
@@ -38,11 +41,11 @@ namespace Kingdee {
 
 		public ApiRequest CreateProgressQuery(string reqId) => new ApiProgressRequest(_serverUrl, false, _encoder, _cookiesContainer, reqId);
 
-		public bool Logout() => Execute<bool>("Kingdee.BOS.WebApi.ServicesStub.AuthService.Logout", null);
+		public bool Logout() => Execute<bool>("Kingdee.BOS.WebApi.ServicesStub.AuthService.Logout", Array.Empty<object>());
 
-		public bool Login(string dbId, string userName, string password, int lcid) => JObject.Parse(Execute<string>("Kingdee.BOS.WebApi.ServicesStub.AuthService.ValidateUserEnDeCode", new object[] {dbId, EnDecode.Encode(userName), EnDecode.Encode(password), lcid}))["LoginResultType"]?.Value<int>() == 1;
+		public bool Login(string dbId, string userName, string password, int lcid) => JObject.Parse(Execute<string>("Kingdee.BOS.WebApi.ServicesStub.AuthService.ValidateUserEnDeCode", dbId, EnDecode.Encode(userName), EnDecode.Encode(password), lcid))["LoginResultType"]?.Value<int>() == 1;
 
-		public string ValidateLogin(string dbId, string userName, string password, int lcid) => Execute<string>("Kingdee.BOS.WebApi.ServicesStub.AuthService.ValidateUserEnDeCode", new object[] {dbId, EnDecode.Encode(userName), EnDecode.Encode(password), lcid});
+		public string ValidateLogin(string dbId, string userName, string password, int lcid) => Execute<string>("Kingdee.BOS.WebApi.ServicesStub.AuthService.ValidateUserEnDeCode", dbId, EnDecode.Encode(userName), EnDecode.Encode(password), lcid);
 
 		public string LoginByAppSecret(
 			string dbId,
@@ -50,9 +53,8 @@ namespace Kingdee {
 			string appId,
 			string appSecret,
 			int lcid
-		) {
-			return Execute<string>("Kingdee.BOS.WebApi.ServicesStub.AuthService.LoginByAppSecret", new object[] {dbId, userName, appId, appSecret, lcid});
-		}
+		)
+			=> Execute<string>("Kingdee.BOS.WebApi.ServicesStub.AuthService.LoginByAppSecret", dbId, userName, appId, appSecret, lcid);
 
 		public string LoginBySign(
 			string dbId,
@@ -61,21 +63,21 @@ namespace Kingdee {
 			long timestamp,
 			string sign,
 			int lcid
-		) {
-			return Execute<string>("Kingdee.BOS.WebApi.ServicesStub.AuthService.LoginBySign", new object[] {dbId, userName, appId, timestamp, sign, lcid});
-		}
+		)
+			=> Execute<string>("Kingdee.BOS.WebApi.ServicesStub.AuthService.LoginBySign", dbId, userName, appId, timestamp, sign, lcid);
 
-		public string LoginBySimplePassport(string passportForBase64, int lcid = 2052) => Execute<string>("Kingdee.BOS.WebApi.ServicesStub.AuthService.LoginBySimplePassport", new object[] {passportForBase64, lcid});
+		public string LoginBySimplePassport(string passportForBase64, int lcid = 2052) => Execute<string>("Kingdee.BOS.WebApi.ServicesStub.AuthService.LoginBySimplePassport", passportForBase64, lcid);
 
 		public string LoginByMobileCard(
 			string passportForBase64,
 			string customizationParameter,
 			int lcid = 2052
-		) {
-			return Execute<string>("Kingdee.BOS.WebApi.ServicesStub.AuthService.LoginByMobileCard", new object[] {passportForBase64, customizationParameter, lcid});
-		}
+		)
+			=> Execute<string>("Kingdee.BOS.WebApi.ServicesStub.AuthService.LoginByMobileCard", passportForBase64, customizationParameter, lcid);
 
-		public string LoginByRsaAuth(string json) => Execute<string>("Kingdee.BOS.WebApi.ServicesStub.AuthService.LoginByRSAAuth", new object[] {json});
+		public string LoginByRsaAuth(string json) => Execute<string>("Kingdee.BOS.WebApi.ServicesStub.AuthService.LoginByRSAAuth", json);
+
+		public TResponse Execute<TResponse, TForm>(string serviceName, RequestBase request) => Execute<TResponse>(serviceName, typeof(TForm).GetFormName(), JsonConvert.SerializeObject(request));
 
 		public T Execute<T>(string serviceName, params object[] parameters) => Execute<T>(serviceName, parameters, timeout: _defaultTimeout);
 
@@ -90,11 +92,30 @@ namespace Kingdee {
 			return Call<T>(request, onFail);
 		}
 
+		public ApiRequest ExecuteAsync<TResponse, TForm>(
+			string serviceName,
+			RequestBase request,
+			Action<TResponse> onSucceed,
+			ProgressChangedHandler onProgressChange = null,
+			FailCallbackHandler onFail = null,
+			int timeout = 0,
+			int reportInterval = 5
+		) where TForm : FormBase
+			=> ExecuteAsync(
+				serviceName,
+				onSucceed,
+				new object[] {typeof(TForm).GetFormName(), JsonConvert.SerializeObject(request)},
+				onProgressChange,
+				onFail,
+				timeout,
+				reportInterval
+			);
+
 		public ApiRequest ExecuteAsync<T>(
 			string serviceName,
-			Action<T> successCallback,
+			Action<T> onSucceed,
 			object[] parameters = null,
-			ProgressChangedHandler progressCallback = null,
+			ProgressChangedHandler onProgressChange = null,
 			FailCallbackHandler onFail = null,
 			int timeout = 0,
 			int reportInterval = 5
@@ -103,7 +124,7 @@ namespace Kingdee {
 				serviceName,
 				(Action<AsyncResult<T>>)(ret => {
 					if (ret.Successful)
-						successCallback(ret.ReturnValue);
+						onSucceed(ret.ReturnValue);
 					else {
 						var reallyFailCallback = GetReallyFailCallback(onFail);
 						if (reallyFailCallback != null)
@@ -113,7 +134,7 @@ namespace Kingdee {
 					}
 				}),
 				parameters,
-				progressCallback,
+				onProgressChange,
 				timeout,
 				reportInterval
 			);
@@ -123,13 +144,13 @@ namespace Kingdee {
 			string serviceName,
 			Action<AsyncResult<T>> callback,
 			object[] parameters = null,
-			ProgressChangedHandler progressCallback = null,
+			ProgressChangedHandler onProgressChange = null,
 			int timeout = 0,
 			int reportInterval = 5
 		) {
 			var asyncRequest = CreateAsyncRequest(serviceName, parameters);
 			asyncRequest.HttpRequest.Timeout = timeout * 1000;
-			CallAsync(asyncRequest, callback, progressCallback, timeout, reportInterval);
+			CallAsync(asyncRequest, callback, onProgressChange, timeout, reportInterval);
 			return asyncRequest;
 		}
 
@@ -151,7 +172,7 @@ namespace Kingdee {
 		public void CallAsync<T>(
 			ApiRequest request,
 			Action<AsyncResult<T>> callback,
-			ProgressChangedHandler progressCallback = null,
+			ProgressChangedHandler onProgressChange = null,
 			int timeout = 0,
 			int reportInterval = 5
 		) {
@@ -162,9 +183,9 @@ namespace Kingdee {
 					callback(ret.Cast<T>());
 				}
 			);
-			if (progressCallback == null)
+			if (onProgressChange == null)
 				return;
-			var reporter = ProgressReporter.Create(this, request, progressCallback, reportInterval);
+			var reporter = ProgressReporter.Create(this, request, onProgressChange, reportInterval);
 			if (reportInterval <= 0)
 				return;
 			new DelayInvoker<ApiRequest>(
