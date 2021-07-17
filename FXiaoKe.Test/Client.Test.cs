@@ -29,5 +29,11 @@ namespace FXiaoKe.Test {
 			var response = await Client.SendTextMessage("Test Message");
 			Assert.IsTrue(response);
 		}
+
+		[Test]
+		public async Task QueryByConditionTest() {
+			await Client.SetOperator("18118359138");
+
+		}
 	}
 }
