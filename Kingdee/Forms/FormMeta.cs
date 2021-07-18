@@ -7,5 +7,6 @@ namespace Kingdee.Forms {
 	public static class FormMeta<T> where T : FormBase {
 		public static string Name => typeof(T).GetFormName();
 		public static List<Field<T>> QueryFields => typeof(T).GetQueryFields(false).Select(field => new Field<T>(field)).ToList();
+		public static T CreateFromQueryFields(IEnumerable<Field> fields, IEnumerable<object> data) => (T)typeof(T).CreateFromQueryFields(fields, data);
 	}
 }

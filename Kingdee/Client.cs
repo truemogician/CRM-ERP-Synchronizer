@@ -1,9 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Kingdee.Forms;
 using Kingdee.Requests;
 using Kingdee.Responses;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using OneOf;
 
 namespace Kingdee {
 	public class Client : ApiClient {
@@ -21,11 +24,17 @@ namespace Kingdee {
 		/// </summary>
 		/// <param name="request"></param>
 		/// <returns></returns>
-		public List<List<object>> Query<T>(QueryRequest<T> request) where T : FormBase
-			=> Execute<List<List<object>>>(
+		public OneOf<BasicResponse, List<T>> Query<T>(QueryRequest<T> request) where T : FormBase {
+			string json = Execute<string>(
 				"Kingdee.BOS.WebApi.ServicesStub.DynamicFormService.ExecuteBillQuery",
 				JsonConvert.SerializeObject(request)
 			);
+			var token = JToken.Parse(json);
+			if (token.Type == JTokenType.Object)
+				return token.Value<BasicResponse>();
+			var contents = token.Value<List<List<object>>>();
+			return contents?.Select(data => FormMeta<T>.CreateFromQueryFields(request.Fields, data)).ToList();
+		}
 
 		/// <summary>
 		///     保存
@@ -120,14 +129,22 @@ namespace Kingdee {
 
 		public void QueryAsync<T>(
 			QueryRequest<T> request,
-			Action<List<List<object>>> onSucceed,
+			Action<OneOf<BasicResponse, List<T>>> onSucceed,
 			FailCallbackHandler onFail = null,
 			ProgressChangedHandler onProgressChange = null,
 			int reportInterval = 5
 		) where T : FormBase {
-			ExecuteAsync(
+			ExecuteAsync<string>(
 				"Kingdee.BOS.WebApi.ServicesStub.DynamicFormService.ExecuteBillQuery",
-				onSucceed,
+				json => {
+					var token = JToken.Parse(json);
+					if (token.Type == JTokenType.Object)
+						onSucceed(token.Value<BasicResponse>());
+					else {
+						var contents = token.Value<List<List<object>>>();
+						onSucceed(contents?.Select(data => FormMeta<T>.CreateFromQueryFields(request.Fields, data)).ToList());
+					}
+				},
 				new object[] {JsonConvert.SerializeObject(request)},
 				onProgressChange,
 				onFail,
