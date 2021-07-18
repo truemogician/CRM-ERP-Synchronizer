@@ -8,8 +8,8 @@ namespace Shared.Validators {
 	[AttributeUsage(
 		AttributeTargets.Property | AttributeTargets.Field | AttributeTargets.Parameter
 	)]
-	public class IEnumerableLengthAttribute : ValidationAttribute {
-		public IEnumerableLengthAttribute(int minLength, int maxLength) {
+	public class ArrayLengthAttribute : ValidationAttribute {
+		public ArrayLengthAttribute(int minLength, int maxLength) {
 			MinLength = minLength;
 			MaxLength = maxLength;
 		}
@@ -29,14 +29,20 @@ namespace Shared.Validators {
 		public override string FormatErrorMessage(string name) => $"The length of {name} must be between {MinLength} and {MaxLength}.";
 	}
 
-	public class IEnumerableMinLength : IEnumerableLengthAttribute {
-		public IEnumerableMinLength(int minLength) : base(minLength, int.MaxValue) { }
+	public class ArrayMinLengthAttribute : ArrayLengthAttribute {
+		public ArrayMinLengthAttribute(int minLength) : base(minLength, int.MaxValue) { }
 		public override string FormatErrorMessage(string name) => $"The length of {name} must be larger than {MinLength}.";
 	}
 
-	public class IEnumerableMaxLength : IEnumerableLengthAttribute {
-		public IEnumerableMaxLength(int maxLength) : base(0, maxLength) { }
+	public class ArrayMaxLengthAttribute : ArrayLengthAttribute {
+		public ArrayMaxLengthAttribute(int maxLength) : base(0, maxLength) { }
 
 		public override string FormatErrorMessage(string name) => $"The length of {name} must be smaller than {MaxLength}.";
+	}
+
+	public class NotEmptyAttribute : ArrayMinLengthAttribute {
+		public NotEmptyAttribute() : base(1) { }
+
+		public override string FormatErrorMessage(string name) => $"{name} cannot be empty";
 	}
 }

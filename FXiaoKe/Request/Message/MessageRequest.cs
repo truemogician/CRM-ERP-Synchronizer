@@ -16,7 +16,7 @@ namespace FXiaoKe.Request.Message {
 		///     开放平台员工ID列表（消息接收者，目前最多支持500人）
 		/// </summary>
 		[JsonProperty("toUser")]
-		[IEnumerableLength(1, 500)]
+		[ArrayLength(1, 500)]
 		public List<string> ReceiversIds { get; set; } = new();
 
 		/// <summary>
