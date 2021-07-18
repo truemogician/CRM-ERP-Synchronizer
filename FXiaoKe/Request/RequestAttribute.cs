@@ -56,7 +56,7 @@ namespace FXiaoKe.Request {
 			get => _responseType;
 			init {
 				if (!value.IsSubclassOf(typeof(ResponseBase)))
-					throw new TypeReflectionException(value, $"{nameof(ResponseType)} must derive from {nameof(ResponseBase)}");
+					throw new TypeException(value, $"{nameof(ResponseType)} must derive from {nameof(ResponseBase)}");
 				_responseType = value;
 			}
 		}

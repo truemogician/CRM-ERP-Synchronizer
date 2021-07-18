@@ -12,7 +12,7 @@ namespace Kingdee.Requests {
 		public DeleteRequest(string idName, params T[] entities) {
 			IdProperty = typeof(T).GetProperty(idName, typeof(string));
 			if (IdProperty is null)
-				throw new TypeReflectionException(typeof(T), $"Property \"{idName}\" with string type not found");
+				throw new TypeException(typeof(T), $"Property \"{idName}\" with string type not found");
 			Entities = entities.ToList();
 		}
 

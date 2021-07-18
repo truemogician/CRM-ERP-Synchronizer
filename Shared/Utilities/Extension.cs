@@ -29,7 +29,7 @@ namespace Shared.Utilities {
 		public static JsonPropertyAttribute GetJsonProperty(this Type type, string propertyName) {
 			var prop = type.GetProperty(propertyName);
 			if (prop is null)
-				throw new TypeReflectionException(type, $"Property \"{propertyName}\" doesn't exist in type \"{type.Name}\"");
+				throw new TypeException(type, $"Property \"{propertyName}\" doesn't exist in type \"{type.Name}\"");
 			return prop.GetCustomAttribute<JsonPropertyAttribute>();
 		}
 
@@ -42,6 +42,13 @@ namespace Shared.Utilities {
 		public static PropertyInfo GetPropertyFromJsonPropertyName(this Type type, string jsonPropertyName) {
 			var props = type.GetProperties(BindingFlags.Public);
 			return props.FirstOrDefault(prop => prop.GetJsonPropertyName() == jsonPropertyName);
+		}
+
+		public static object Construct(this Type type, params object[] parameters) {
+			var constructor = type.GetConstructor(parameters.Select(p => p.GetType()).ToArray());
+			if (constructor is null)
+				throw new TypeException(type, $"{type.FullName} can't be constructed with such parameters");
+			return constructor.Invoke(parameters);
 		}
 	}
 }
