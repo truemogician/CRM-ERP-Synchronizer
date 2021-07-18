@@ -58,7 +58,7 @@ namespace Kingdee.Requests {
 
 		public override void WriteJson(JsonWriter writer, IEnumerable<Field> value, JsonSerializer serializer) {
 			serializer.Converters.Add(CollectionConverter);
-			serializer.Serialize(writer, value.Select(field => field.ToString()));
+			serializer.Serialize(writer, value.Select(field => field.ToString("json")));
 			serializer.Converters.Remove(CollectionConverter);
 		}
 

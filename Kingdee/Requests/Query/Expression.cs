@@ -92,7 +92,7 @@ namespace Kingdee.Requests.Query {
 		public override string ToString()
 			=> _content.Index switch {
 				0 => _content.AsT0.ToString(),
-				1 => _content.AsT1.ToString(),
+				1 => _content.AsT1.ToString("json"),
 				2 => _content.AsT2.ToString(),
 				_ => throw new InvalidOperationException($"{nameof(_content.Index)} out of range")
 			};

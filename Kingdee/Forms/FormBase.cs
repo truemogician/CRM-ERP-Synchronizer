@@ -1,4 +1,12 @@
-﻿namespace Kingdee.Forms {
+﻿using Kingdee.Requests;
+using Shared.Exceptions;
+
+namespace Kingdee.Forms {
 	[Form]
-	public class FormBase { }
+	public abstract class FormBase {
+		public object this[Field field] {
+			get => field.GetValue(this);
+			set => field.SetValue(this, value);
+		}
+	}
 }
