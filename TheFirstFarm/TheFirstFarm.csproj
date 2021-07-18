@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
 		<OutputType>WinExe</OutputType>
@@ -22,6 +22,12 @@
 
 	<ItemGroup>
 		<None Include="..\.editorconfig" Link=".editorconfig" />
+		<AdditionalFiles Include="..\DependencyValidation\DependencyValidation.layerdiagram" Link="DependencyValidation.layerdiagram">
+		  <Visible>False</Visible>
+		</AdditionalFiles>
+		<AdditionalFiles Include="..\DependencyValidation\DependencyValidation1.layerdiagram" Link="DependencyValidation1.layerdiagram">
+		  <Visible>False</Visible>
+		</AdditionalFiles>
 	</ItemGroup>
 
 	<ItemGroup>

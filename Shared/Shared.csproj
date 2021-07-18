@@ -6,6 +6,18 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+	  <AdditionalFiles Include="..\DependencyValidation\DependencyValidation1.layerdiagram" Link="DependencyValidation1.layerdiagram">
+	    <Visible>False</Visible>
+	  </AdditionalFiles>
+	</ItemGroup>
+
+	<ItemGroup>
+	  <AdditionalFiles Include="..\DependencyValidation\DependencyValidation.layerdiagram" Link="DependencyValidation.layerdiagram">
+	    <Visible>False</Visible>
+	  </AdditionalFiles>
+	</ItemGroup>
+
+	<ItemGroup>
 		<PackageReference Include="Microsoft.AspNetCore.Mvc.DataAnnotations" Version="2.2.0" />
 		<PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
 		<PackageReference Include="Newtonsoft.Json" Version="13.0.1" />

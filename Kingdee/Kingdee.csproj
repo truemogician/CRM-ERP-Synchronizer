@@ -7,6 +7,18 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+	  <AdditionalFiles Include="..\DependencyValidation\DependencyValidation1.layerdiagram" Link="DependencyValidation1.layerdiagram">
+	    <Visible>False</Visible>
+	  </AdditionalFiles>
+	</ItemGroup>
+
+	<ItemGroup>
+	  <AdditionalFiles Include="..\DependencyValidation\DependencyValidation.layerdiagram" Link="DependencyValidation.layerdiagram">
+	    <Visible>False</Visible>
+	  </AdditionalFiles>
+	</ItemGroup>
+
+	<ItemGroup>
 		<PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
 		<PackageReference Include="OneOf" Version="3.0.190" />
 		<PackageReference Include="System.Configuration.ConfigurationManager" Version="5.0.0" />
