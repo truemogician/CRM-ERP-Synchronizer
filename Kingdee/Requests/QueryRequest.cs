@@ -8,17 +8,23 @@ using Shared.JsonConverters;
 
 namespace Kingdee.Requests {
 	public class QueryRequest<T> : RequestBase where T : FormBase {
-		public QueryRequest() : this(FormMeta<T>.QueryFields) { }
+		public QueryRequest(int limit = 0, int offset = 0) : this(FormMeta<T>.QueryFields) {
+			Limit = limit;
+			Offset = offset;
+		}
 
-		public QueryRequest(IEnumerable<Field<T>> fields) {
+		public QueryRequest(Sentence<T> filter, int limit = 0, int offset = 0) : this(limit, offset) => Filter = filter;
+
+		public QueryRequest(List<Field<T>> fields) {
 			FormName = FormMeta<T>.Name;
+			fields.Sort((a, b) => string.CompareOrdinal(a.ToString(), b.ToString()));
 			Fields = fields;
 		}
 
 		/// <summary>
 		/// </summary>
 		[JsonProperty("FormId")]
-		public string FormName { get; set; }
+		public string FormName { get; }
 
 		/// <summary>
 		/// </summary>
@@ -30,22 +36,23 @@ namespace Kingdee.Requests {
 		/// </summary>
 		[JsonProperty("FilterString")]
 		[JsonConverter(typeof(ToStringConverter<Sentence>))]
-		public Sentence<T> Filters { get; set; }
+		public Sentence<T> Filter { get; set; }
 
 		/// <summary>
 		/// </summary>
 		[JsonProperty("OrderString")]
-		public string Orders { get; set; }
+		public string Order { get; set; }
 
 		/// <summary>
 		/// </summary>
 		[JsonProperty("TopRowCount")]
-		public int TopRowCount { get; set; }
+		[JsonIgnore]
+		public int TopRowCount => Limit + Offset;
 
 		/// <summary>
 		/// </summary>
 		[JsonProperty("StartRow")]
-		public int StartRow { get; set; }
+		public int Offset { get; set; }
 
 		/// <summary>
 		/// </summary>
