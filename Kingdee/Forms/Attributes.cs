@@ -8,9 +8,6 @@ namespace Kingdee.Forms {
 		public string Name { get; init; }
 	}
 
-	[AttributeUsage(AttributeTargets.Class | AttributeTargets.Interface)]
-	public class SubFormAttribute : Attribute { }
-
 	[AttributeUsage(AttributeTargets.Property)]
-	public class QueryIgnoreAttribute : Attribute { }
+	public class SubFormAttribute : Attribute { }
 }

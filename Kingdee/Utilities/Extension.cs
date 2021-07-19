@@ -1,12 +1,15 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reflection;
+using System.Text.Json.Serialization;
 using Kingdee.Forms;
 using Kingdee.Requests;
+using Shared;
 using Shared.Exceptions;
 using Shared.Utilities;
+using JsonIgnoreAttribute = Newtonsoft.Json.JsonIgnoreAttribute;
 
 namespace Kingdee.Utilities {
 	public static class Extension {
@@ -20,22 +23,23 @@ namespace Kingdee.Utilities {
 
 		private static List<Field> GetQueryFields(Type type, Field field) {
 			var result = new List<Field>();
-			foreach (var prop in type.GetProperties()) {
-				if (prop.GetCustomAttribute<QueryIgnoreAttribute>() is not null)
+			var props = type.GetProperties();
+			bool blackList = props.Any(prop => prop.IsDefined(typeof(JsonIgnoreAttribute)));
+			bool whiteList = props.Any(prop => prop.IsDefined(typeof(JsonIncludeAttribute)));
+			if (blackList && whiteList)
+				throw new Exception($"Mixed use of {nameof(JsonIgnoreAttribute)} and {nameof(JsonIncludeAttribute)}");
+			foreach (var prop in props.Select(p => new EnumerablePropertyInfo(p))) {
+				if (blackList && prop.IsDefined(typeof(JsonIgnoreAttribute)) || whiteList && !prop.IsDefined(typeof(JsonIncludeAttribute)))
 					continue;
 				var fld = field is null
 					? new Field(prop.Name) {
 						FormType = type
 					}
 					: field.Concat(prop.Name);
-				if (Type.GetTypeCode(prop.PropertyType) == TypeCode.Object) {
-					var propType = prop.PropertyType;
-					if (propType.GetCustomAttribute<SubFormAttribute>() is null && propType.GetCustomAttribute<FormAttribute>() is null)
-						continue;
-					result.AddRange(GetQueryFields(propType, fld));
-				}
-				else
+				if (prop.PropertyType.IsValueType || prop.PropertyType == typeof(string))
 					result.Add(fld);
+				else
+					result.AddRange(GetQueryFields(prop.ElementType, fld));
 			}
 			return result;
 		}
@@ -44,21 +48,38 @@ namespace Kingdee.Utilities {
 			if (fields.Count != data.Count)
 				throw new Exception($"Count of {nameof(fields)} doesn't equal to that of {nameof(data)}");
 			obj ??= type.Construct();
-			//fields.Sort((a,b)=>string.Compare(a.ToString(), b.ToString(), StringComparison.Ordinal));
 			for (int i = 0, delta; i < fields.Count; i += delta) {
 				delta = 1;
 				(var field, object datum) = (fields[i], data[i]);
-				if (field.Length == 1)
-					field.SetValue(obj, datum);
+				var stProp = field.StartingInfo;
+				object targetObj = obj;
+				if (field.Length > 1) {
+					if (stProp.GetValue(targetObj) is null)
+						stProp.SetValue(targetObj, stProp.PropertyType.Construct());//ToDo: interface construction
+					targetObj = stProp.GetValue(targetObj);
+				}
+				for (int k = 0; k < stProp.Rank; ++k) {
+					var list = targetObj as IList ?? throw new TypeException(targetObj!.GetType(), "IList required");
+					if (list.Count > 0)
+						targetObj = list[0];
+					else {
+						var itemType = targetObj.GetType().GetItemType();
+						targetObj = itemType.Construct();
+						list.Add(targetObj);
+					}
+				}
+				if (field.Length == 1) {
+					if (stProp.Rank > 0)
+						(targetObj as IList)!.Add(datum);
+					else
+						field.EndingInfo.SetValueWithConversion(targetObj, datum);
+				}
 				else {
-					for (int j = i + 1; j < fields.Count && fields[j].PropertyNames[0] == field.PropertyNames[0]; ++j, ++delta) { }
-					var stProp = field.StartingProperty;
-					if (stProp.GetValue(obj) is null)
-						stProp.SetValue(obj, stProp.PropertyType.Construct());
+					for (int j = i + 1; j < fields.Count && fields[j].Names[0] == field.Names[0]; ++j, ++delta) { }
 					SetQueryFields(
-						stProp.GetValue(obj),
-						stProp.PropertyType,
-						fields.GetRange(i, delta).Select(f => f[1..]).ToList(),
+						targetObj,
+						stProp.ElementType,
+						fields.GetRange(i, delta).Select(f => f[1..]).AsList(),
 						data[i..(i + delta)]
 					);
 				}
@@ -66,9 +87,9 @@ namespace Kingdee.Utilities {
 			return obj;
 		}
 
-		public static object SetQueryFields(this object obj, IEnumerable<Field> fields, IEnumerable<object> data) => SetQueryFields(obj, obj.GetType(), fields.ToList(), data.ToArray());
+		public static object SetQueryFields(this object obj, IEnumerable<Field> fields, IEnumerable<object> data) => SetQueryFields(obj, obj.GetType(), fields.AsList(), data.AsArray());
 
-		public static object CreateFromQueryFields(this Type type, IEnumerable<Field> fields, IEnumerable<object> data) => SetQueryFields(null, type, fields.ToList(), data.ToArray());
+		public static object CreateFromQueryFields(this Type type, IEnumerable<Field> fields, IEnumerable<object> data) => SetQueryFields(null, type, fields.AsList(), data.AsArray());
 
 		public static List<Field> GetQueryFields(this Type type, bool verify = true) {
 			if (verify)
