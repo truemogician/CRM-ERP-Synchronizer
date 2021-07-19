@@ -1,18 +1,82 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.IO;
 using System.Linq;
+using System.Reflection;
+using System.Text;
+using System.Threading;
 using Kingdee.Forms;
 using Kingdee.Requests;
 using Kingdee.Responses;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using OneOf;
+using Shared.Exceptions;
+using Shared.Utilities;
 
 namespace Kingdee {
 	public class Client : ApiClient {
 		public Client(string serverUrl) : base(serverUrl) { }
 
 		public Client(string serverUrl, int timeout) : base(serverUrl, timeout) { }
+
+		private void FormatFields(List<Field> fields, ArraySegment<object> data, JsonWriter writer) {
+			if (fields.Count != data.Count)
+				throw new Exception($"Count of {nameof(fields)} doesn't equal to that of {nameof(data)}");
+			writer.WriteStartObject();
+			for (int i = 0, delta; i < fields.Count; i += delta) {
+				delta = 1;
+				(var field, object datum) = (fields[i], data[i]);
+				var stProp = field.StartingInfo;
+				writer.WritePropertyName(stProp.GetJsonPropertyName());
+				for (int k = 0; k < stProp.Rank; ++k)
+					writer.WriteStartArray();
+				if (field.Length == 1)
+					writer.WriteValue(datum);
+				else {
+					for (int j = i + 1; j < fields.Count && fields[j].Names[0] == field.Names[0]; ++j, ++delta) { }
+					FormatFields(
+						fields.GetRange(i, delta).Select(f => f[1..]).AsList(),
+						data[i..(i + delta)],
+						writer
+					);
+				}
+				for (int k = 0; k < stProp.Rank; ++k)
+					writer.WriteEndArray();
+			}
+			writer.WriteEndObject();
+		}
+
+		private List<object> MergeForms(List<object> forms) {
+			var subFormInfo = forms[0].GetType().GetMemberWithAttribute<SubFormAttribute>();
+			if (subFormInfo is null)
+				return forms;
+			var type = subFormInfo is PropertyInfo prop ? prop.PropertyType : (subFormInfo as FieldInfo)!.FieldType;
+			var groups = forms.GroupBy(form => form.GetType().GetMemberWithAttribute<KeyAttribute>().GetValue(form));
+			return groups.Select(
+					group => {
+						var list = group.AsList();
+						var subForms = MergeForms(
+							(type.Implements(typeof(IList))
+								? list.SelectMany(form => (subFormInfo.GetValue(form) as IList)!.OfType<object>())
+								: list.Select(form => subFormInfo.GetValue(form))).AsList()
+						);
+						if (type.Implements(typeof(IList))) {
+							var propObj = subFormInfo.GetValue(list[0]) as IList;
+							propObj!.Clear();
+							foreach (object subForm in subForms)
+								propObj.Add(subForm);
+							subFormInfo.SetValue(list[0], propObj);
+						}
+						else
+							subFormInfo.SetValue(list.Single(), subForms.Single());
+						return list[0];
+					}
+				)
+				.AsList();
+		}
 
 		#region Sync Requests
 		public List<DataCenter> GetDataCenters() => Execute<List<DataCenter>>("Kingdee.BOS.ServiceFacade.ServicesStub.Account.AccountService.GetDataCenterList", Array.Empty<object>());
@@ -32,8 +96,18 @@ namespace Kingdee {
 			var token = JToken.Parse(json);
 			if (token.Type == JTokenType.Object)
 				return token.Value<BasicResponse>();
-			var contents = token.Value<List<List<object>>>();
-			return contents?.Select(data => FormMeta<T>.CreateFromQueryFields(request.Fields, data)).ToList();
+			var contents = token is JArray array
+				? array.Values<JArray>().Select(arr => arr.Values<JValue>().Select(v => v.Value))
+				: throw new JTokenTypeException(token, JTokenType.Array);
+			var builder = new StringBuilder();
+			var forms = contents.Select(
+				data => {
+					builder.Clear();
+					FormatFields(request.Fields.AsList(), data.AsArray(), new JsonTextWriter(new StringWriter(builder)));
+					return JsonConvert.DeserializeObject<T>(builder.ToString());
+				}
+			);
+			return MergeForms(forms.OfType<object>().AsList()).Cast<T>().AsList();
 		}
 
 		/// <summary>
