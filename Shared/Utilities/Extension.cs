@@ -7,6 +7,54 @@ using Shared.Exceptions;
 
 namespace Shared.Utilities {
 	public static class Extension {
+		public static object GetValue(this MemberInfo info, object obj)
+			=> info switch {
+				FieldInfo field       => field.GetValue(obj),
+				PropertyInfo property => property.GetValue(obj),
+				_                     => throw new Exception($"Cannot get value from {info.Name}")
+			};
+
+		public static void SetValue(this MemberInfo info, object obj, object value) {
+			switch (info) {
+				case FieldInfo field:
+					field.SetValue(obj, value);
+					break;
+				case PropertyInfo property:
+					property.SetValue(obj, value);
+					break;
+				default: throw new Exception($"Cannot get value from {info.Name}");
+			}
+		}
+
+		public static bool Implements(this Type type, Type interfaceType)
+			=> (interfaceType.IsGenericTypeDefinition
+				? type.GetGenericInterface(interfaceType)
+				: type.GetInterface(interfaceType.Name)) is not null;
+
+		public static Type GetGenericInterface(this Type type, Type genericTypeDefinition)
+			=> type.GetInterfaces()
+				.SingleOrDefault(i => i.IsGenericType && i.GetGenericTypeDefinition() == genericTypeDefinition);
+
+		public static Type[] GetGenericInterfaceArguments(this Type type, Type genericTypeDefinition) => type.GetGenericInterface(genericTypeDefinition)?.GetGenericArguments();
+
+		public static List<PropertyInfo> GetIndexers(this Type type) => type.GetProperties().Where(p => p.GetIndexParameters().Length > 0).ToList();
+
+		public static PropertyInfo GetIndexer(this Type type, params Type[] parameterTypes)
+			=> type.GetProperties()
+				.SingleOrDefault(
+					p => p.GetIndexParameters() is var args &&
+						args.Length == parameterTypes.Length &&
+						parameterTypes.Select((t, index) => t == args[index].ParameterType).All(x => x)
+				);
+
+		public static List<MemberInfo> GetMembersWithAttribute(this Type type, Type attributeType) => type.GetMembers().Where(member => member.IsDefined(attributeType)).ToList();
+
+		public static List<MemberInfo> GetMembersWithAttribute<T>(this Type type) where T : Attribute => type.GetMembersWithAttribute(typeof(T));
+
+		public static MemberInfo GetMemberWithAttribute(this Type type, Type attributeType) => type.GetMembersWithAttribute(attributeType).SingleOrDefault();
+
+		public static MemberInfo GetMemberWithAttribute<T>(this Type type) where T : Attribute => type.GetMembersWithAttribute<T>().SingleOrDefault();
+
 		public static List<T> GetAttributes<T>(this PropertyInfo property) where T : Attribute => property.GetCustomAttributes(typeof(T), true).Cast<T>().ToList();
 
 		public static T GetAttribute<T>(this PropertyInfo property) where T : Attribute => property.GetAttributes<T>().FirstOrDefault();
@@ -49,6 +97,59 @@ namespace Shared.Utilities {
 			if (constructor is null)
 				throw new TypeException(type, $"{type.FullName} can't be constructed with such parameters");
 			return constructor.Invoke(parameters);
+		}
+
+		public static void SetValueWithConversion(this MemberInfo info, object obj, object value) {
+			(Action<object, object> setValue, Type type) = info switch {
+				FieldInfo field   => ((Action<object, object>)field.SetValue, field.FieldType),
+				PropertyInfo prop => (prop.SetValue, prop.PropertyType),
+				_                 => throw new Exception("Property or field expected")
+			};
+			if (type.IsInstanceOfType(value) || value is null)
+				setValue(obj, value);
+			else if (type.Implements(typeof(IConvertible)) && value.GetType().Implements(typeof(IConvertible)))
+				setValue(
+					obj,
+					Type.GetTypeCode(type) switch {
+						TypeCode.Boolean  => Convert.ToBoolean(value),
+						TypeCode.SByte    => Convert.ToSByte(value),
+						TypeCode.Byte     => Convert.ToByte(value),
+						TypeCode.Int16    => Convert.ToInt16(value),
+						TypeCode.UInt16   => Convert.ToUInt16(value),
+						TypeCode.Int32    => Convert.ToInt32(value),
+						TypeCode.UInt32   => Convert.ToUInt32(value),
+						TypeCode.Int64    => Convert.ToInt64(value),
+						TypeCode.UInt64   => Convert.ToUInt64(value),
+						TypeCode.Single   => Convert.ToSingle(value),
+						TypeCode.Double   => Convert.ToDouble(value),
+						TypeCode.Decimal  => Convert.ToDecimal(value),
+						TypeCode.DateTime => Convert.ToDateTime(value),
+						TypeCode.Char     => Convert.ToChar(value),
+						TypeCode.String   => Convert.ToString(value),
+						_                 => throw new EnumValueOutOfRangeException<TypeCode>(Type.GetTypeCode(type))
+					}
+				);
+			else
+				throw new InterfaceNotImplementedException(typeof(IConvertible));
+		}
+
+		public static List<T> AsList<T>(this IEnumerable<T> enumerable) => enumerable is List<T> list ? list : enumerable.ToList();
+
+		public static T[] AsArray<T>(this IEnumerable<T> enumerable) => enumerable is T[] array ? array : enumerable.ToArray();
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="type"></param>
+		/// <param name="genericTypeDefinition">The generic interface <paramref name="type"/> is required to implement. Default is <see cref="IEnumerable{}"/></param>
+		/// <returns></returns>
+		public static Type GetItemType(this Type type, Type genericTypeDefinition = null) {
+			genericTypeDefinition ??= typeof(IEnumerable<>);
+			if (!genericTypeDefinition.IsGenericTypeDefinition)
+				throw new TypeException(genericTypeDefinition, "Required to be a generic type definition");
+			if (!type.Implements(genericTypeDefinition))
+				return null;
+			return type.HasElementType ? type.GetElementType() : type.GetGenericInterfaceArguments(genericTypeDefinition).Single();
 		}
 	}
 }
