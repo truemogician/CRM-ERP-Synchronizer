@@ -3,6 +3,7 @@ using System.Net;
 using System.Text;
 using Kingdee.Forms;
 using Kingdee.Requests;
+using Kingdee.Responses;
 using Kingdee.Utilities;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -45,7 +46,7 @@ namespace Kingdee {
 
 		public bool Login(string dbId, string userName, string password, int lcid) => JObject.Parse(Execute<string>("Kingdee.BOS.WebApi.ServicesStub.AuthService.ValidateUserEnDeCode", dbId, EnDecode.Encode(userName), EnDecode.Encode(password), lcid))["LoginResultType"]?.Value<int>() == 1;
 
-		public string ValidateLogin(string dbId, string userName, string password, int lcid) => Execute<string>("Kingdee.BOS.WebApi.ServicesStub.AuthService.ValidateUserEnDeCode", dbId, EnDecode.Encode(userName), EnDecode.Encode(password), lcid);
+		public LoginResponse ValidateLogin(string dbId, string userName, string password, int lcid) => Execute<LoginResponse>("Kingdee.BOS.WebApi.ServicesStub.AuthService.ValidateUserEnDeCode", dbId, EnDecode.Encode(userName), EnDecode.Encode(password), lcid);
 
 		public string LoginByAppSecret(
 			string dbId,
