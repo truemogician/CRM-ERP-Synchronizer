@@ -13,6 +13,7 @@ using FXiaoKe.Response;
 using FXiaoKe.Utilities;
 using Newtonsoft.Json;
 using Shared.Exceptions;
+using Shared.Utilities;
 
 namespace FXiaoKe {
 	public class Client {
@@ -102,10 +103,32 @@ namespace FXiaoKe {
 
 		public async Task<T> QueryById<T>(string id) where T : ModelBase {
 			var response = await (ModelMeta<T>.IsCustomModel
-				? ReceiveResponse<QueryByIdResponse<T>, QueryCustomByIdRequest<T>>(new QueryCustomByIdRequest<T>(id, this))
+				? ReceiveResponse<QueryByIdResponse<T>, CustomQueryByIdRequest<T>>(new CustomQueryByIdRequest<T>(id, this))
 				: ReceiveResponse<QueryByIdResponse<T>, QueryByIdRequest<T>>(new QueryByIdRequest<T>(id, this)));
 			return response.Data;
 		}
+
+		private async Task<CreationResponse> Create(ModelBase model) {
+			var response = await (model.GetType().IsCustomModel()
+				? ReceiveResponse<CreationResponse, CustomCreationRequest<ModelBase>>(new CustomCreationRequest<ModelBase>() {Data = model})
+				: ReceiveResponse<CreationResponse, CreationRequest<ModelBase>>(new CreationRequest<ModelBase>() {Data = model}));
+			if (!response)
+				return response;
+			var cascadeModels = model.CascadeSubModels;
+			foreach (var cascade in cascadeModels) {
+				if (cascade.GetType().GetModelAttribute().SubjectTo is var srcType && srcType != model.GetType())
+					throw new TypeNotMatchException(model.GetType(), srcType);
+				var info = cascade.GetType().GetMemberWithAttribute<MasterKeyAttribute>();
+				if (info is null)
+					throw new AttributeNotFoundException(typeof(MasterKeyAttribute));
+				info.SetValue(cascade, response.DataId);
+				if (await Create(cascade) is var resp && !resp)
+					return resp;
+			}
+			return response;
+		}
+
+		public Task<CreationResponse> Create<T>(T model) where T : ModelBase => Create((ModelBase)model);
 
 		public Task<BasicResponse> SendMessage<T>(T request) where T : MessageRequest => ReceiveResponse<BasicResponse, T>(request);
 
@@ -113,11 +136,7 @@ namespace FXiaoKe {
 			var receiversIdsList = receiversIds.ToList();
 			if (receiversIdsList.Count == 0 && !string.IsNullOrEmpty(OperatorId))
 				receiversIdsList.Add(OperatorId);
-			return SendMessage(
-				new TextMessageRequest(text, this) {
-					ReceiversIds = receiversIdsList
-				}
-			);
+			return SendMessage(new TextMessageRequest(text, this) {ReceiversIds = receiversIdsList});
 		}
 
 		protected async Task AuthenticateRequest<T>(T request) where T : RequestBase {
