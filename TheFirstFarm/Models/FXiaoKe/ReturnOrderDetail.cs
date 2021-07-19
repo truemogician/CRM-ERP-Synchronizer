@@ -5,15 +5,20 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 
 namespace TheFirstFarm.Models.FXiaoKe {
-	[Model("object_wVB1X__c", true)]
-	public class ReturnDetail {
+	[Model("object_wVB1X__c", Custom = true, SubjectTo = typeof(ReturnOrder))]
+	public class ReturnOrderDetail {
 		/// <summary>
 		///     退换货明细编号
 		/// </summary>
 		[JsonProperty("name")]
-		[PrimaryKey]
+		[Key]
 		[Required]
 		public string Id { get; set; }
+
+		[JsonProperty("field_1b2Y1__c")]
+		[MasterKey]
+		[Required]
+		public string ReturnOrderId { get; set; }
 
 		/// <summary>
 		///     物料编码
@@ -77,7 +82,7 @@ namespace TheFirstFarm.Models.FXiaoKe {
 		[JsonProperty("owner")]
 		[ForeignKey(typeof(Staff))]
 		[Required]
-		public string Contact { get; set; }
+		public string OwnerId { get; set; }
 	}
 
 	[JsonConverter(typeof(StringEnumConverter))]
