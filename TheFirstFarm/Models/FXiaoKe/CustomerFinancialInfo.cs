@@ -13,7 +13,7 @@ namespace TheFirstFarm.Models.FXiaoKe {
 		///     发票抬头
 		/// </summary>
 		[JsonProperty("name")]
-		[PrimaryKey]
+		[Key]
 		[Required]
 		public string Title { get; set; }
 

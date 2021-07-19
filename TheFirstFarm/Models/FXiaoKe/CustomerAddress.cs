@@ -13,7 +13,7 @@ namespace TheFirstFarm.Models.FXiaoKe {
 		///     地址编号
 		/// </summary>
 		[JsonProperty("name")]
-		[PrimaryKey]
+		[Key]
 		[RegularExpression(@"Addr\.\d{4}-\d{2}-\d{2}_\d{6,}")]
 		[Required]
 		public string Id { get; set; }

@@ -1,13 +1,16 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Runtime.Serialization;
 using FXiaoKe.Models;
+using Kingdee.Forms;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
+using TheFirstFarm.Models.Common;
 
 namespace TheFirstFarm.Models.FXiaoKe {
-	[Model("object_4qZkc__c", true)]
-	public class ReturnOrder {
+	[Model("object_4qZkc__c", Custom = true)]
+	public class ReturnOrder : ModelBase {
 		/// <summary>
 		///     业务类型（erp）
 		/// </summary>
@@ -18,7 +21,7 @@ namespace TheFirstFarm.Models.FXiaoKe {
 		///     单据编号
 		/// </summary>
 		[JsonProperty("name")]
-		[PrimaryKey]
+		[Key]
 		[Required]
 		public string Id { get; set; }
 
@@ -42,39 +45,15 @@ namespace TheFirstFarm.Models.FXiaoKe {
 		[JsonProperty("owner")]
 		[ForeignKey(typeof(Staff))]
 		[Required]
-		public string ContactId { get; set; }
+		public string OwnerId { get; set; }
 
 		/// <summary>
 		///     退货原因
 		/// </summary>
 		[JsonProperty("field_S1QH2__c")]
 		public string Reason { get; set; }
-	}
 
-	[JsonConverter(typeof(StringEnumConverter))]
-	public enum BusinessType {
-		/// <summary>
-		///     普通销售
-		/// </summary>
-		[EnumMember(Value = "5n22nRQ2s")]
-		General,
-
-		/// <summary>
-		///     寄售
-		/// </summary>
-		[EnumMember(Value = "cruFbEeF0")]
-		Consignment,
-
-		/// <summary>
-		///     直运
-		/// </summary>
-		[EnumMember(Value = "1xt283wXn")]
-		DirectShipment,
-
-		/// <summary>
-		///     其他
-		/// </summary>
-		[EnumMember(Value = "other")]
-		Other
+		[SubModel(Eager = true, Cascade = true)]
+		public List<ReturnOrderDetail> Details { get; set; }
 	}
 }

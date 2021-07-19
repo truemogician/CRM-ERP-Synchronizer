@@ -1,23 +1,34 @@
 ﻿using System;
 
 namespace FXiaoKe.Models {
+	public abstract class FXiaoKeAttribute : Attribute { }
+
 	[AttributeUsage(AttributeTargets.Class | AttributeTargets.Interface)]
-	public class ModelAttribute : Attribute {
-		public ModelAttribute(string name = null, bool custom = false) {
-			Name = name;
-			Custom = custom;
-		}
+	public class ModelAttribute : FXiaoKeAttribute {
+		public ModelAttribute(string name = null) => Name = name;
 
 		public string Name { get; init; }
+
 		public bool Custom { get; init; }
+
+		public Type SubjectTo { get; init; }
 	}
 
 	[AttributeUsage(AttributeTargets.Property | AttributeTargets.Field)]
-	public class PrimaryKeyAttribute : Attribute { }
+	public class MasterKeyAttribute : FXiaoKeAttribute { }
 
 	[AttributeUsage(AttributeTargets.Property | AttributeTargets.Field)]
-	public class ForeignKeyAttribute : Attribute {
+	public class ForeignKeyAttribute : FXiaoKeAttribute {
 		public ForeignKeyAttribute(Type type) => ForeignType = type;
 		public Type ForeignType { get; set; }
+	}
+
+	[AttributeUsage(AttributeTargets.Property | AttributeTargets.Field)]
+	public class GeneratedAttribute : FXiaoKeAttribute { }
+
+	[AttributeUsage(AttributeTargets.Property | AttributeTargets.Field)]
+	public class SubModelAttribute : FXiaoKeAttribute {
+		public bool Eager { get; init; } = true;
+		public bool Cascade { get; init; } = true;
 	}
 }

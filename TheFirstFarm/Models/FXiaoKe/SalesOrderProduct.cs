@@ -72,6 +72,7 @@ namespace TheFirstFarm.Models.FXiaoKe {
 		///     负责人
 		/// </summary>
 		[JsonProperty("owner")]
-		public string Contact { get; set; }
+		[ForeignKey(typeof(Staff))]
+		public string OwnerId { get; set; }
 	}
 }

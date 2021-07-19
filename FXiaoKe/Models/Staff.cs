@@ -1,11 +1,12 @@
 ﻿// ReSharper disable StringLiteralTypo
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using Newtonsoft.Json;
 
 namespace FXiaoKe.Models {
 	public class Staff : ModelBase {
 		[JsonProperty("openUserId")]
-		[PrimaryKey]
+		[Key]
 		public string Id { get; set; }
 
 		[JsonProperty("enterpriseId")]

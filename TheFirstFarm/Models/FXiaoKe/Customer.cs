@@ -17,7 +17,7 @@ namespace TheFirstFarm.Models.FXiaoKe {
 		/// </summary>
 
 		[JsonProperty("account_no")]
-		[Required]
+		[Generated]
 		[RegularExpression(@"CUST\d{4,}")]
 		public string Id { get; set; }
 
@@ -26,7 +26,7 @@ namespace TheFirstFarm.Models.FXiaoKe {
 		/// </summary>
 		[JsonProperty("name")]
 		[Required]
-		[PrimaryKey]
+		[Key]
 		public string Name { get; set; }
 
 		/// <summary>
@@ -36,7 +36,7 @@ namespace TheFirstFarm.Models.FXiaoKe {
 		[JsonProperty("owner")]
 		[Required]
 		[ForeignKey(typeof(Staff))]
-		public string Contact { get; set; }
+		public string OwnerId { get; set; }
 
 		/// <summary>
 		///     结算币别
