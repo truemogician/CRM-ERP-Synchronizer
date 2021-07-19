@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.IO;
 using System.Text;
@@ -10,11 +11,19 @@ using Newtonsoft.Json.Linq;
 using Shared.Exceptions;
 
 namespace FXiaoKe.Request {
+	[Request("/cgi/crm/custom/v2/data/create")]
+	public class CustomCreationRequest<T> : CreationRequest<T> where T : ModelBase { }
+
+	[Request("/cgi/crm/custom/v2/data/create")]
+	public class CustomCreationRequest<T, TDetail> : CreationRequest<T, TDetail> where T : ModelBase where TDetail : ModelBase { }
+
+	[Request("/cgi/crm/v2/data/create")]
 	public class CreationRequest<T> : CreationRequestBase<CreationData<T>> where T : ModelBase { }
 
+	[Request("/cgi/crm/v2/data/create")]
 	public class CreationRequest<T, TDetail> : CreationRequestBase<CreationData<T, TDetail>> where T : ModelBase where TDetail : ModelBase { }
 
-	[Request("/cgi/crm/v2/data/create", typeof(CreationResponse))]
+	[Request(null, typeof(CreationResponse))]
 	public abstract class CreationRequestBase<T> : CrmRequest<T> {
 		/// <summary>
 		///     是否触发工作流（不传时默认为true, 表示触发），该参数对所有对象均有效
@@ -42,6 +51,10 @@ namespace FXiaoKe.Request {
 	}
 
 	public class CreationData<T> where T : ModelBase {
+		public CreationData() { }
+
+		public CreationData(T model) => Model = model;
+
 		/// <summary>
 		///     主对象数据map(和对象描述中字段一一对应)
 		/// </summary>
@@ -49,6 +62,9 @@ namespace FXiaoKe.Request {
 		[JsonConverter(typeof(CreationDataModelConverter))]
 		[Required]
 		public T Model { get; set; }
+
+		public static implicit operator CreationData<T>(T model) => new(model);
+		public static implicit operator T(CreationData<T> data) => data.Model;
 	}
 
 	public class CreationData<T, TDetail> : CreationData<T> where T : ModelBase where TDetail : ModelBase {

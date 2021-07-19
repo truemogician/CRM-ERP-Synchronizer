@@ -12,10 +12,10 @@ using Shared.Utilities;
 
 namespace FXiaoKe.Request {
 	[Request("/cgi/crm/custom/v2/data/get", typeof(QueryByConditionResponse))]
-	public class QueryCustomByIdRequest<T> : QueryByIdRequest<T> where T : ModelBase {
-		public QueryCustomByIdRequest() { }
-		public QueryCustomByIdRequest(Client client) : base(client) { }
-		public QueryCustomByIdRequest(string id, Client client) : base(id, client) { }
+	public class CustomQueryByIdRequest<T> : QueryByIdRequest<T> where T : ModelBase {
+		public CustomQueryByIdRequest() { }
+		public CustomQueryByIdRequest(Client client) : base(client) { }
+		public CustomQueryByIdRequest(string id, Client client) : base(id, client) { }
 	}
 
 	[Request("/cgi/crm/v2/data/get", typeof(QueryByConditionResponse))]
