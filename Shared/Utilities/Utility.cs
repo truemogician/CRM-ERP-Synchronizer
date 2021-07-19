@@ -6,15 +6,19 @@ using Shared.Exceptions;
 
 namespace Shared.Utilities {
 	public static class Utility {
+		private static readonly DataAnnotationsValidator.DataAnnotationsValidator Validator = new();
+
 		public static void VerifyInheritance(Type derived, Type super) {
 			if (!derived.IsSubclassOf(super))
 				throw new TypeException(derived, $"Type \"{derived.FullName}\" should derive from \"{super.FullName}\"");
 		}
 
-		public static List<ValidationResult> Validate<T>(T obj) {
-			var valContext = new ValidationContext(obj, null, null);
+		public static List<ValidationResult> Validate<T>(T obj, bool recursive = false) {
 			var result = new List<ValidationResult>();
-			Validator.TryValidateObject(obj, valContext, result, true);
+			if (recursive)
+				Validator.TryValidateObjectRecursive(obj, result);
+			else
+				Validator.TryValidateObject(obj, result);
 			return result;
 		}
 
