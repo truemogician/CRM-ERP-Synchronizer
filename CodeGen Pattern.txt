@@ -7,8 +7,18 @@
 纷享销客枚举：
 function generateEnum(name, options){
 	let result = `public enum ${name} {\r\n`;
-    options.forEach(option => 
+	options.forEach(option => 
 		result+=`\t\t/// <summary>\r\n\t\t/// ${option.label}\r\n\t\t/// </summary>\r\n\t\t[EnumMember(Value = "${option.value}")]\r\n\t\t${option.label},\r\n\r\n`
+	);
+	result+=`}`
+	console.log(result);
+}
+
+金蝶枚举：
+function generateEnum(name, options){
+	let result = `public enum ${name} {\r\n`;
+	options.forEach(option => 
+		result+=`\t\t/// <summary>\r\n\t\t/// ${option.Caption}\r\n\t\t/// </summary>\r\n\t\t[EnumMember(Value = "${option.Value}")]\r\n\t\t${option.Caption},\r\n\r\n`
 	);
 	result+=`}`
 	console.log(result);

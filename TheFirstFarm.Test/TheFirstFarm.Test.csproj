@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFramework>net5.0</TargetFramework>
+		<TargetFramework>net5.0-windows</TargetFramework>
 
 		<IsPackable>false</IsPackable>
 	</PropertyGroup>
@@ -23,6 +23,10 @@
 		<PackageReference Include="NUnit" Version="3.13.1" />
 		<PackageReference Include="NUnit3TestAdapter" Version="3.17.0" />
 		<PackageReference Include="coverlet.collector" Version="3.0.2" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <ProjectReference Include="..\TheFirstFarm\TheFirstFarm.csproj" />
 	</ItemGroup>
 
 </Project>
