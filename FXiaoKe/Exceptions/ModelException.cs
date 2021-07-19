@@ -7,13 +7,13 @@ namespace FXiaoKe.Exceptions {
 		public Type ModelType { get; set; }
 	}
 
-	public class DuplicatePrimaryKeyException : ModelException {
-		public DuplicatePrimaryKeyException(string message = null, Exception innerException = null) : base(message, innerException) { }
-		public DuplicatePrimaryKeyException(Type modelType, string message = null, Exception innerException = null) : base(modelType, message, innerException) { }
+	public class DuplicateKeyException : ModelException {
+		public DuplicateKeyException(string message = null, Exception innerException = null) : base(message, innerException) { }
+		public DuplicateKeyException(Type modelType, string message = null, Exception innerException = null) : base(modelType, message, innerException) { }
 	}
 
-	public class MissingPrimaryKeyException : ModelException {
-		public MissingPrimaryKeyException(string message = null, Exception innerException = null) : base(message, innerException) { }
-		public MissingPrimaryKeyException(Type modelType, string message = null, Exception innerException = null) : base(modelType, message, innerException) { }
+	public class MissingKeyException : ModelException {
+		public MissingKeyException(string message = null, Exception innerException = null) : base(message, innerException) { }
+		public MissingKeyException(Type modelType, string message = null, Exception innerException = null) : base(modelType, message, innerException) { }
 	}
 }

@@ -24,4 +24,10 @@ namespace Shared.Exceptions {
 
 		public InvariantTypeException(Type dstType, Type srcType, string message = null, Exception innerException = null) : base(dstType, srcType, message, innerException) { }
 	}
+
+	public class InterfaceNotImplementedException : Exception {
+		public InterfaceNotImplementedException(string message = null, Exception innerException = null) : base(message, innerException) { }
+		public InterfaceNotImplementedException(Type interfaceType, string message = null, Exception innerException = null) : this(message, innerException) => InterfaceType = interfaceType;
+		public Type InterfaceType { get; set; }
+	}
 }
