@@ -4,7 +4,7 @@ using System.Linq;
 using Kingdee.Forms;
 using Kingdee.Requests.Query;
 using Newtonsoft.Json;
-using Shared.JsonConverters;
+using Shared.Serialization;
 
 namespace Kingdee.Requests {
 	public class QueryRequest<T> : RequestBase where T : FormBase {

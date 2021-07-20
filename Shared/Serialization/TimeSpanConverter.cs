@@ -3,7 +3,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Shared.Exceptions;
 
-namespace Shared.JsonConverters {
+namespace Shared.Serialization {
 	public abstract class TimeSpanConverter<T> : JsonConverter<TimeSpan> where T : IConvertible {
 		protected abstract Func<TimeSpan, T> ToNumber { get; }
 		protected abstract Func<T, TimeSpan> FromNumber { get; }

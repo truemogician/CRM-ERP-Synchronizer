@@ -3,7 +3,7 @@ using Kingdee.Requests;
 using Kingdee.Requests.Query;
 using Newtonsoft.Json;
 using NUnit.Framework;
-using Shared.JsonConverters;
+using Shared.Serialization;
 
 namespace Kingdee.Test {
 	public class QuerySentenceTests {

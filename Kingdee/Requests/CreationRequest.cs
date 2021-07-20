@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using Kingdee.Converters;
 using Newtonsoft.Json;
-using Shared.JsonConverters;
+using Shared.Serialization;
 
 namespace Kingdee.Requests {
 	public abstract class CreationRequest<T> : RequestBase {

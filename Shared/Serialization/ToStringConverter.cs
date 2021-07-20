@@ -1,7 +1,7 @@
 ﻿using System;
 using Newtonsoft.Json;
 
-namespace Shared.JsonConverters {
+namespace Shared.Serialization {
 	public class ToStringConverter<T> : JsonConverter<T> {
 		public override void WriteJson(JsonWriter writer, T value, JsonSerializer serializer) => writer.WriteValue(value.ToString());
 

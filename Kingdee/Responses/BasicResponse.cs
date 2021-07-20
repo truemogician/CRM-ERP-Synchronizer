@@ -1,7 +1,7 @@
 ﻿// ReSharper disable StringLiteralTypo
 using System.Collections.Generic;
 using Newtonsoft.Json;
-using Shared.JsonConverters;
+using Shared.Serialization;
 
 namespace Kingdee.Responses {
 	[JsonConverter(typeof(ObjectWrapperConverter<BasicResponse>), "Result")]

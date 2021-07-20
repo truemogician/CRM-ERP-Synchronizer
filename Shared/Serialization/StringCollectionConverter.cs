@@ -4,7 +4,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Shared.Exceptions;
 
-namespace Shared.JsonConverters {
+namespace Shared.Serialization {
 	public class StringCollectionConverter : JsonConverter<IEnumerable<string>> {
 		public StringCollectionConverter(string separator) => Separator = separator;
 		public StringCollectionConverter(char separator) => Separator = new string(separator, 1);

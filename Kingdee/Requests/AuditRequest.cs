@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using Kingdee.Forms;
 using Newtonsoft.Json;
-using Shared.JsonConverters;
+using Shared.Serialization;
 
 namespace Kingdee.Requests {
 	public class AuditRequest<T> : DeleteRequest<T> where T : FormBase {

@@ -3,7 +3,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Shared.Exceptions;
 
-namespace Shared.JsonConverters {
+namespace Shared.Serialization {
 	public sealed class ObjectWrapperConverter : ObjectWrapperConverter<string> {
 		public ObjectWrapperConverter(string propertyName) : base(propertyName) { }
 	}
