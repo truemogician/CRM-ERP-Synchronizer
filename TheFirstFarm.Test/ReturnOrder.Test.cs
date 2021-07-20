@@ -4,6 +4,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using FXiaoKe;
+using FXiaoKe.Request;
+using FXiaoKe.Request.Message;
+using FXiaoKe.Response;
+using FXiaoKe.Utilities;
 using Kingdee.Forms;
 using Kingdee.Requests;
 using Newtonsoft.Json;
@@ -11,6 +15,8 @@ using NUnit.Framework;
 using NUnit.Framework.Interfaces;
 using NUnit.Framework.Internal;
 using NUnit.Framework.Internal.Builders;
+using Shared.Serialization;
+using Shared.Utilities;
 using TheFirstFarm.Models.Kingdee;
 
 namespace TheFirstFarm.Test {
@@ -28,6 +34,7 @@ namespace TheFirstFarm.Test {
 			);
 			KingdeeClient = new Kingdee.Client("http://120.27.55.22/k3cloud/");
 			Assert.IsTrue(KingdeeClient.ValidateLogin("60b86b4a9ade83", "Administrator", "888888", 2052));
+			JsonConvert.DefaultSettings = () => new JsonSerializerSettings() {ContractResolver = new JsonIncludeResolver()};
 		}
 
 		[TestCaseGeneric(TypeArguments = new[] {typeof(ReturnOrder)}, ExpectedResult = 18)]
@@ -47,21 +54,59 @@ namespace TheFirstFarm.Test {
 
 		[Test]
 		public async Task RecordOrderSaveTest() {
+			FXiaoKeClient.OnRequestFail += (sender, args) => {
+				var reqType = args.Request.GetType();
+				if (args.Request is MessageRequest) {
+					args.Continue = true;
+					return;
+				}
+				if (args.Response is BasicResponse resp) {
+					var attr = args.Request.Attribute;
+					var composite = new CompositeMessage(attr.ErrorMessage ?? "发生未知错误", Client.Origin) {
+						Head = resp.ErrorMessage,
+						Form = new List<LabelAndValue>() {
+							("时间", DateTime.Now.ToString("yyyy-MM-dd H:mm:ss.fff")),
+							("路径", attr.Url.PathAndQuery)
+						}
+					};
+					if (reqType.IsAssignableToGeneric(typeof(CreationRequestBase<>))) {
+						var modelType = ((dynamic)args.Request).Data.Model.GetType() as Type;
+						composite.Form.Add(("对象", modelType.GetModelName()));
+					}
+					var _ = FXiaoKeClient.SendCompositeMessage(composite);
+				}
+				args.Continue = args.Response.ResponseMessage.IsSuccessStatusCode;
+			};
 			var kingdeeModels = KingdeeClient.Query(new QueryRequest<ReturnOrder>()).AsT1;
 			var fXiaoKeModels = kingdeeModels.Select(
 				model =>
 					new Models.FXiaoKe.ReturnOrder() {
-						CustomerId = model.CustomerId.Number,
+						CustomerId = model.CustomerId,
 						Date = model.Date!.Value,
-						OwnerId = model.SalesmanId.Number,
+						OwnerId = model.SalesmanId,
 						Reason = model.ReturnReason,
-						Id = model.Number
+						Id = model.Number,
+						BusinessType = model.BusinessType,
+						Details = model.Details.Select(
+								detail => new Models.FXiaoKe.ReturnOrderDetail() {
+									ProductId = detail.MaterialId,
+									ProductName = detail.MaterialName,
+									Specification = detail.MaterialModel,
+									SaleUnit = detail.SaleUnit,
+									ReturnAmount = detail.ReturnAmount,
+									UnitPrice = detail.UnitPrice,
+									TaxRate = detail.TaxRate,
+									Volume = detail.Volumn,
+									ReturnType = Utilities.Utility.TransformEnum<ReturnType, Models.FXiaoKe.ReturnType>(detail.ReturnType) ?? throw new Exception(),
+									OwnerId = model.SalesmanId
+								}
+							)
+							.ToList()
 					}
 			);
-			foreach (var model in fXiaoKeModels) {
-				var resp = await FXiaoKeClient.Create(model);
-				Assert.IsTrue(resp);
-			}
+			Assert.IsTrue(await FXiaoKeClient.SetOperator("18118359138"));
+			foreach (var model in fXiaoKeModels)
+				await FXiaoKeClient.Create(model);
 		}
 	}
 
@@ -83,7 +128,7 @@ namespace TheFirstFarm.Test {
 			}
 
 			var genMethod = method.MakeGenericMethod(TypeArguments);
-			return base.BuildFrom(genMethod, suite);
+			return BuildFrom(genMethod, suite);
 		}
 	}
 }
