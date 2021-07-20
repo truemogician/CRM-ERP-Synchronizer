@@ -1,50 +1,76 @@
 ﻿using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using Newtonsoft.Json;
-using Shared.JsonConverters;
+using Shared.Serialization;
+using Shared.Validators;
 
 namespace FXiaoKe.Request.Message {
 	public class CompositeMessageRequest : MessageRequest {
 		public CompositeMessageRequest() { }
-		public CompositeMessageRequest(Client client) : base(client) { }
+		public CompositeMessageRequest(CompositeMessage message) => Composite = message;
 		public override MessageType Type => MessageType.Composite;
 
 		[JsonProperty("composite")]
+		[Required]
 		public CompositeMessage Composite { get; set; }
 	}
 
 	public class CompositeMessage {
+		public CompositeMessage() { }
+
+		public CompositeMessage(string title, string url) {
+			Title = title;
+			Link.Url = url;
+		}
+
 		[JsonProperty("head")]
-		[JsonConverter(typeof(ObjectWrapperConverter), "head")]
-		public string Head { get; set; }
+		[JsonConverter(typeof(ObjectWrapperConverter), "title")]
+		[Required]
+		public string Title { get; set; }
 
 		[JsonProperty("first")]
 		[JsonConverter(typeof(ObjectWrapperConverter), "content")]
-		public string First { get; set; }
+		public string Head { get; set; }
 
 		[JsonProperty("form")]
-		public List<Form> Form { get; set; }
+		[ArrayMaxLength(6)]
+		public List<LabelAndValue> Form { get; init; } = new();
 
 		[JsonProperty("remark")]
 		[JsonConverter(typeof(ObjectWrapperConverter), "content")]
-		public string Remark { get; set; }
+		public string Tail { get; set; }
 
 		[JsonProperty("link")]
-		public Link Link { get; set; }
+		[Required]
+		public Link Link { get; set; } = new();
 	}
 
-	public class Form {
+	public class LabelAndValue {
+		public LabelAndValue() { }
+
+		public LabelAndValue(string label, string value) {
+			Label = label;
+			Value = value;
+		}
+
 		[JsonProperty("label")]
 		public string Label { get; set; }
 
 		[JsonProperty("value")]
+		[Required]
 		public string Value { get; set; }
+
+		public static implicit operator LabelAndValue((string, string) tuple) => new(tuple.Item1, tuple.Item2);
+		public static implicit operator (string, string)(LabelAndValue self) => (self.Label, self.Value);
 	}
 
 	public class Link {
 		[JsonProperty("title")]
-		public string Title { get; set; }
+		[Required]
+		public string Title { get; set; } = "详情";
 
 		[JsonProperty("url")]
+		[Required]
 		public string Url { get; set; }
 	}
 }
