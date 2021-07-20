@@ -1,13 +1,21 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using Shared.Utilities;
 
 namespace Shared.Exceptions {
-	public class ValidationFailedException : Exception {
+	public class ValidationFailedException : ExceptionWithDefaultMessage {
 		public ValidationFailedException(string message = null, Exception innerException = null) : base(message, innerException) { }
 
-		public ValidationFailedException(IEnumerable<ValidationResult> results, string message = null, Exception innerException = null) : this(message, innerException) => ValidationResults = results;
+		public ValidationFailedException(object obj, IEnumerable<ValidationResult> results, string message = null, Exception innerException = null) : this(message, innerException) {
+			this[nameof(SourceObject)] = obj;
+			this[nameof(Results)] = results.AsList();
+		}
 
-		public IEnumerable<ValidationResult> ValidationResults { get; }
+		public object SourceObject => Get<object>(nameof(SourceObject));
+
+		public List<ValidationResult> Results => Get<List<ValidationResult>>(nameof(Results));
+
+		protected override string DefaultMessage => $"Validation on {SourceObject} failed with {Results.Count} errors";
 	}
 }
