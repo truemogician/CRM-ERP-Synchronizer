@@ -60,6 +60,8 @@ namespace FXiaoKe.Request {
 				_responseType = value;
 			}
 		}
+
+		public string ErrorMessage { get; init; }
 	}
 
 	public enum HttpMethod {
