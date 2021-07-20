@@ -23,7 +23,7 @@ namespace FXiaoKe.Request {
 	[Request("/cgi/crm/v2/data/create")]
 	public class CreationRequest<T, TDetail> : CreationRequestBase<CreationData<T, TDetail>> where T : ModelBase where TDetail : ModelBase { }
 
-	[Request(null, typeof(CreationResponse))]
+	[Request(null, typeof(CreationResponse), ErrorMessage = "创建对象时发生错误")]
 	public abstract class CreationRequestBase<T> : CrmRequest<T> {
 		/// <summary>
 		///     是否触发工作流（不传时默认为true, 表示触发），该参数对所有对象均有效
@@ -84,11 +84,9 @@ namespace FXiaoKe.Request {
 			using var stringWriter = new StringWriter(builder);
 			serializer.Serialize(stringWriter, value, value.GetType());
 			string json = builder.ToString();
-			int index = json.IndexOf('{');
-			writer.WriteRaw(json[..index]);
-			writer.WritePropertyName("dataObjectApiName");
-			writer.WriteValue(value.GetType().GetModelName());
-			writer.WriteRaw(json[(index + 1)..]);
+			int index = json.LastIndexOf('}');
+			json = $"{json[..index]},\"dataObjectApiName\":\"{value.GetType().GetModelName()}\"}}";
+			writer.WriteRawValue(json);
 		}
 
 		public override ModelBase ReadJson(JsonReader reader, Type objectType, ModelBase existingValue, bool hasExistingValue, JsonSerializer serializer) {
