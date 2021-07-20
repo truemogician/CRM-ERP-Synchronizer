@@ -1,7 +1,7 @@
 using System;
 using System.Linq;
 using System.Threading.Tasks;
-using FXiaoKe.Response;
+using FXiaoKe.Responses;
 using NUnit.Framework;
 
 namespace FXiaoKe.Test {

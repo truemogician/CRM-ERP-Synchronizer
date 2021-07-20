@@ -1,6 +1,6 @@
 ﻿using System;
-using FXiaoKe.Request;
-using FXiaoKe.Response;
+using FXiaoKe.Requests;
+using FXiaoKe.Responses;
 using Shared.Exceptions;
 
 namespace FXiaoKe.Exceptions {
