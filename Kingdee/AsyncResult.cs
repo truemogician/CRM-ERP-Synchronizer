@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using Newtonsoft.Json;
 
 namespace Kingdee {
 	public class AsyncResult<T> {
@@ -46,7 +47,7 @@ namespace Kingdee {
 			};
 			if (typeof(T) == typeof(string)) {
 				string json = ReturnValue == null ? "" : ReturnValue.ToString();
-				asyncResult.ReturnValue = !string.IsNullOrEmpty(json) ? JsonObject.Deserialize<To>(json) : default;
+				asyncResult.ReturnValue = !string.IsNullOrEmpty(json) ? JsonConvert.DeserializeObject<To>(json) : default;
 			}
 			else
 				asyncResult.ReturnValue = (To)(object)ReturnValue;

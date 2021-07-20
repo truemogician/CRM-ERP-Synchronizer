@@ -21,31 +21,6 @@ namespace Kingdee {
 
 		public static JsonObject Parse(string json) => new(json);
 
-		public static T Deserialize<T>(string json) => (T)Deserialize(json, typeof(T));
-
-		private static object Deserialize(string json, Type type) {
-			if (string.IsNullOrEmpty(json)) {
-				if (type.IsValueType)
-					return Activator.CreateInstance(type);
-				return type == typeof(string) ? json : (object)null;
-			}
-			if (type == typeof(string))
-				return json;
-			if (type.IsEnum)
-				return Enum.Parse(type, json, true);
-			if (type == typeof(int))
-				return int.Parse(json);
-			if (type == typeof(byte))
-				return byte.Parse(json);
-			if (type == typeof(long))
-				return long.Parse(json);
-			if (type == typeof(DateTime))
-				return DateTime.Parse(json);
-			if (type == typeof(decimal))
-				return decimal.Parse(json);
-			return type == typeof(bool) ? bool.Parse(json) : JsonConvert.DeserializeObject(json, type);
-		}
-
 		public void SetValue(string prop, object v) {
 			if (v != null && v.GetType().IsSimpleType())
 				AddOrUpdate(prop, new JValue(v));

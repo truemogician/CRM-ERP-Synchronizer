@@ -165,7 +165,7 @@ namespace Kingdee {
 						? default
 						: typeof(T) == typeof(string)
 							? (dynamic)json
-							: JsonObject.Deserialize<T>(json);
+							: JsonConvert.DeserializeObject<T>(json);
 				},
 				GetReallyFailCallback(onFail)
 			);
