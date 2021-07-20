@@ -1,22 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Runtime.Serialization;
 using FXiaoKe.Models;
-using Kingdee.Forms;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Converters;
 using TheFirstFarm.Models.Common;
 
 namespace TheFirstFarm.Models.FXiaoKe {
 	[Model("object_4qZkc__c", Custom = true)]
 	public class ReturnOrder : ModelBase {
-		/// <summary>
-		///     业务类型（erp）
-		/// </summary>
-		[JsonProperty("field_2imfP__c")]
-		public BusinessType BusinessType { get; set; }
-
 		/// <summary>
 		///     单据编号
 		/// </summary>
@@ -48,11 +39,18 @@ namespace TheFirstFarm.Models.FXiaoKe {
 		public string OwnerId { get; set; }
 
 		/// <summary>
+		///     业务类型（erp）
+		/// </summary>
+		[JsonProperty("field_2imfP__c")]
+		public BusinessType BusinessType { get; set; }
+
+		/// <summary>
 		///     退货原因
 		/// </summary>
 		[JsonProperty("field_S1QH2__c")]
 		public string Reason { get; set; }
 
+		[JsonIgnore]
 		[SubModel(Eager = true, Cascade = true)]
 		public List<ReturnOrderDetail> Details { get; set; }
 	}

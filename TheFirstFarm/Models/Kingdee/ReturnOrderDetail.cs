@@ -3,9 +3,11 @@
 // ReSharper disable InconsistentNaming
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Runtime.Serialization;
 using System.Text.Json.Serialization;
 using Kingdee.Forms;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 
 namespace TheFirstFarm.Models.Kingdee {
 	public class ReturnOrderDetail {
@@ -15,7 +17,7 @@ namespace TheFirstFarm.Models.Kingdee {
 		[JsonProperty("FMaterialId")]
 		[JsonInclude]
 		[Required]
-		public int MaterialId { get; set; }
+		public NumberWrapper MaterialId { get; set; }
 
 		/// <summary>
 		/// 物料名称
@@ -75,7 +77,7 @@ namespace TheFirstFarm.Models.Kingdee {
 		[JsonProperty("FRETURNTYPE")]
 		[JsonInclude]
 		[Required]
-		public NumberWrapper ReturnType { get; set; }
+		public NumberWrapper<ReturnType> ReturnType { get; set; }
 
 		[JsonProperty("FENTRYID")]
 		public int FENTRYID { get; set; }
@@ -208,5 +210,20 @@ namespace TheFirstFarm.Models.Kingdee {
 
 		[JsonProperty("FTaxDetailSubEntity")]
 		public List<FTaxDetailSubEntity> FTaxDetailSubEntity { get; set; }
+	}
+
+	[Newtonsoft.Json.JsonConverter(typeof(StringEnumConverter))]
+	public enum ReturnType {
+		/// <summary>
+		///     退货（指退货不补货）
+		/// </summary>
+		[EnumMember(Value = "THLX01_SYS")]
+		ReturnOnly,
+
+		/// <summary>
+		///     退货补货（指退货且补货）
+		/// </summary>
+		[EnumMember(Value = "THLX02_SYS")]
+		ReturnAndReplenish
 	}
 }

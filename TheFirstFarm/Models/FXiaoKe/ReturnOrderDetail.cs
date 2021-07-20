@@ -6,7 +6,7 @@ using Newtonsoft.Json.Converters;
 
 namespace TheFirstFarm.Models.FXiaoKe {
 	[Model("object_wVB1X__c", Custom = true, SubjectTo = typeof(ReturnOrder))]
-	public class ReturnOrderDetail {
+	public class ReturnOrderDetail : ModelBase {
 		/// <summary>
 		///     退换货明细编号
 		/// </summary>
