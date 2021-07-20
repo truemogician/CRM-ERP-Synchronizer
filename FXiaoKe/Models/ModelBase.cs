@@ -13,8 +13,6 @@ namespace FXiaoKe.Models {
 		[Generated]
 		public virtual string DataId { get; set; }
 
-		public virtual List<ValidationResult> Validate() => Utility.Validate(this);
-
 		[JsonIgnore]
 		public List<ModelBase> CascadeSubModels
 			=> GetType()
@@ -23,5 +21,7 @@ namespace FXiaoKe.Models {
 					member => (member is FieldInfo field ? field.GetValue(this) : (member as PropertyInfo)!.GetValue(this)) as ModelBase
 				)
 				.ToList();
+
+		public virtual List<ValidationResult> Validate() => Utility.Validate(this);
 	}
 }

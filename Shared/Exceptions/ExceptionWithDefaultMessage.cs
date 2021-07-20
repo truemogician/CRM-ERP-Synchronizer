@@ -7,11 +7,13 @@ namespace Shared.Exceptions {
 	public class ExceptionWithDefaultMessage : Exception {
 		[JsonIgnore]
 		private readonly bool _useDefaultMessage;
+
 		protected ExceptionWithDefaultMessage(string message = null, Exception innerException = null) : base(message, innerException) => _useDefaultMessage = message is null;
 		protected ExceptionWithDefaultMessage([NotNull] SerializationInfo info, StreamingContext context) : base(info, context) { }
 
 		[JsonIgnore]
 		protected virtual string DefaultMessage { get; } = null;
+
 		public sealed override string Message => _useDefaultMessage && DefaultMessage is not null ? DefaultMessage : base.Message;
 
 		protected object this[object key] {

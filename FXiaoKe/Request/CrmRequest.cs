@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 
 namespace FXiaoKe.Request {
 	public abstract class CrmRequestBase<T> : RequestWithAdvancedAuth {

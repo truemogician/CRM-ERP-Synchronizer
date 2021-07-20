@@ -146,10 +146,12 @@ namespace Shared.Utilities {
 		public static T[] AsArray<T>(this IEnumerable<T> enumerable) => enumerable is T[] array ? array : enumerable.ToArray();
 
 		/// <summary>
-		/// 
 		/// </summary>
 		/// <param name="type"></param>
-		/// <param name="genericTypeDefinition">The generic interface <paramref name="type"/> is required to implement. Default is <see cref="IEnumerable{}"/></param>
+		/// <param name="genericTypeDefinition">
+		///     The generic interface <paramref name="type" /> is required to implement. Default is
+		///     <see cref="IEnumerable{}" />
+		/// </param>
 		/// <returns></returns>
 		public static Type GetItemType(this Type type, Type genericTypeDefinition = null) {
 			genericTypeDefinition ??= typeof(IEnumerable<>);

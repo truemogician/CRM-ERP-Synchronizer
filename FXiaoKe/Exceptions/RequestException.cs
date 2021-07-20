@@ -1,7 +1,6 @@
 ﻿using System;
 using FXiaoKe.Request;
 using FXiaoKe.Response;
-using Microsoft.Extensions.DependencyModel.Resolution;
 using Shared.Exceptions;
 
 namespace FXiaoKe.Exceptions {

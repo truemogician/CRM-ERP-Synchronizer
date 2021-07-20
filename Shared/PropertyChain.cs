@@ -70,6 +70,18 @@ namespace Shared {
 			}
 		}
 
+		public virtual string ToString(string format = null, IFormatProvider formatProvider = null) {
+			Func<EnumerablePropertyInfo, string> getName = format?.ToLowerInvariant() switch {
+				"json" or "j" => prop => prop.GetJsonPropertyName(),
+				_             => prop => prop.Name
+			};
+			return InfoChain.Aggregate(
+				new StringBuilder(),
+				(builder, prop) => builder.Append($"{getName(prop)}."),
+				builder => builder.ToString(0, builder.Length - 1)
+			);
+		}
+
 		IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
 		public IEnumerator<EnumerablePropertyInfo> GetEnumerator() => InfoChain.GetEnumerator();
@@ -100,18 +112,6 @@ namespace Shared {
 		public EnumerablePropertyInfo this[int index] {
 			get => InfoChain.ToList()[index];
 			set => NameChain[index] = value.Name;
-		}
-
-		public virtual string ToString(string format = null, IFormatProvider formatProvider = null) {
-			Func<EnumerablePropertyInfo, string> getName = format?.ToLowerInvariant() switch {
-				"json" or "j" => prop => prop.GetJsonPropertyName(),
-				_             => prop => prop.Name
-			};
-			return InfoChain.Aggregate(
-				new StringBuilder(),
-				(builder, prop) => builder.Append($"{getName(prop)}."),
-				builder => builder.ToString(0, builder.Length - 1)
-			);
 		}
 
 		public void FromString(string chain, string format = null) {
