@@ -37,7 +37,7 @@ namespace Shared {
 		public IEnumerable<int> Ranks => InfoChain.Select(info => info.Rank);
 
 		[NotEmpty]
-		protected List<string> NameChain { get; } = new();
+		protected List<string> NameChain { get; private set; } = new();
 
 		protected IEnumerable<EnumerablePropertyInfo> InfoChain {
 			get {
@@ -112,6 +112,11 @@ namespace Shared {
 				(builder, prop) => builder.Append($"{getName(prop)}."),
 				builder => builder.ToString(0, builder.Length - 1)
 			);
+		}
+
+		public void FromString(string chain, string format = null) {
+			var result = FromString(StartingType, chain, format);
+			NameChain = result.NameChain;
 		}
 
 		public static PropertyChain FromString(Type type, string chain, string format = null) {

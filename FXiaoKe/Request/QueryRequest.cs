@@ -1,4 +1,5 @@
 ﻿// ReSharper disable StringLiteralTypo
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -6,23 +7,24 @@ using System.Reflection;
 using System.Runtime.Serialization;
 using FXiaoKe.Models;
 using FXiaoKe.Response;
+using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
+using Shared;
+using Shared.Exceptions;
 using Shared.Utilities;
 
 namespace FXiaoKe.Request {
 	[Request("/cgi/crm/custom/v2/data/get", typeof(QueryByConditionResponse))]
 	public class CustomQueryByIdRequest<T> : QueryByIdRequest<T> where T : ModelBase {
 		public CustomQueryByIdRequest() { }
-		public CustomQueryByIdRequest(Client client) : base(client) { }
-		public CustomQueryByIdRequest(string id, Client client) : base(id, client) { }
+		public CustomQueryByIdRequest(string id) : base(id) { }
 	}
 
 	[Request("/cgi/crm/v2/data/get", typeof(QueryByConditionResponse))]
 	public class QueryByIdRequest<T> : CrmRequest<IdInfo<T>> where T : ModelBase {
 		public QueryByIdRequest() { }
-		public QueryByIdRequest(Client client) : base(client) { }
-		public QueryByIdRequest(string id, Client client) : base(new IdInfo<T>(id), client) { }
+		public QueryByIdRequest(string id) : base(new IdInfo<T>(id)) { }
 	}
 
 	public class IdInfo<T> : DataBase<T> where T : ModelBase {
@@ -36,25 +38,50 @@ namespace FXiaoKe.Request {
 		public string Id { get; set; }
 	}
 
-	[Request("/cgi/crm/custom/v2/data/query", typeof(QueryByConditionResponse))]
-	public class QueryCustomByConditionRequest<T> : QueryByConditionRequest<T> where T : ModelBase {
+	public class QueryCustomByConditionRequest<T> : QueryCustomByConditionRequest where T : ModelBase {
 		public QueryCustomByConditionRequest() { }
-		public QueryCustomByConditionRequest(Client client) : base(client) { }
+		public QueryCustomByConditionRequest(ConditionInfo<T> data) => Data = data;
+		public override ConditionInfo<T> Data { get; }
+	}
+
+	[Request("/cgi/crm/custom/v2/data/query", typeof(QueryByConditionResponse))]
+	public class QueryCustomByConditionRequest : QueryByConditionRequest {
+		public QueryCustomByConditionRequest() { }
+		public QueryCustomByConditionRequest(ConditionInfo data) : base(data) { }
+	}
+
+	public class QueryByConditionRequest<T> : QueryByConditionRequest where T : ModelBase {
+		public QueryByConditionRequest() { }
+		public QueryByConditionRequest(ConditionInfo<T> data) => Data = data;
+
+		public override ConditionInfo<T> Data { get; }
 	}
 
 	[Request("/cgi/crm/v2/data/query", typeof(QueryByConditionResponse))]
-	public class QueryByConditionRequest<T> : CrmRequest<ConditionInfo<T>> where T : ModelBase {
+	public class QueryByConditionRequest : CovariantCrmRequest<ConditionInfo> {
 		public QueryByConditionRequest() { }
-		public QueryByConditionRequest(Client client) : base(client) { }
+		public QueryByConditionRequest(ConditionInfo data) : base(data) { }
 	}
 
-	public class ConditionInfo<T> : DataBase<T> where T : ModelBase {
+	public class ConditionInfo<T> : ConditionInfo where T : ModelBase {
+		public ConditionInfo() { }
+		public ConditionInfo(QueryCondition<T> condition) => Condition = condition;
+		public override QueryCondition<T> Condition { get; }
+		public static implicit operator QueryCondition<T>(ConditionInfo<T> self) => self.Condition;
+
+		public static implicit operator ConditionInfo<T>(QueryCondition<T> other) => new(other);
+	}
+
+	public class ConditionInfo {
+		public ConditionInfo() { }
+		public ConditionInfo(QueryCondition condition) => Condition = condition;
+
 		/// <summary>
 		///     查询条件列表
 		/// </summary>
 		[JsonProperty("search_query_info")]
 		[Required]
-		public QueryCondition<T> Condition { get; set; }
+		public virtual QueryCondition Condition { get; }
 
 		/// <summary>
 		///     true->返回total,false->不返回total总数。默认true。设置为false可以加快接口响应速度
@@ -62,18 +89,35 @@ namespace FXiaoKe.Request {
 		[JsonProperty("find_explicit_total_num")]
 		public bool ReturnTotal { get; set; } = true;
 
-		public static explicit operator QueryCondition<T>(ConditionInfo<T> self) => self.Condition;
+		public static implicit operator QueryCondition(ConditionInfo self) => self.Condition;
 
-		public static explicit operator ConditionInfo<T>(QueryCondition<T> other)
-			=> new() {
-				Condition = other
-			};
+		public static implicit operator ConditionInfo(QueryCondition other) => new(other);
 	}
 
-	public class QueryCondition<T> where T : ModelBase {
+	public class QueryCondition<T> : QueryCondition where T : ModelBase {
 		public QueryCondition() { }
 
-		public QueryCondition(params ModelFilter<T>[] filters) => Filters = filters.ToList();
+		public QueryCondition(params ModelFilter<T>[] filters) => Filters = filters;
+
+		public QueryCondition(IEnumerable<ModelFilter<T>> filters, IEnumerable<ModelOrder<T>> orders) {
+			Filters = filters.AsList();
+			Orders = orders.AsList();
+		}
+
+		public override IReadOnlyList<ModelFilter<T>> Filters { get; }
+
+		public override IReadOnlyList<ModelOrder<T>> Orders { get; }
+	}
+
+	public class QueryCondition {
+		public QueryCondition() { }
+
+		public QueryCondition(params ModelFilter[] filters) => Filters = filters;
+
+		public QueryCondition(IEnumerable<ModelFilter> filters, IEnumerable<ModelOrder> orders) {
+			Filters = filters.AsList();
+			Orders = orders.AsList();
+		}
 
 		/// <summary>
 		///     获取数据条数, 最大值为100
@@ -94,14 +138,14 @@ namespace FXiaoKe.Request {
 		/// </summary>
 		[JsonProperty("filters")]
 		[Required]
-		public List<ModelFilter<T>> Filters { get; set; } = new();
+		public virtual IReadOnlyList<ModelFilter> Filters { get; } = new List<ModelFilter>();
 
 		/// <summary>
 		///     排序
 		/// </summary>
 		[JsonProperty("orders")]
 		[Required]
-		public List<ModelOrder<T>> Orders { get; set; } = new();
+		public virtual IReadOnlyList<ModelOrder> Orders { get; } = new List<ModelOrder>();
 
 		/// <summary>
 		///     返回字段列表
@@ -110,28 +154,43 @@ namespace FXiaoKe.Request {
 		public List<string> FieldProjection { get; set; }
 	}
 
-	public class ModelFilter<T> where T : ModelBase {
+	public class ModelFilter<T> : ModelFilter where T : ModelBase {
+		public ModelFilter(string propertyName) : base(typeof(T), propertyName) { }
+		public ModelFilter(string propertyName, QueryOperator @operator, params object[] values) : base(typeof(T), propertyName, @operator, values) { }
+
+		public ModelFilter(ModelFilter source) : this(source.Property.Names.Single(), source.Operator, source.Values) {
+			if (source.Type != typeof(T))
+				throw new TypeNotMatchException(typeof(T), source.Type);
+		}
+	}
+
+	public class ModelFilter {
 		/// <summary>
 		/// </summary>
 		/// <param name="propertyName">属性名称，建议使用nameof获取</param>
-		public ModelFilter(string propertyName) => Property = typeof(T).GetProperty(propertyName);
+		public ModelFilter(Type type, string propertyName) => Property = new PropertyChain(propertyName) {StartingType = type};
 
-		public ModelFilter(string propertyName, QueryOperator @operator, params object[] values) : this(propertyName) {
+		public ModelFilter(Type type, string propertyName, QueryOperator @operator, params object[] values) : this(type, propertyName) {
 			Operator = @operator;
 			Values = values.ToList();
 		}
 
 		[JsonIgnore]
-		[Required]
-		public PropertyInfo Property { get; set; }
+		public Type Type {
+			get => Property.StartingType;
+			set => Property.StartingType = value;
+		}
+
+		[JsonIgnore]
+		internal PropertyChain Property { get; }
 
 		/// <summary>
 		///     筛选字段名，对象字段详情请参考对象描述
 		/// </summary>
 		[JsonProperty("field_name")]
 		public string JsonPropertyName {
-			get => Property.GetJsonProperty() is { } attr ? attr.PropertyName : Property.Name;
-			set => Property = typeof(T).GetPropertyFromJsonPropertyName(value);
+			get => Property.ToString("json");
+			set => Property.FromString(value, "json");
 		}
 
 		/// <summary>
@@ -153,27 +212,45 @@ namespace FXiaoKe.Request {
 		public ModelEqualityFilter(string propertyName, object value) : base(propertyName, QueryOperator.Equal, value) { }
 	}
 
-	public class ModelOrder<T> where T : ModelBase {
+	public class ModelOrder<T> : ModelOrder where T : ModelBase {
 		/// <summary>
 		/// </summary>
 		/// <param name="propertyName">属性名称，建议使用nameof获取</param>
 		/// <param name="ascending"></param>
-		public ModelOrder(string propertyName, bool ascending) {
-			Property = typeof(T).GetProperty(propertyName);
+		public ModelOrder(string propertyName, bool ascending) : base(typeof(T), propertyName, ascending) { }
+
+		public ModelOrder(ModelOrder source) : this(source.Property.Names.Single(), source.Ascending) {
+			if (source.Type != typeof(T))
+				throw new TypeNotMatchException(typeof(T), source.Type);
+		}
+	}
+
+	public class ModelOrder {
+		/// <summary>
+		/// </summary>
+		/// <param name="propertyName">属性名称，建议使用nameof获取</param>
+		/// <param name="ascending"></param>
+		public ModelOrder(Type type, string propertyName, bool ascending) {
+			Property = new PropertyChain(propertyName) {StartingType = type};
 			Ascending = ascending;
 		}
 
 		[JsonIgnore]
-		[Required]
-		public PropertyInfo Property { get; set; }
+		internal PropertyChain Property { get; }
+
+		[JsonIgnore]
+		public Type Type {
+			get => Property.StartingType;
+			set => Property.StartingType = value;
+		}
 
 		/// <summary>
 		///     字段名
 		/// </summary>
 		[JsonProperty("fieldName")]
 		public string JsonPropertyName {
-			get => Property.GetJsonProperty() is { } attr ? attr.PropertyName : Property.Name;
-			set => Property = typeof(T).GetPropertyFromJsonPropertyName(value);
+			get => Property.ToString("json");
+			set => Property.FromString(value, "json");
 		}
 
 		/// <summary>
@@ -188,8 +265,16 @@ namespace FXiaoKe.Request {
 		public AscendingModelOrder(string propertyName) : base(propertyName, true) { }
 	}
 
+	public class AscendingModelOrder : ModelOrder {
+		public AscendingModelOrder(Type type, string propertyName) : base(type, propertyName, true) { }
+	}
+
 	public class DescendingModelOrder<T> : ModelOrder<T> where T : ModelBase {
 		public DescendingModelOrder(string propertyName) : base(propertyName, false) { }
+	}
+
+	public class DescendingModelOrder : ModelOrder {
+		public DescendingModelOrder(Type type, string propertyName) : base(type, propertyName, false) { }
 	}
 
 	[JsonConverter(typeof(StringEnumConverter))]

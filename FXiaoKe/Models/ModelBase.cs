@@ -3,13 +3,19 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Reflection;
 using FXiaoKe.Utilities;
+using Newtonsoft.Json;
 using Shared.Utilities;
 
 namespace FXiaoKe.Models {
 	[Model]
 	public abstract class ModelBase {
+		[JsonProperty("_id")]
+		[Generated]
+		public virtual string DataId { get; set; }
+
 		public virtual List<ValidationResult> Validate() => Utility.Validate(this);
 
+		[JsonIgnore]
 		public List<ModelBase> CascadeSubModels
 			=> GetType()
 				.GetCascadeSubModels()
