@@ -3,11 +3,12 @@ using System.ComponentModel.DataAnnotations;
 using System.Runtime.Serialization;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
+using Shared.Utilities;
 
 namespace FXiaoKe.Request.Message {
 	public class ArticlesMessageRequest : MessageRequest {
 		public ArticlesMessageRequest() { }
-		public ArticlesMessageRequest(Client client) : base(client) { }
+		public ArticlesMessageRequest(params Article[] articles) => Articles = articles.AsList();
 		public override MessageType Type => MessageType.Articles;
 
 		[JsonProperty("articles")]

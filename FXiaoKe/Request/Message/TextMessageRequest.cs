@@ -1,13 +1,11 @@
 ﻿using Newtonsoft.Json;
-using Shared.JsonConverters;
+using Shared.Serialization;
 
 namespace FXiaoKe.Request.Message {
 	public class TextMessageRequest : MessageRequest {
 		public TextMessageRequest() { }
 
-		public TextMessageRequest(Client client) : base(client) { }
-
-		public TextMessageRequest(string text, Client client) : this(client) => Text = text;
+		public TextMessageRequest(string text) => Text = text;
 
 		public override MessageType Type => MessageType.Text;
 

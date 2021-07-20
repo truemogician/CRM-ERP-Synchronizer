@@ -2,10 +2,6 @@
 
 namespace FXiaoKe.Request {
 	public class RequestWithBasicAuth : RequestBase {
-		public RequestWithBasicAuth() { }
-
-		public RequestWithBasicAuth(Client client) => UseClient(client);
-
 		/// <summary>
 		///     企业应用访问公司合法性凭证
 		/// </summary>
