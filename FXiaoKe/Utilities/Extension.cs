@@ -45,8 +45,6 @@ namespace FXiaoKe.Utilities {
 			return result ?? throw new MissingKeyException(type);
 		}
 
-		public static List<RequestAttribute> GetRequestAttributes(this Type type) => type.GetCustomAttributes<RequestAttribute>().ToList();
-
 		public static List<MemberInfo> GetSubModels(this Type type, bool verify = true) {
 			if (verify)
 				Utility.VerifyInheritance(type, typeof(ModelBase));

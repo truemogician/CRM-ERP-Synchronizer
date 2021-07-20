@@ -11,7 +11,7 @@ namespace Shared.Utilities {
 			=> info switch {
 				FieldInfo field       => field.GetValue(obj),
 				PropertyInfo property => property.GetValue(obj),
-				_                     => throw new Exception($"Cannot get value from {info.Name}")
+				_                     => throw new MemberTypeException(info, MemberTypes.Property | MemberTypes.Field)
 			};
 
 		public static void SetValue(this MemberInfo info, object obj, object value) {
@@ -22,9 +22,19 @@ namespace Shared.Utilities {
 				case PropertyInfo property:
 					property.SetValue(obj, value);
 					break;
-				default: throw new Exception($"Cannot get value from {info.Name}");
+				default: throw new MemberTypeException(info, MemberTypes.Property | MemberTypes.Field);
 			}
 		}
+
+		public static Type GetValueType(this MemberInfo info)
+			=> info switch {
+				FieldInfo field             => field.FieldType,
+				PropertyInfo property       => property.PropertyType,
+				MethodInfo method           => method.ReturnType,
+				ConstructorInfo constructor => constructor.DeclaringType,
+				EventInfo @event            => @event.EventHandlerType,
+				_                           => info.ReflectedType
+			};
 
 		public static bool Implements(this Type type, Type interfaceType)
 			=> (interfaceType.IsGenericTypeDefinition
@@ -37,6 +47,16 @@ namespace Shared.Utilities {
 
 		public static Type[] GetGenericInterfaceArguments(this Type type, Type genericTypeDefinition) => type.GetGenericInterface(genericTypeDefinition)?.GetGenericArguments();
 
+		public static bool IsAssignableToGeneric(this Type type, Type genericTypeDeclaration) {
+			while (type != null && type != typeof(object)) {
+				var cur = type.IsGenericType ? type.GetGenericTypeDefinition() : type;
+				if (genericTypeDeclaration == cur)
+					return true;
+				type = type.BaseType;
+			}
+			return false;
+		}
+
 		public static List<PropertyInfo> GetIndexers(this Type type) => type.GetProperties().Where(p => p.GetIndexParameters().Length > 0).ToList();
 
 		public static PropertyInfo GetIndexer(this Type type, params Type[] parameterTypes)
@@ -47,13 +67,21 @@ namespace Shared.Utilities {
 						parameterTypes.Select((t, index) => t == args[index].ParameterType).All(x => x)
 				);
 
-		public static List<MemberInfo> GetMembersWithAttribute(this Type type, Type attributeType) => type.GetMembers().Where(member => member.IsDefined(attributeType)).ToList();
+		public static List<MemberInfo> GetMembersWithAttributes(this Type type, params Type[] attributeTypes) => type.GetMembers().Where(member => attributeTypes.All(member.IsDefined)).ToList();
 
-		public static List<MemberInfo> GetMembersWithAttribute<T>(this Type type) where T : Attribute => type.GetMembersWithAttribute(typeof(T));
+		public static List<MemberInfo> GetMembersWithAttribute<T>(this Type type) where T : Attribute => type.GetMembersWithAttributes(typeof(T));
 
-		public static MemberInfo GetMemberWithAttribute(this Type type, Type attributeType) => type.GetMembersWithAttribute(attributeType).SingleOrDefault();
+		public static MemberInfo GetMemberWithAttributes(this Type type, params Type[] attributeTypes) => type.GetMembersWithAttributes(attributeTypes).SingleOrDefault();
 
 		public static MemberInfo GetMemberWithAttribute<T>(this Type type) where T : Attribute => type.GetMembersWithAttribute<T>().SingleOrDefault();
+
+		public static List<(MemberInfo Member, List<Attribute> Attributes)> GetMembersAndAttributes(this Type type, params Type[] attributeTypes) => type.GetMembers().Where(member => attributeTypes.All(member.IsDefined)).Select(member => (member, attributeTypes.Select(member.GetCustomAttribute).AsList())).AsList();
+
+		public static List<(MemberInfo Member, T Attribute)> GetMembersAndAttribute<T>(this Type type) where T : Attribute => type.GetMembersAndAttributes(typeof(T)).Select(result => (result.Member, result.Attributes.Single() as T)).AsList();
+
+		public static (MemberInfo Member, List<Attribute> Attributes) GetMemberAndAttributes(this Type type, params Type[] attributeTypes) => type.GetMembersAndAttributes(attributeTypes).SingleOrDefault();
+
+		public static (MemberInfo Member, T Attribute) GetMemberAndAttribute<T>(this Type type) where T : Attribute => type.GetMembersAndAttribute<T>().SingleOrDefault();
 
 		public static List<T> GetAttributes<T>(this PropertyInfo property) where T : Attribute => property.GetCustomAttributes(typeof(T), true).Cast<T>().ToList();
 
@@ -108,27 +136,7 @@ namespace Shared.Utilities {
 			if (type.IsInstanceOfType(value) || value is null)
 				setValue(obj, value);
 			else if (type.Implements(typeof(IConvertible)) && value.GetType().Implements(typeof(IConvertible)))
-				setValue(
-					obj,
-					Type.GetTypeCode(type) switch {
-						TypeCode.Boolean  => Convert.ToBoolean(value),
-						TypeCode.SByte    => Convert.ToSByte(value),
-						TypeCode.Byte     => Convert.ToByte(value),
-						TypeCode.Int16    => Convert.ToInt16(value),
-						TypeCode.UInt16   => Convert.ToUInt16(value),
-						TypeCode.Int32    => Convert.ToInt32(value),
-						TypeCode.UInt32   => Convert.ToUInt32(value),
-						TypeCode.Int64    => Convert.ToInt64(value),
-						TypeCode.UInt64   => Convert.ToUInt64(value),
-						TypeCode.Single   => Convert.ToSingle(value),
-						TypeCode.Double   => Convert.ToDouble(value),
-						TypeCode.Decimal  => Convert.ToDecimal(value),
-						TypeCode.DateTime => Convert.ToDateTime(value),
-						TypeCode.Char     => Convert.ToChar(value),
-						TypeCode.String   => Convert.ToString(value),
-						_                 => throw new EnumValueOutOfRangeException<TypeCode>(Type.GetTypeCode(type))
-					}
-				);
+				setValue(obj, Convert.ChangeType(value, type));
 			else
 				throw new InterfaceNotImplementedException(typeof(IConvertible));
 		}
@@ -150,6 +158,23 @@ namespace Shared.Utilities {
 			if (!type.Implements(genericTypeDefinition))
 				return null;
 			return type.HasElementType ? type.GetElementType() : type.GetGenericInterfaceArguments(genericTypeDefinition).Single();
+		}
+
+		public static List<MemberInfo> GetMembers(this Type type, MemberTypes memberTypes) {
+			var result = new List<MemberInfo>();
+			if (memberTypes.HasFlag(MemberTypes.Property))
+				result.AddRange(type.GetProperties());
+			if (memberTypes.HasFlag(MemberTypes.Field))
+				result.AddRange(type.GetFields());
+			if (memberTypes.HasFlag(MemberTypes.Constructor))
+				result.AddRange(type.GetConstructors());
+			if (memberTypes.HasFlag(MemberTypes.Event))
+				result.AddRange(type.GetEvents());
+			if (memberTypes.HasFlag(MemberTypes.Method))
+				result.AddRange(type.GetMethods());
+			if (memberTypes.HasFlag(MemberTypes.NestedType))
+				result.AddRange(type.GetNestedTypes());
+			return result;
 		}
 	}
 }

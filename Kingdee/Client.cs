@@ -4,9 +4,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 using System.Text;
-using System.Threading;
 using Kingdee.Forms;
 using Kingdee.Requests;
 using Kingdee.Responses;
@@ -14,6 +12,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using OneOf;
 using Shared.Exceptions;
+using Shared.Serialization;
 using Shared.Utilities;
 
 namespace Kingdee {
@@ -53,7 +52,7 @@ namespace Kingdee {
 			var subFormInfo = forms[0].GetType().GetMemberWithAttribute<SubFormAttribute>();
 			if (subFormInfo is null)
 				return forms;
-			var type = subFormInfo is PropertyInfo prop ? prop.PropertyType : (subFormInfo as FieldInfo)!.FieldType;
+			var type = subFormInfo.GetValueType();
 			var groups = forms.GroupBy(form => form.GetType().GetMemberWithAttribute<KeyAttribute>().GetValue(form));
 			return groups.Select(
 					group => {
