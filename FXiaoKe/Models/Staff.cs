@@ -1,126 +1,147 @@
 ﻿// ReSharper disable StringLiteralTypo
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
+using System.Runtime.Serialization;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
+using Shared.Serialization;
 
 namespace FXiaoKe.Models {
 	public class Staff : ModelBase {
+		/// <summary>
+		/// 开放平台Id
+		/// </summary>
 		[JsonProperty("openUserId")]
-		[Key]
 		public string Id { get; set; }
 
-		[JsonProperty("enterpriseId")]
-		public int EnterpriseId { get; set; }
-
+		/// <summary>
+		/// 账号
+		/// </summary>
 		[JsonProperty("account")]
 		public string Account { get; set; }
 
-		[JsonProperty("fullName")]
-		public string FullName { get; set; }
-
+		/// <summary>
+		/// 姓名
+		/// </summary>
 		[JsonProperty("name")]
 		public string Name { get; set; }
 
-		[JsonProperty("status")]
-		public string Status { get; set; }
+		/// <summary>
+		/// 昵称
+		/// </summary>
+		[JsonProperty("nickName")]
+		public string NickName { get; set; }
 
-		[JsonProperty("mobile")]
-		public string Mobile { get; set; }
+		/// <summary>
+		/// 是否离职
+		/// </summary>
+		[JsonProperty("isStop")]
+		public bool Suspended { get; set; }
 
-		[JsonProperty("leaderId")]
-		public string LeaderId { get; set; }
+		/// <summary>
+		/// 邮箱
+		/// </summary>
+		[JsonProperty("email")]
+		public string Email { get; set; }
 
-		[JsonProperty("telephone")]
-		public string Telephone { get; set; }
-
-		[JsonProperty("role")]
-		public string Role { get; set; }
-
-		[JsonProperty("post")]
-		public string Post { get; set; }
-
+		/// <summary>
+		/// QQ
+		/// </summary>
 		[JsonProperty("qq")]
 		// ReSharper disable once InconsistentNaming
 		public string QQ { get; set; }
 
-		[JsonProperty("email")]
-		public string Email { get; set; }
-
-		[JsonProperty("gender")]
-		public string Gender { get; set; }
-
-		[JsonProperty("profileImage")]
-		public string ProfileImage { get; set; }
-
-		[JsonProperty("description")]
-		public string Description { get; set; }
-
+		/// <summary>
+		/// 微信
+		/// </summary>
 		[JsonProperty("weixin")]
 		public string WeChat { get; set; }
 
-		[JsonProperty("msn")]
-		public string Msn { get; set; }
+		/// <summary>
+		/// 手机号
+		/// </summary>
+		[JsonProperty("mobile")]
+		public string PhoneNumber { get; set; }
 
-		[JsonProperty("extensionNumber")]
-		public string ExtensionNumber { get; set; }
+		/// <summary>
+		/// 性别
+		/// </summary>
+		[JsonProperty("gender")]
+		public Gender Gender { get; set; }
 
-		[JsonProperty("mobileSetting")]
-		public MobileSetting MobileSetting { get; set; }
+		/// <summary>
+		/// 职位
+		/// </summary>
+		[JsonProperty("position")]
+		public string Position { get; set; }
 
-		[JsonProperty("workingState")]
-		public string WorkingState { get; set; }
+		/// <summary>
+		/// 头像文件Id
+		/// </summary>
+		[JsonProperty("profileImageUrl")]
+		public string AvatarId { get; set; }
 
-		[JsonProperty("isActive")]
-		public bool IsActive { get; set; }
-
-		[JsonProperty("mainDepartmentIds")]
-		public List<int> MainDepartmentIds { get; set; }
-
+		/// <summary>
+		/// 所属部门及其父部门Id列表
+		/// </summary>
 		[JsonProperty("departmentIds")]
 		public List<int> DepartmentIds { get; set; }
 
-		[JsonProperty("departmentAsteriskIds")]
-		public List<object> DepartmentAsteriskIds { get; set; }
+		/// <summary>
+		/// 员工主属部门ID
+		/// </summary>
+		[JsonProperty("mainDepartmentId")]
+		[JsonConverter(typeof(ReferenceIdConverter<Department>), nameof(Models.Department.Id))]
+		public Department Department { get; set; }
 
-		[JsonProperty("employeeAsteriskIds")]
-		public List<object> EmployeeAsteriskIds { get; set; }
+		/// <summary>
+		/// 员工附属部门ID列表
+		/// </summary>
+		[JsonProperty("attachingDepartmentIds")]
+		public List<int> AttachingDepartmentIds { get; set; }
 
-		[JsonProperty("birthDate")]
-		public string BirthDate { get; set; }
+		/// <summary>
+		/// 编号
+		/// </summary>
+		[JsonProperty("employeeNumber")]
+		public string Number { get; set; }
 
+		/// <summary>
+		/// 入职日期
+		/// </summary>
 		[JsonProperty("hireDate")]
 		public string HireDate { get; set; }
 
-		[JsonProperty("empNum")]
-		public string EmpNum { get; set; }
+		/// <summary>
+		/// 生日
+		/// </summary>
+		[JsonProperty("birthDate")]
+		public string Birthday { get; set; }
 
+		/// <summary>
+		/// 参加工作日期
+		/// </summary>
 		[JsonProperty("startWorkDate")]
-		public string StartWorkDate { get; set; }
+		public string StartDate { get; set; }
 
-		[JsonProperty("stopTime")]
-		public int StopTime { get; set; }
-
+		/// <summary>
+		/// 创建时间
+		/// </summary>
 		[JsonProperty("createTime")]
 		public long CreateTime { get; set; }
 
-		[JsonProperty("updateTime")]
-		public long UpdateTime { get; set; }
-
-		[JsonProperty("nameSpell")]
-		public string NameSpell { get; set; }
-
-		[JsonProperty("nameOrder")]
-		public string NameOrder { get; set; }
+		/// <summary>
+		/// 汇报对象Id
+		/// </summary>
+		[JsonProperty("leaderId")]
+		public string LeaderId { get; set; }
 	}
 
-	public class MobileSetting {
-		[JsonProperty("mobileStatus")]
-		public string MobileStatus { get; set; }
+	[JsonConverter(typeof(StringEnumConverter))]
+	public enum Gender : byte {
+		[EnumMember(Value = "M")]
+		Male,
 
-		[JsonProperty("departmentIds")]
-		public List<int> DepartmentIds { get; set; }
-
-		[JsonProperty("employeeIds")]
-		public List<int> EmployeeIds { get; set; }
+		[EnumMember(Value = "F")]
+		Female
 	}
 }
