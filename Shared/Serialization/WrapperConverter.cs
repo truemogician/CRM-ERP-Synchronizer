@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Shared.Exceptions;
@@ -44,12 +45,14 @@ namespace Shared.Serialization {
 
 		public override T ReadJson(JsonReader reader, Type objectType, T existingValue, bool hasExistingValue, JsonSerializer serializer) {
 			var token = JToken.Load(reader);
+			if (token.Type is JTokenType.Null or JTokenType.Undefined)
+				return default;
 			if (token.Type != JTokenType.Array)
 				throw new JTokenTypeException(token, JTokenType.Array);
 			var array = token as JArray;
 			if (array!.Count > 1)
 				throw new JTokenException(array, $"{array.Count} items read, but only 1 expected");
-			return array[0].Value<T>();
+			return array.Count == 0 ? default : array[0].Value<T>();
 		}
 	}
 }
