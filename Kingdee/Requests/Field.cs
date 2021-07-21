@@ -5,9 +5,9 @@ using System.Reflection;
 using System.Text;
 using Kingdee.Forms;
 using Kingdee.Requests.Query;
+using Newtonsoft.Json;
 using Shared;
 using Shared.Exceptions;
-using Shared.Utilities;
 
 namespace Kingdee.Requests {
 	public class Field : PropertyChain, IFormType {
@@ -16,11 +16,6 @@ namespace Kingdee.Requests {
 		public Field(params string[] propertyNameChain) : base(propertyNameChain) { }
 
 		public Field(PropertyChain src) : base(src) { }
-
-		public Type FormType {
-			get => StartingType;
-			set => StartingType = value;
-		}
 
 		public DataType DataType
 			=> Type.GetTypeCode(EndingType) switch {
@@ -32,6 +27,11 @@ namespace Kingdee.Requests {
 			};
 
 		public override Field this[Range range] => new(base[range]);
+
+		public Type FormType {
+			get => StartingType;
+			set => StartingType = value;
+		}
 
 		public override bool Equals(object obj) {
 			if (obj is null)

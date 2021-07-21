@@ -26,7 +26,5 @@ namespace Shared.Utilities {
 			if (results.Count > 0)
 				throw new ValidationFailedException(obj, results);
 		}
-
-		public static T Construct<T>(params object[] parameters) => (T)typeof(T).Construct(parameters);
 	}
 }

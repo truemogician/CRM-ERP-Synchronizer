@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using Shared.Utilities;
+using System.Linq;
 
 namespace Shared.Exceptions {
 	public class ValidationFailedException : ExceptionWithDefaultMessage {

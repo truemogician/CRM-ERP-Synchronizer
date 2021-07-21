@@ -2,24 +2,20 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
-using Accessibility;
 using FXiaoKe;
 using FXiaoKe.Models;
-using FXiaoKe.Requests;
 using FXiaoKe.Requests.Message;
-using FXiaoKe.Responses;
 using FXiaoKe.Utilities;
 using Kingdee.Forms;
-using Kingdee.Requests;
 using Newtonsoft.Json;
 using NUnit.Framework;
 using NUnit.Framework.Interfaces;
 using NUnit.Framework.Internal;
 using NUnit.Framework.Internal.Builders;
 using Shared.Serialization;
-using Shared.Utilities;
-using TheFirstFarm.Models.Common;
+using TheFirstFarm.Utilities;
 using FModels = TheFirstFarm.Models.FXiaoKe;
 using KModels = TheFirstFarm.Models.Kingdee;
 using FRequests = FXiaoKe.Requests;
@@ -35,14 +31,14 @@ namespace TheFirstFarm.Test {
 
 		[SetUp]
 		public void Setup() {
-			JsonConvert.DefaultSettings = () => new JsonSerializerSettings() {ContractResolver = new JsonIncludeResolver()};
+			JsonConvert.DefaultSettings = () => new JsonSerializerSettings {ContractResolver = new JsonIncludeResolver()};
 			FXiaoKeClient = new Client(
 				"FSAID_1319ebe",
 				"fe4fd3abb55a45d3ae5ed03b3bcb6fc8",
 				"D63C0B6A42F171D173EF728CBFC12874"
 			);
 			FXiaoKeClient.RequestFailed += (_, args) => {
-				if (args.Response is BasicResponse resp)
+				if (args.Response is FResponses.BasicResponse resp)
 					Console.WriteLine(resp.ErrorMessage);
 			};
 			KingdeeClient = new Kingdee.Client("http://120.27.55.22/k3cloud/");
@@ -58,14 +54,14 @@ namespace TheFirstFarm.Test {
 
 		[TestCaseGeneric(TypeArgument = typeof(KModels.ReturnOrder))]
 		public void KingdeeQueryTest<T>() where T : FormBase {
-			var response = KingdeeClient.Query(new QueryRequest<T>());
+			var response = KingdeeClient.Query(new KRequests.QueryRequest<T>());
 			Assert.IsTrue(response.IsT1);
 			foreach (var resp in response.AsT1)
 				Console.WriteLine(JsonConvert.SerializeObject(resp, Formatting.Indented));
 		}
 
 		[TestCaseGeneric(TypeArgument = typeof(FModels.ReturnOrder))]
-		public async Task FXiaoKeQueryTest<T>(params ModelFilter<T>[] filters) where T : ModelBase {
+		public async Task FXiaoKeQueryTest<T>(params FRequests.ModelFilter<T>[] filters) where T : ModelBase {
 			FXiaoKeClient.Operator = await FXiaoKeClient.GetStaffByPhoneNumber("18118359138");
 			var result = await FXiaoKeClient.QueryByCondition(filters);
 			Console.WriteLine($@"{result?.Count} {typeof(T).Name} found");
@@ -79,16 +75,16 @@ namespace TheFirstFarm.Test {
 					args.Continue = true;
 					return;
 				}
-				if (args.Response is BasicResponse resp) {
+				if (args.Response is FResponses.BasicResponse resp) {
 					var attr = args.Request.Attribute;
 					var composite = new CompositeMessage(attr.ErrorMessage ?? "发生未知错误", Client.Origin) {
 						Head = resp.ErrorMessage,
-						Form = new List<LabelAndValue>() {
+						Form = new List<LabelAndValue> {
 							("时间", DateTime.Now.ToString("yyyy-MM-dd H:mm:ss.fff")),
 							("路径", attr.Url.PathAndQuery)
 						}
 					};
-					if (reqType.IsAssignableToGeneric(typeof(CreationRequestBase<>))) {
+					if (reqType.IsAssignableToGeneric(typeof(FRequests.CreationRequestBase<>))) {
 						var modelType = ((dynamic)args.Request).Data.Model.GetType() as Type;
 						composite.Form.Add(("对象", modelType.GetModelName()));
 					}
@@ -97,7 +93,7 @@ namespace TheFirstFarm.Test {
 				}
 				args.Continue = args.Response.ResponseMessage.IsSuccessStatusCode;
 			};
-			var kingdeeModels = KingdeeClient.Query(new QueryRequest<KModels.ReturnOrder>()).AsT1;
+			var kingdeeModels = KingdeeClient.Query(new KRequests.QueryRequest<KModels.ReturnOrder>()).AsT1;
 			var department = await FXiaoKeClient.GetDepartmentDetailTree();
 			var staffs = await FXiaoKeClient.GetStaffs(department);
 			FXiaoKeClient.Operator = staffs.Single(staff => staff.Name == "周孝成");
@@ -120,7 +116,7 @@ namespace TheFirstFarm.Test {
 									UnitPrice = detail.UnitPrice,
 									TaxRate = detail.TaxRate,
 									Volume = detail.Volumn,
-									ReturnType = Utilities.Utility.TransformEnum<KModels.ReturnType, FModels.ReturnType>(detail.ReturnType) ?? throw new Exception(),
+									ReturnType = Utility.TransformEnum<KModels.ReturnType, FModels.ReturnType>(detail.ReturnType) ?? throw new Exception(),
 									OwnerId = model.SalesmanId
 								}
 							)

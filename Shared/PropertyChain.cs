@@ -6,6 +6,7 @@ using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using Newtonsoft.Json;
 using Shared.Exceptions;
 using Shared.Utilities;
 using Shared.Validators;
@@ -121,7 +122,7 @@ namespace Shared {
 
 		public static PropertyChain FromString(Type type, string chain, string format = null) {
 			Func<string, string> getPropName = format?.ToLowerInvariant() switch {
-				"json" or "j" => name => type.GetPropertyFromJsonPropertyName(name).Name,
+				"json" or "j" => name => type.GetMemberFromJsonPropertyName(name).Name,
 				_             => name => name
 			};
 			string[] propertyNameChain = chain.Split('.')

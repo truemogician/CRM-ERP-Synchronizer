@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using Kingdee.Forms;
 using Kingdee.Requests;
@@ -12,8 +13,6 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using OneOf;
 using Shared.Exceptions;
-using Shared.Serialization;
-using Shared.Utilities;
 
 namespace Kingdee {
 	public class Client : ApiClient {
