@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Reflection;
+using Shared.Utilities;
 
 namespace FXiaoKe.Models {
 	public abstract class FXiaoKeAttribute : Attribute { }
@@ -26,7 +27,7 @@ namespace FXiaoKe.Models {
 			var masterType = declaringType.GetCustomAttribute<ModelAttribute>()!.SubjectTo;
 			if (masterType is null)
 				throw new NullReferenceException("Master type not specified");
-			return masterType.GetMember(KeyName, MemberTypes.Property | MemberTypes.Field, BindingFlags.Public).SingleOrDefault();
+			return masterType.GetMember(KeyName, MemberTypes.Property | MemberTypes.Field);
 		}
 	}
 
