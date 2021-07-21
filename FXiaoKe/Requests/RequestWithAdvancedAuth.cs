@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using System;
+using Newtonsoft.Json;
 
 namespace FXiaoKe.Requests {
 	public class RequestWithAdvancedAuth : RequestWithBasicAuth {
@@ -10,7 +11,11 @@ namespace FXiaoKe.Requests {
 
 		public sealed override void UseClient(Client client) {
 			base.UseClient(client);
-			OperatorId = client.OperatorId;
+			if (client.Operator is null)
+				throw new InvalidOperationException($"{nameof(client.Operator)} hasn't been set");
+			if (string.IsNullOrEmpty(client.Operator.Id))
+				throw new InvalidOperationException($"{nameof(client.Operator)}'s {nameof(client.Operator.Id)} is empty");
+			OperatorId = client.Operator.Id;
 		}
 	}
 }

@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using System;
+using Newtonsoft.Json;
 
 namespace FXiaoKe.Requests {
 	public class RequestWithBasicAuth : RequestBase {
@@ -15,6 +16,8 @@ namespace FXiaoKe.Requests {
 		public string CorpId { get; set; }
 
 		public virtual void UseClient(Client client) {
+			if (string.IsNullOrEmpty(client.CorpAccessToken) || string.IsNullOrEmpty(client.CorpId))
+				throw new InvalidOperationException($"{nameof(client.CorpAccessToken)} or {nameof(client.CorpId)} is empty");
 			CorpAccessToken = client.CorpAccessToken;
 			CorpId = client.CorpId;
 		}
