@@ -41,13 +41,13 @@ namespace FXiaoKe {
 
 		protected DateTime? ExpireAt { get; private set; }
 
-		public string OperatorId { get; private set; }
+		public Staff Operator { get; set; }
 
-		public event CommonEventHandler<ValidationFailureEventArgs> OnValidationFail = delegate { };
+		public event CommonEventHandler<ValidationFailedEventArgs> ValidationFailed = delegate { };
 
-		public event CommonEventHandler<RequestFailureEventArgs> OnRequestFail = delegate { };
+		public event CommonEventHandler<RequestFailedEventArgs> RequestFailed = delegate { };
 
-		public event CommonEventHandler<RequestSuccessEventArgs> OnRequestSucceed = delegate { };
+		public event CommonEventHandler<RequestSucceededEventArgs> RequestSucceeded = delegate { };
 
 		public async Task<TResponse> ReceiveResponse<TResponse, TRequest>(TRequest request) where TRequest : RequestBase where TResponse : ResponseBase => await ReceiveResponse(request, typeof(TResponse)) as TResponse;
 
@@ -64,21 +64,21 @@ namespace FXiaoKe {
 			if (!respMessage.IsSuccessStatusCode) {
 				response = responseType.Construct() as ResponseBase;
 				response!.ResponseMessage = respMessage;
-				var args = new RequestFailureEventArgs(request, response);
-				OnRequestFail(this, args);
+				var args = new RequestFailedEventArgs(request, response);
+				RequestFailed(this, args);
 				return args.Continue ? response : throw new RequestFailedException(request, response);
 			}
 			string json = await respMessage.Content.ReadAsStringAsync();
 			response = JsonConvert.DeserializeObject(json, responseType) as ResponseBase;
 			response!.ResponseMessage = respMessage;
 			if (response is BasicResponse resp && !resp) {
-				var args = new RequestFailureEventArgs(request, response);
-				OnRequestFail(this, args);
+				var args = new RequestFailedEventArgs(request, response);
+				RequestFailed(this, args);
 				if (!args.Continue)
 					throw new RequestFailedException(request, response);
 			}
 			else if (ValidateResponse(response))
-				OnRequestSucceed(this, new RequestSuccessEventArgs(request, response));
+				RequestSucceeded(this, new RequestSucceededEventArgs(request, response));
 			return response;
 		}
 
@@ -91,46 +91,55 @@ namespace FXiaoKe {
 			return authResp;
 		}
 
-		public async Task<Staff> QueryStaff(string phoneNumber) {
+		public async Task<Staff> GetStaffByPhoneNumber(string phoneNumber) {
 			var request = new StaffQueryRequest(phoneNumber);
 			var resp = await ReceiveResponse<StaffQueryResponse, StaffQueryRequest>(request);
 			return resp.Staffs.SingleOrDefault();
 		}
 
-		public async Task<bool> SetOperator(string staffPhoneNumber) {
-			try {
-				var staff = await QueryStaff(staffPhoneNumber);
-				OperatorId = staff.Id;
-				return true;
-			}
-			catch (RequestFailedException) {
-				return false;
-			}
-		}
-
 		private async Task<List<ModelBase>> QueryByCondition(QueryByConditionRequest request) {
-			var response = await ReceiveResponse<QueryByConditionResponse<ModelBase>, QueryByConditionRequest>(request);
-			var results = response.Data.DataList;
+			var response = await ReceiveResponse(request, typeof(QueryByConditionResponse<>).MakeGenericType(request.Data.Type));
+			var results = (((dynamic)response).Data.DataList as IList)!.AsType<ModelBase>().AsList();
 			var resultType = results[0].GetType();
 			var subModelInfos = resultType.GetEagerSubModels();
 			if (subModelInfos.Count == 0)
 				return results;
 			foreach (var subModelInfo in subModelInfos) {
-				var subModelType = subModelInfo.GetValueType();
-				bool many = subModelType.Implements(typeof(IList));
-				subModelType = many ? subModelType.GetItemType(typeof(IList)) : subModelType;
+				var rawType = subModelInfo.GetValueType();
+				bool many = rawType.Implements(typeof(IList<>));
+				var subModelType = many ? rawType.GetItemType(typeof(IList<>)) : rawType;
 				if (subModelType.GetCustomAttribute<ModelAttribute>()!.SubjectTo is var type && type != resultType)
 					throw new TypeNotMatchException(resultType, type);
-				var (_, masterKey) = subModelType.GetMemberAndAttribute<MasterKeyAttribute>();
+				var (masterKeyMember, masterKey) = subModelType.GetMemberAndAttribute<MasterKeyAttribute>();
 				if (masterKey is null)
 					throw new AttributeNotFoundException(typeof(MasterKeyAttribute));
 				var tasks = new Task[results.Count];
+				var keyInfo = masterKey.GetKey(subModelType);
 				for (int i = 0; i < results.Count; ++i) {
 					var result = results[i];
-					var condition = new QueryCondition<ModelBase>(new ModelEqualityFilter<ModelBase>(masterKey.KeyName, masterKey.GetKey(subModelType).GetValue(result)));
-					tasks[i] = QueryByCondition(new QueryByConditionRequest<ModelBase>(condition))
+					var condition = new QueryCondition(new ModelEqualityFilter(subModelType, masterKeyMember.Name, keyInfo.GetValue(result)));
+					var subReq = subModelType.IsCustomModel()
+						? new QueryCustomByConditionRequest(condition)
+						: new QueryByConditionRequest(condition);
+					tasks[i] = QueryByCondition(subReq)
 						.ContinueWith(
-							(Task<List<ModelBase>> task) => subModelInfo.SetValue(result, many ? task.Result : task.Result.SingleOrDefault())
+							task => {
+								if (!many)
+									subModelInfo.SetValue(result, task.Result.SingleOrDefault());
+								else {
+									object target = subModelInfo.GetValue(result);
+									if (target is null) {
+										if (rawType.IsAbstract || rawType.IsInterface)
+											throw new TypeException(rawType, "Abstract class or Interface cannot be instantiated");
+										target = rawType.Construct();
+										subModelInfo.SetValue(result, target);
+									}
+									var list = target as IList;
+									list!.Clear();
+									foreach (var res in task.Result)
+										list.Add(res);
+								}
+							}
 						);
 				}
 				await Task.WhenAll(tasks);
@@ -181,17 +190,17 @@ namespace FXiaoKe {
 
 		public Task<BasicResponse> SendTextMessage(string text, params string[] receiversIds) {
 			var receiversIdsList = receiversIds.ToList();
-			if (receiversIdsList.Count == 0 && !string.IsNullOrEmpty(OperatorId))
-				receiversIdsList.Add(OperatorId);
+			if (receiversIdsList.Count == 0 && !string.IsNullOrEmpty(Operator?.Id))
+				receiversIdsList.Add(Operator.Id);
 			return SendMessage(new TextMessageRequest(text) {ReceiversIds = receiversIdsList});
 		}
 
 		public Task<BasicResponse> SendCompositeMessage(CompositeMessage message, params string[] receiversIds) {
 			var receiversIdsList = receiversIds.ToList();
-			if (receiversIdsList.Count == 0 && !string.IsNullOrEmpty(OperatorId))
-				receiversIdsList.Add(OperatorId);
+			if (receiversIdsList.Count == 0 && !string.IsNullOrEmpty(Operator?.Id))
+				receiversIdsList.Add(Operator.Id);
 			return SendMessage(
-				new CompositeMessageRequest() {
+				new CompositeMessageRequest {
 					Composite = message,
 					ReceiversIds = receiversIdsList
 				}
@@ -248,8 +257,8 @@ namespace FXiaoKe {
 			await AuthenticateRequest(request);
 			var results = request.Validate();
 			if (results?.Count > 0) {
-				var args = new ValidationFailureEventArgs(request, results);
-				OnValidationFail(this, args);
+				var args = new ValidationFailedEventArgs(request, results);
+				ValidationFailed(this, args);
 				if (!args.Continue)
 					throw new ValidationFailedException(request, results);
 			}
@@ -259,8 +268,8 @@ namespace FXiaoKe {
 		private bool ValidateResponse(ResponseBase response) {
 			var results = response.Validate();
 			if (results?.Count > 0) {
-				var args = new ValidationFailureEventArgs(response, results);
-				OnValidationFail(this, args);
+				var args = new ValidationFailedEventArgs(response, results);
+				ValidationFailed(this, args);
 				if (!args.Continue)
 					throw new ValidationFailedException(response, results);
 				return false;
@@ -268,8 +277,8 @@ namespace FXiaoKe {
 			return true;
 		}
 
-		public class RequestSuccessEventArgs : EventArgs {
-			public RequestSuccessEventArgs(RequestBase request = null, ResponseBase response = null) {
+		public class RequestSucceededEventArgs : EventArgs {
+			public RequestSucceededEventArgs(RequestBase request = null, ResponseBase response = null) {
 				Request = request;
 				Response = response;
 			}
@@ -279,13 +288,13 @@ namespace FXiaoKe {
 			public ResponseBase Response { get; }
 		}
 
-		public class RequestFailureEventArgs : RequestSuccessEventArgs {
-			public RequestFailureEventArgs(RequestBase request = null, ResponseBase response = null) : base(request, response) { }
+		public class RequestFailedEventArgs : RequestSucceededEventArgs {
+			public RequestFailedEventArgs(RequestBase request = null, ResponseBase response = null) : base(request, response) { }
 			public bool Continue { get; set; } = false;
 		}
 
-		public class ValidationFailureEventArgs : EventArgs {
-			public ValidationFailureEventArgs(object obj, IEnumerable<ValidationResult> results) {
+		public class ValidationFailedEventArgs : EventArgs {
+			public ValidationFailedEventArgs(object obj, IEnumerable<ValidationResult> results) {
 				SourceObject = obj;
 				Results = results.AsList();
 			}

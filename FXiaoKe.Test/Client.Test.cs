@@ -15,19 +15,16 @@ namespace FXiaoKe.Test {
 				"fe4fd3abb55a45d3ae5ed03b3bcb6fc8",
 				"D63C0B6A42F171D173EF728CBFC12874"
 			);
-			Client.OnRequestFail += (_, args) => Assert.Fail(args.Response is BasicResponse resp ? resp.ErrorMessage : "Request failed");
-			Client.OnValidationFail += (_, args) => Assert.Fail($"Validation failed: {string.Join(' ', args.Results.Select(res => res.ErrorMessage))}");
+			Client.RequestFailed += (_, args) => Assert.Fail(args.Response is BasicResponse resp ? resp.ErrorMessage : "Request failed");
+			Client.ValidationFailed += (_, args) => Assert.Fail($"Validation failed: {string.Join(' ', args.Results.Select(res => res.ErrorMessage))}");
 		}
 
 		[Test]
 		public async Task AuthorizationTest() => Assert.IsTrue(await Client.Authorize());
 
-		[TestCase("18118359138")]
-		public async Task SetOperatorTest(string phoneNumber) => Assert.IsTrue(await Client.SetOperator(phoneNumber));
-
 		[TestCase("²âÊÔÏûÏ¢", "18118359138")]
 		public async Task SendTextMessageTest(string message, params string[] phoneNumbers) {
-			string[] ids = await Task.WhenAll(phoneNumbers.Select(number => Client.QueryStaff(number).ContinueWith(task => task.Result.Id)));
+			string[] ids = await Task.WhenAll(phoneNumbers.Select(number => Client.GetStaffByPhoneNumber(number).ContinueWith(task => task.Result.Id)));
 			Assert.DoesNotThrowAsync(() => Client.SendTextMessage(message, ids));
 		}
 
