@@ -3,11 +3,10 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
-using System.Reflection;
 using System.Runtime.Serialization;
 using FXiaoKe.Models;
 using FXiaoKe.Responses;
-using Microsoft.AspNetCore.Mvc;
+using FXiaoKe.Utilities;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Shared;
@@ -65,16 +64,34 @@ namespace FXiaoKe.Requests {
 
 	public class ConditionInfo<T> : ConditionInfo where T : ModelBase {
 		public ConditionInfo() { }
-		public ConditionInfo(QueryCondition<T> condition) => Condition = condition;
+
+		public ConditionInfo(QueryCondition<T> condition) {
+			Condition = condition;
+			ObjectName = typeof(T).GetModelName();
+		}
+
 		public override QueryCondition<T> Condition { get; }
+
+		public override Type Type => typeof(T);
+
 		public static implicit operator QueryCondition<T>(ConditionInfo<T> self) => self.Condition;
 
 		public static implicit operator ConditionInfo<T>(QueryCondition<T> other) => new(other);
+
+		public static implicit operator ConditionInfo<T>(ModelFilter<T> filter) => new(filter);
+
+		public static implicit operator ConditionInfo<T>(ModelFilter<T>[] filters) => new(filters);
+
+		public static implicit operator ConditionInfo<T>(List<ModelFilter<T>> filters) => new(filters.ToArray());
 	}
 
-	public class ConditionInfo {
+	public class ConditionInfo : DataBase, IType {
 		public ConditionInfo() { }
-		public ConditionInfo(QueryCondition condition) => Condition = condition;
+
+		public ConditionInfo(QueryCondition condition) {
+			Condition = condition;
+			ObjectName = condition.Type.GetModelName();
+		}
 
 		/// <summary>
 		///     查询条件列表
@@ -87,11 +104,19 @@ namespace FXiaoKe.Requests {
 		///     true->返回total,false->不返回total总数。默认true。设置为false可以加快接口响应速度
 		/// </summary>
 		[JsonProperty("find_explicit_total_num")]
-		public bool ReturnTotal { get; set; } = true;
+		public bool ReturnTotal { get; set; }
+
+		public virtual Type Type => Condition.Type;
 
 		public static implicit operator QueryCondition(ConditionInfo self) => self.Condition;
 
 		public static implicit operator ConditionInfo(QueryCondition other) => new(other);
+
+		public static implicit operator ConditionInfo(ModelFilter filter) => new(filter);
+
+		public static implicit operator ConditionInfo(ModelFilter[] filters) => new(filters);
+
+		public static implicit operator ConditionInfo(List<ModelFilter> filters) => new(filters.ToArray());
 	}
 
 	public class QueryCondition<T> : QueryCondition where T : ModelBase {
@@ -104,19 +129,44 @@ namespace FXiaoKe.Requests {
 			Orders = orders.AsList();
 		}
 
+		[JsonIgnore]
 		public override IReadOnlyList<ModelFilter<T>> Filters { get; }
 
+		[JsonIgnore]
 		public override IReadOnlyList<ModelOrder<T>> Orders { get; }
+
+		public override Type Type {
+			get => typeof(T);
+			init {
+				if (value != typeof(T))
+					throw new InvalidOperationException($"{nameof(Type)} must equals to generic type parameter");
+			}
+		}
+
+		public static implicit operator QueryCondition<T>(ModelFilter<T> filter) => new(filter);
+
+		public static implicit operator QueryCondition<T>(ModelFilter<T>[] filters) => new(filters);
+
+		public static implicit operator QueryCondition<T>(List<ModelFilter<T>> filters) => new(filters.ToArray());
 	}
 
-	public class QueryCondition {
+	public class QueryCondition : IType {
+		private readonly Type _type;
+
 		public QueryCondition() { }
 
-		public QueryCondition(params ModelFilter[] filters) => Filters = filters;
+		public QueryCondition(Type type) => _type = type;
+
+		public QueryCondition(params ModelFilter[] filters) {
+			Filters = filters;
+			_type = filters.SameOrDefault(filter => filter.Type);
+		}
 
 		public QueryCondition(IEnumerable<ModelFilter> filters, IEnumerable<ModelOrder> orders) {
-			Filters = filters.AsList();
-			Orders = orders.AsList();
+			var (filterList, orderList) = (filters.AsList(), orders.AsList());
+			Filters = filterList;
+			Orders = orderList;
+			_type = ((IEnumerable<IType>)filterList).Concat(orderList).SameOrDefault(t => t.Type);
 		}
 
 		/// <summary>
@@ -152,6 +202,17 @@ namespace FXiaoKe.Requests {
 		/// </summary>
 		[JsonProperty("fieldProjection")]
 		public List<string> FieldProjection { get; set; }
+
+		public virtual Type Type {
+			get => _type;
+			init => _type = value;
+		}
+
+		public static implicit operator QueryCondition(ModelFilter filter) => new(filter);
+
+		public static implicit operator QueryCondition(ModelFilter[] filters) => new(filters);
+
+		public static implicit operator QueryCondition(List<ModelFilter> filters) => new(filters.ToArray());
 	}
 
 	public class ModelFilter<T> : ModelFilter where T : ModelBase {
@@ -164,21 +225,16 @@ namespace FXiaoKe.Requests {
 		}
 	}
 
-	public class ModelFilter {
+	public class ModelFilter : IType {
 		/// <summary>
 		/// </summary>
+		/// <param name="type"></param>
 		/// <param name="propertyName">属性名称，建议使用nameof获取</param>
 		public ModelFilter(Type type, string propertyName) => Property = new PropertyChain(propertyName) {StartingType = type};
 
 		public ModelFilter(Type type, string propertyName, QueryOperator @operator, params object[] values) : this(type, propertyName) {
 			Operator = @operator;
 			Values = values.ToList();
-		}
-
-		[JsonIgnore]
-		public Type Type {
-			get => Property.StartingType;
-			set => Property.StartingType = value;
 		}
 
 		[JsonIgnore]
@@ -206,10 +262,19 @@ namespace FXiaoKe.Requests {
 		[JsonProperty("operator")]
 		[Required]
 		public QueryOperator Operator { get; set; }
+
+		public Type Type {
+			get => Property.StartingType;
+			set => Property.StartingType = value;
+		}
 	}
 
 	public class ModelEqualityFilter<T> : ModelFilter<T> where T : ModelBase {
 		public ModelEqualityFilter(string propertyName, object value) : base(propertyName, QueryOperator.Equal, value) { }
+	}
+
+	public class ModelEqualityFilter : ModelFilter {
+		public ModelEqualityFilter(Type type, string propertyName, object value) : base(type, propertyName, QueryOperator.Equal, value) { }
 	}
 
 	public class ModelOrder<T> : ModelOrder where T : ModelBase {
@@ -225,7 +290,7 @@ namespace FXiaoKe.Requests {
 		}
 	}
 
-	public class ModelOrder {
+	public class ModelOrder : IType {
 		/// <summary>
 		/// </summary>
 		/// <param name="propertyName">属性名称，建议使用nameof获取</param>
@@ -237,12 +302,6 @@ namespace FXiaoKe.Requests {
 
 		[JsonIgnore]
 		internal PropertyChain Property { get; }
-
-		[JsonIgnore]
-		public Type Type {
-			get => Property.StartingType;
-			set => Property.StartingType = value;
-		}
 
 		/// <summary>
 		///     字段名
@@ -259,6 +318,11 @@ namespace FXiaoKe.Requests {
 		[JsonProperty("isAsc")]
 		[Required]
 		public bool Ascending { get; set; }
+
+		public Type Type {
+			get => Property.StartingType;
+			set => Property.StartingType = value;
+		}
 	}
 
 	public class AscendingModelOrder<T> : ModelOrder<T> where T : ModelBase {
@@ -275,6 +339,11 @@ namespace FXiaoKe.Requests {
 
 	public class DescendingModelOrder : ModelOrder {
 		public DescendingModelOrder(Type type, string propertyName) : base(type, propertyName, false) { }
+	}
+
+	internal interface IType {
+		[JsonIgnore]
+		public Type Type { get; }
 	}
 
 	[JsonConverter(typeof(StringEnumConverter))]
