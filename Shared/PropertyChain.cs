@@ -248,14 +248,14 @@ namespace Shared {
 
 		public void SetIndexedValue(object obj, object value, params int[] indices) {
 			if (indices.Length != Rank)
-				throw new Exception($"{Rank} indices expected");
+				throw new ArgumentNullException($"{Rank} indices expected");
 			var type = Info.PropertyType;
-			if (obj.GetType() != type)
-				throw new TypeNotMatchException(type, obj.GetType());
+			if (!type.IsInstanceOfType(obj))
+				throw new InvariantTypeException(type, obj?.GetType());
 			object result = Info.GetValue(obj);
 			for (int i = 0; i < Rank; ++i) {
-				if (result?.GetType().GetGenericInterface(typeof(IList<>)) is null)
-					throw new TypeException(result?.GetType(), "IList<> interface required for setting value");
+				if (result!.GetType().Implements(typeof(IList)))
+					throw new TypeException(result?.GetType(), $"{nameof(IList)} required for setting value");
 				if (i < Rank - 1)
 					result = (result as IList)![indices[i]];
 				else

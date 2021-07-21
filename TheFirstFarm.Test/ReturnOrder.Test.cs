@@ -45,14 +45,14 @@ namespace TheFirstFarm.Test {
 			Assert.IsTrue(KingdeeClient.ValidateLogin("60b86b4a9ade83", "Administrator", "888888", 2052));
 		}
 
-		[TestCaseGeneric(TypeArgument = typeof(KModels.ReturnOrder), ExpectedResult = 18)]
+		[TestCaseGeneric(GenericArgument = typeof(KModels.ReturnOrder), ExpectedResult = 18)]
 		public int KingdeeFieldsTest<T>() where T : FormBase {
 			var fields = FormMeta<T>.QueryFields;
 			Console.WriteLine(string.Join(", ", fields.Select(field => field.ToString("json"))));
 			return fields.Count;
 		}
 
-		[TestCaseGeneric(TypeArgument = typeof(KModels.ReturnOrder))]
+		[TestCaseGeneric(GenericArgument = typeof(KModels.ReturnOrder))]
 		public void KingdeeQueryTest<T>() where T : FormBase {
 			var response = KingdeeClient.Query(new KRequests.QueryRequest<T>());
 			Assert.IsTrue(response.IsT1);
@@ -60,7 +60,7 @@ namespace TheFirstFarm.Test {
 				Console.WriteLine(JsonConvert.SerializeObject(resp, Formatting.Indented));
 		}
 
-		[TestCaseGeneric(TypeArgument = typeof(FModels.ReturnOrder))]
+		[TestCaseGeneric(GenericArgument = typeof(FModels.ReturnOrder))]
 		public async Task FXiaoKeQueryTest<T>(params FRequests.ModelFilter<T>[] filters) where T : ModelBase {
 			FXiaoKeClient.Operator = await FXiaoKeClient.GetStaffByPhoneNumber("18118359138");
 			var result = await FXiaoKeClient.QueryByCondition(filters);
@@ -133,24 +133,24 @@ namespace TheFirstFarm.Test {
 		public TestCaseGenericAttribute(params object[] arguments)
 			: base(arguments) { }
 
-		public Type TypeArgument {
-			get => TypeArguments.SingleOrDefault();
-			set => TypeArguments = new[] {value};
+		public Type GenericArgument {
+			get => GenericArguments.SingleOrDefault();
+			set => GenericArguments = new[] {value};
 		}
 
-		public Type[] TypeArguments { get; set; }
+		public Type[] GenericArguments { get; set; }
 
 		IEnumerable<TestMethod> ITestBuilder.BuildFrom(IMethodInfo method, NUnit.Framework.Internal.Test suite) {
 			if (!method.IsGenericMethodDefinition)
 				return BuildFrom(method, suite);
 
-			if (TypeArguments == null || TypeArguments.Length != method.GetGenericArguments().Length) {
+			if (GenericArguments == null || GenericArguments.Length != method.GetGenericArguments().Length) {
 				var @params = new TestCaseParameters {RunState = RunState.NotRunnable};
-				@params.Properties.Set("_SKIPREASON", $"{nameof(TypeArguments)} should have {method.GetGenericArguments().Length} elements");
+				@params.Properties.Set("_SKIPREASON", $"{nameof(GenericArguments)} should have {method.GetGenericArguments().Length} elements");
 				return new[] {new NUnitTestCaseBuilder().BuildTestMethod(method, suite, @params)};
 			}
 
-			var genMethod = method.MakeGenericMethod(TypeArguments);
+			var genMethod = method.MakeGenericMethod(GenericArguments);
 			return BuildFrom(genMethod, suite);
 		}
 	}

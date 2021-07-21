@@ -25,16 +25,12 @@ namespace System.Reflection {
 			}
 		}
 
-		public static void SetValueWithConversion(this MemberInfo info, object obj, object value) {
-			(Action<object, object> setValue, Type type) = info switch {
-				FieldInfo field   => ((Action<object, object>)field.SetValue, field.FieldType),
-				PropertyInfo prop => (prop.SetValue, prop.PropertyType),
-				_                 => throw new Exception("Property or field expected")
-			};
+		public static void SetValueWithConversion(this MemberInfo member, object obj, object value) {
+			var type = member.GetValueType();
 			if (type.IsInstanceOfType(value) || value is null)
-				setValue(obj, value);
+				member.SetValue(obj, value);
 			else if (type.Implements(typeof(IConvertible)) && value.GetType().Implements(typeof(IConvertible)))
-				setValue(obj, Convert.ChangeType(value, type));
+				member.SetValue(obj, Convert.ChangeType(value, type));
 			else
 				throw new InterfaceNotImplementedException(typeof(IConvertible));
 		}
@@ -71,22 +67,31 @@ namespace System.Reflection {
 				? type.GetGenericInterface(interfaceType)
 				: type.GetInterface(interfaceType.Name)) is not null;
 
-		public static Type GetGenericInterface(this Type type, Type genericTypeDefinition)
-			=> type.GetInterfaces()
-				.SingleOrDefault(i => i.IsGenericType && i.GetGenericTypeDefinition() == genericTypeDefinition);
+		public static Type[] GetGenericInterfaces(this Type type, Type genericTypeDefinition) {
+			if (!genericTypeDefinition.IsGenericTypeDefinition)
+				throw new TypeException(genericTypeDefinition, "Required to be a generic type definition");
+			return type.GetInterfaces()
+				.Where(i => i.IsGenericType && i.GetGenericTypeDefinition() == genericTypeDefinition)
+				.ToArray();
+		}
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static Type GetGenericInterface(this Type type, Type genericTypeDefinition) => type.GetGenericInterfaces(genericTypeDefinition).SingleOrDefault();
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static Type[] GetGenericInterfaceArguments(this Type type, Type genericTypeDefinition) => type.GetGenericInterface(genericTypeDefinition)?.GetGenericArguments();
 
-		public static bool IsAssignableToGeneric(this Type type, Type genericTypeDeclaration) {
-			while (type != null && type != typeof(object)) {
-				var cur = type.IsGenericType ? type.GetGenericTypeDefinition() : type;
-				if (genericTypeDeclaration == cur)
+		public static bool IsAssignableToGeneric(this Type type, Type genericType) {
+			do {
+				var cur = type?.IsGenericType == true ? type.GetGenericTypeDefinition() : type;
+				if (genericType == cur)
 					return true;
-				type = type.BaseType;
-			}
+				type = type?.BaseType;
+			} while (type != null && type != typeof(object));
 			return false;
 		}
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static PropertyInfo[] GetIndexers(this Type type) => type.GetProperties().Where(p => p.GetIndexParameters().Length > 0).AsArray();
 
 		public static PropertyInfo GetIndexer(this Type type, params Type[] parameterTypes)
@@ -99,20 +104,27 @@ namespace System.Reflection {
 
 		public static MemberInfo[] GetMembersWithAttributes(this Type type, params Type[] attributeTypes) => type.GetMembers().Where(member => attributeTypes.All(member.IsDefined)).ToArray();
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static MemberInfo[] GetMembersWithAttribute<T>(this Type type) where T : Attribute => type.GetMembersWithAttributes(typeof(T));
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static MemberInfo GetMemberWithAttributes(this Type type, params Type[] attributeTypes) => type.GetMembersWithAttributes(attributeTypes).SingleOrDefault();
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static MemberInfo GetMemberWithAttribute<T>(this Type type) where T : Attribute => type.GetMembersWithAttribute<T>().SingleOrDefault();
 
 		public static (MemberInfo Member, Attribute[] Attributes)[] GetMembersAndAttributes(this Type type, params Type[] attributeTypes) => type.GetMembers().Where(member => attributeTypes.All(member.IsDefined)).Select(member => (member, attributeTypes.Select(member.GetCustomAttribute).ToArray())).ToArray();
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static (MemberInfo Member, T Attribute)[] GetMembersAndAttribute<T>(this Type type) where T : Attribute => type.GetMembersAndAttributes(typeof(T)).Select(result => (result.Member, result.Attributes.Single() as T)).ToArray();
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static (MemberInfo Member, Attribute[] Attributes) GetMemberAndAttributes(this Type type, params Type[] attributeTypes) => type.GetMembersAndAttributes(attributeTypes).SingleOrDefault();
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static (MemberInfo Member, T Attribute) GetMemberAndAttribute<T>(this Type type) where T : Attribute => type.GetMembersAndAttribute<T>().SingleOrDefault();
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static Type GetMemberType(this Type type, string name) => type.GetMember(name).SingleOrDefault()?.GetValueType();
 
 		public static MemberInfo[] GetMembers(this Type type, MemberTypes memberTypes) {

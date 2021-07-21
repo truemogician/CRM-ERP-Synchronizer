@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using Shared.Exceptions;
 
 // ReSharper disable once CheckNamespace
@@ -22,10 +23,13 @@ namespace Newtonsoft.Json {
 			return prop.GetCustomAttribute<JsonPropertyAttribute>();
 		}
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static string GetJsonPropertyName(this Type type, string propertyName) => type.GetProperty(propertyName).GetJsonPropertyName();
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static JsonPropertyAttribute GetJsonProperty(this MemberInfo member) => member.GetCustomAttribute<JsonPropertyAttribute>();
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static string GetJsonPropertyName(this MemberInfo member) => member.GetJsonProperty() is { } attr ? attr.PropertyName : member.Name;
 
 		public static MemberInfo GetMemberFromJsonPropertyName(this Type type, string jsonPropertyName) {
