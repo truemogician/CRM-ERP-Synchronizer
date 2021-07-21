@@ -1,7 +1,10 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using Newtonsoft.Json;
 using Shared.Exceptions;
 
@@ -111,21 +114,17 @@ namespace Shared.Utilities {
 
 		public static string GetJsonPropertyName(this Type type, string propertyName) => type.GetProperty(propertyName).GetJsonPropertyName();
 
-		public static JsonPropertyAttribute GetJsonProperty(this PropertyInfo property) => property.GetCustomAttribute<JsonPropertyAttribute>();
+		public static JsonPropertyAttribute GetJsonProperty(this MemberInfo member) => member.GetCustomAttribute<JsonPropertyAttribute>();
 
-		public static string GetJsonPropertyName(this PropertyInfo property) => property.GetJsonProperty() is { } attr ? attr.PropertyName : property.Name;
+		public static string GetJsonPropertyName(this MemberInfo member) => member.GetJsonProperty() is { } attr ? attr.PropertyName : member.Name;
 
 		public static PropertyInfo GetPropertyFromJsonPropertyName(this Type type, string jsonPropertyName) {
 			var props = type.GetProperties(BindingFlags.Public);
 			return props.FirstOrDefault(prop => prop.GetJsonPropertyName() == jsonPropertyName);
 		}
 
-		public static object Construct(this Type type, params object[] parameters) {
-			var constructor = type.GetConstructor(parameters.Select(p => p.GetType()).ToArray());
-			if (constructor is null)
-				throw new TypeException(type, $"{type.FullName} can't be constructed with such parameters");
-			return constructor.Invoke(parameters);
-		}
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static object Construct(this Type type, params object[] parameters) => Activator.CreateInstance(type, parameters);
 
 		public static void SetValueWithConversion(this MemberInfo info, object obj, object value) {
 			(Action<object, object> setValue, Type type) = info switch {
@@ -144,6 +143,34 @@ namespace Shared.Utilities {
 		public static List<T> AsList<T>(this IEnumerable<T> enumerable) => enumerable is List<T> list ? list : enumerable.ToList();
 
 		public static T[] AsArray<T>(this IEnumerable<T> enumerable) => enumerable is T[] array ? array : enumerable.ToArray();
+
+		public static IEnumerable<T> AsType<T>(this IEnumerable enumerable) => from object item in enumerable select item is T result ? result : throw new InvalidCastException();
+
+		public static TValue SameOrDefault<T, TValue>(this IEnumerable<T> enumerable, Func<T, TValue> predicate) {
+			TValue reference = default;
+			bool first = true;
+			foreach (var item in enumerable)
+				if (first) {
+					reference = predicate(item);
+					first = false;
+				}
+				else if (!predicate(item).Equals(reference))
+					throw new InvalidOperationException($"Values aren't the same");
+			return reference;
+		}
+
+		public static TValue Same<T, TValue>(this IEnumerable<T> enumerable, Func<T, TValue> predicate) {
+			TValue reference = default;
+			bool first = true;
+			foreach (var item in enumerable)
+				if (first) {
+					reference = predicate(item);
+					first = false;
+				}
+				else if (!predicate(item).Equals(reference))
+					throw new InvalidOperationException($"Values aren't the same");
+			return !first ? reference : throw new InvalidOperationException("Sequence contains no element");
+		}
 
 		/// <summary>
 		/// </summary>
@@ -177,6 +204,11 @@ namespace Shared.Utilities {
 			if (memberTypes.HasFlag(MemberTypes.NestedType))
 				result.AddRange(type.GetNestedTypes());
 			return result;
+		}
+
+		public static MemberInfo GetMember(this Type type, string name, MemberTypes memberTypes) {
+			var members = type.GetMember(name);
+			return members.SingleOrDefault(member => memberTypes.HasFlag(member.MemberType));
 		}
 	}
 }
