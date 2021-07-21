@@ -1,17 +1,24 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System;
+using System.ComponentModel.DataAnnotations;
 using FXiaoKe.Models;
 using FXiaoKe.Utilities;
 using Newtonsoft.Json;
 
 namespace FXiaoKe.Requests {
-	public class DataBase<T> where T : ModelBase {
-		public DataBase() => ObjectName = typeof(T).GetModelName();
+	public abstract class DataBase<T> : DataBase where T : ModelBase {
+		protected DataBase() : base(typeof(T)) { }
+	}
+
+	public abstract class DataBase {
+		protected DataBase() { }
+
+		protected DataBase(Type type) => ObjectName = type.GetModelName();
 
 		/// <summary>
 		///     对象的api_name
 		/// </summary>
 		[JsonProperty("dataObjectApiName")]
 		[Required]
-		public virtual string ObjectName { get; }
+		public string ObjectName { get; init; }
 	}
 }
