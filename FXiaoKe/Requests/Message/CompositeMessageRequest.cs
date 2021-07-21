@@ -1,5 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Linq;
+using System.Text;
 using Newtonsoft.Json;
 using Shared.Serialization;
 using Shared.Validators;
@@ -43,6 +45,20 @@ namespace FXiaoKe.Requests.Message {
 		[JsonProperty("link")]
 		[Required]
 		public Link Link { get; set; } = new();
+
+		public override string ToString() {
+			var builder = new StringBuilder();
+			builder.AppendLine(Title);
+			if (!string.IsNullOrEmpty(Head))
+				builder.AppendLine(Head);
+			int labelWidth = Form.Max(form => form.Label.Length);
+			foreach (var row in Form)
+				builder.AppendLine(row.ToString(labelWidth));
+			if (!string.IsNullOrEmpty(Tail))
+				builder.AppendLine(Tail);
+			builder.AppendLine().AppendLine(Link.ToString());
+			return builder.ToString();
+		}
 	}
 
 	public class LabelAndValue {
@@ -62,6 +78,10 @@ namespace FXiaoKe.Requests.Message {
 
 		public static implicit operator LabelAndValue((string, string) tuple) => new(tuple.Item1, tuple.Item2);
 		public static implicit operator (string, string)(LabelAndValue self) => (self.Label, self.Value);
+
+		public override string ToString() => ToString(0);
+
+		public string ToString(int width) => $"{(Label ?? string.Empty).PadRight(width)}: {Value}";
 	}
 
 	public class Link {
@@ -72,5 +92,9 @@ namespace FXiaoKe.Requests.Message {
 		[JsonProperty("url")]
 		[Required]
 		public string Url { get; set; }
+
+		public override string ToString() => ToString(0);
+
+		public string ToString(int width) => $"{(Title ?? string.Empty).PadRight(width)}: {Url}";
 	}
 }
