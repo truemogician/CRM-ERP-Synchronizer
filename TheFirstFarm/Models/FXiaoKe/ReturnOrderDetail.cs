@@ -3,6 +3,7 @@ using System.Runtime.Serialization;
 using FXiaoKe.Models;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
+using Shared.Serialization;
 
 namespace TheFirstFarm.Models.FXiaoKe {
 	[Model("object_wVB1X__c", Custom = true, SubjectTo = typeof(ReturnOrder))]
@@ -80,6 +81,7 @@ namespace TheFirstFarm.Models.FXiaoKe {
 		///     负责人
 		/// </summary>
 		[JsonProperty("owner")]
+		[JsonConverter(typeof(ArrayWrapperConverter<string>))]
 		[ForeignKey(typeof(Staff))]
 		[Required]
 		public string OwnerId { get; set; }

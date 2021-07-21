@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using FXiaoKe.Models;
 using Newtonsoft.Json;
+using Shared.Serialization;
 using TheFirstFarm.Models.Common;
 
 namespace TheFirstFarm.Models.FXiaoKe {
@@ -20,6 +21,7 @@ namespace TheFirstFarm.Models.FXiaoKe {
 		///     日期
 		/// </summary>
 		[JsonProperty("field_6V5Ls__c")]
+		[JsonConverter(typeof(TimestampConverter))]
 		public DateTime Date { get; set; }
 
 		/// <summary>
@@ -34,6 +36,7 @@ namespace TheFirstFarm.Models.FXiaoKe {
 		///     负责人
 		/// </summary>
 		[JsonProperty("owner")]
+		[JsonConverter(typeof(ArrayWrapperConverter<string>))]
 		[ForeignKey(typeof(Staff))]
 		[Required]
 		public string OwnerId { get; set; }
