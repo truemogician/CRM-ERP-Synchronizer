@@ -106,8 +106,8 @@ namespace FXiaoKe {
 				return results;
 			foreach (var subModelInfo in subModelInfos) {
 				var rawType = subModelInfo.GetValueType();
-				bool many = rawType.Implements(typeof(IList<>));
-				var subModelType = many ? rawType.GetItemType(typeof(IList<>)) : rawType;
+				bool many = rawType.Implements(typeof(ICollection<>));
+				var subModelType = many ? rawType.GetItemType(typeof(ICollection<>)) : rawType;
 				if (subModelType.GetCustomAttribute<ModelAttribute>()!.SubjectTo is var type && type != resultType)
 					throw new TypeNotMatchException(resultType, type);
 				var (masterKeyMember, masterKey) = subModelType.GetMemberAndAttribute<MasterKeyAttribute>();
@@ -129,15 +129,17 @@ namespace FXiaoKe {
 								else {
 									object target = subModelInfo.GetValue(result);
 									if (target is null) {
-										if (rawType.IsAbstract || rawType.IsInterface)
-											throw new TypeException(rawType, "Abstract class or Interface cannot be instantiated");
-										target = rawType.Construct();
+										var constrType = subModelInfo.GetCustomAttribute<DefaultConstructorAttribute>()?.ConstructingType;
+										if (constrType is not null && !constrType.IsAssignableTo(rawType))
+											throw new InvariantTypeException(rawType, constrType);
+										constrType ??= rawType;
+										target = constrType.Construct();
 										subModelInfo.SetValue(result, target);
 									}
-									var list = target as IList;
-									list!.Clear();
+									dynamic collection = target;//ICollection<>
+									collection.Clear();
 									foreach (var res in task.Result)
-										list.Add(res);
+										collection.Add(res);
 								}
 							}
 						);

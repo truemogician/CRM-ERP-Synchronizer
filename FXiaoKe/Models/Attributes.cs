@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Reflection;
+using Shared.Exceptions;
 using Shared.Utilities;
 
 namespace FXiaoKe.Models {
@@ -39,6 +40,17 @@ namespace FXiaoKe.Models {
 
 	[AttributeUsage(AttributeTargets.Property | AttributeTargets.Field)]
 	public class GeneratedAttribute : FXiaoKeAttribute { }
+
+	[AttributeUsage(AttributeTargets.Property | AttributeTargets.Field)]
+	public class DefaultConstructorAttribute : FXiaoKeAttribute {
+		public DefaultConstructorAttribute(Type constructingType) {
+			if (constructingType.IsAbstract || constructingType.IsInterface || constructingType.IsGenericTypeDefinition)
+				throw new TypeException(constructingType, $"{constructingType.Name} can't be instantiated");
+			ConstructingType = constructingType;
+		}
+
+		public Type ConstructingType { get; }
+	}
 
 	[AttributeUsage(AttributeTargets.Property | AttributeTargets.Field)]
 	public class SubModelAttribute : FXiaoKeAttribute {
