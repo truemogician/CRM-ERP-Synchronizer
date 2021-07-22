@@ -17,6 +17,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="5.0.8" />
 		<PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
 	</ItemGroup>
 
@@ -37,6 +38,7 @@
 
 	<ItemGroup>
 	  <Folder Include="Models\Common\" />
+	  <Folder Include="Database\" />
 	  <Folder Include="Utilities\" />
 	</ItemGroup>
 

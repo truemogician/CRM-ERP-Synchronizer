@@ -62,6 +62,13 @@ namespace System.Reflection {
 			return type.HasElementType ? type.GetElementType() : type.GetGenericInterfaceArguments(genericTypeDefinition).Single();
 		}
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static Type GetCollectionType(this Type type, Type genericTypeDefinition = null) {
+			genericTypeDefinition ??= typeof(ICollection<>);
+			return genericTypeDefinition.MakeGenericType(type.GetItemType(genericTypeDefinition));
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static bool Implements(this Type type, Type interfaceType)
 			=> (interfaceType.IsGenericTypeDefinition
 				? type.GetGenericInterface(interfaceType)
@@ -156,5 +163,8 @@ namespace System.Reflection {
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static object Construct(this Type type, params object[] parameters) => Activator.CreateInstance(type, parameters);
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static object Invoke(this MethodInfo method, object obj, params object[] parameters) => method.Invoke(obj, parameters);
 	}
 }

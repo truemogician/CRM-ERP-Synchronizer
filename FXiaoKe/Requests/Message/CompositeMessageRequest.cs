@@ -35,7 +35,7 @@ namespace FXiaoKe.Requests.Message {
 		public string Head { get; set; }
 
 		[JsonProperty("form")]
-		[ArrayMaxLength(6)]
+		[CollectionMaxCount(6)]
 		public List<LabelAndValue> Form { get; init; } = new();
 
 		[JsonProperty("remark")]

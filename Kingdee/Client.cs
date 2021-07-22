@@ -47,33 +47,33 @@ namespace Kingdee {
 			writer.WriteEndObject();
 		}
 
-		private List<object> MergeForms(List<object> forms) {
-			var subFormInfo = forms[0].GetType().GetMemberWithAttribute<SubFormAttribute>();
+		private static IEnumerable<object> MergeForms(IEnumerable<object> forms) {
+			var subFormInfo = forms.GetType().GetItemType().GetMemberWithAttribute<SubFormAttribute>();
 			if (subFormInfo is null)
 				return forms;
 			var type = subFormInfo.GetValueType();
 			var groups = forms.GroupBy(form => form.GetType().GetMemberWithAttribute<KeyAttribute>().GetValue(form));
 			return groups.Select(
-					group => {
-						var list = group.AsList();
-						var subForms = MergeForms(
-							(type.Implements(typeof(IList))
-								? list.SelectMany(form => (subFormInfo.GetValue(form) as IList)!.OfType<object>())
-								: list.Select(form => subFormInfo.GetValue(form))).AsList()
-						);
-						if (type.Implements(typeof(IList))) {
-							var propObj = subFormInfo.GetValue(list[0]) as IList;
-							propObj!.Clear();
-							foreach (object subForm in subForms)
-								propObj.Add(subForm);
-							subFormInfo.SetValue(list[0], propObj);
-						}
-						else
-							subFormInfo.SetValue(list.Single(), subForms.Single());
-						return list[0];
+				group => {
+					var list = group.AsList();
+					var subForms = MergeForms(
+						(type.Implements(typeof(ICollection<>))
+							? list.SelectMany(form => (subFormInfo.GetValue(form) as IEnumerable)!.AsType<object>())
+							: list.Select(form => subFormInfo.GetValue(form))).AsList()
+					);
+					if (type.Implements(typeof(ICollection<>))) {
+						object propObj = subFormInfo.GetValue(list[0]);//ICollection<T>
+						var collectionType = propObj.GetType().GetCollectionType(typeof(ICollection<>));
+						collectionType.GetMethod(nameof(ICollection<object>.Clear))!.Invoke(propObj, null);
+						foreach (object subForm in subForms)
+							collectionType.GetMethod(nameof(ICollection<object>.Add))!.Invoke(propObj, subForm);
+						subFormInfo.SetValue(list[0], propObj);
 					}
-				)
-				.AsList();
+					else
+						subFormInfo.SetValue(list.Single(), subForms.Single());
+					return list[0];
+				}
+			);
 		}
 
 		#region Sync Requests

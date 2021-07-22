@@ -59,18 +59,24 @@ namespace Kingdee.Utilities {
 					targetObj = stProp.GetValue(targetObj);
 				}
 				for (int k = 0; k < stProp.Rank; ++k) {
-					var list = targetObj as IList ?? throw new TypeException(targetObj!.GetType(), "IList required");
-					if (list.Count > 0)
-						targetObj = list[0];
+					if (targetObj?.GetType().Implements(typeof(ICollection<>)) != true)
+						throw new InterfaceNotImplementedException(typeof(ICollection<>));
+					var collectionType = targetObj.GetType().GetCollectionType(typeof(ICollection<>));
+					if ((int)collectionType.GetProperty(nameof(ICollection<object>.Count))!.GetValue(targetObj)! > 0) {
+						dynamic enumerator = collectionType.GetMethod(nameof(ICollection<object>.GetEnumerator)).Invoke(targetObj);
+						enumerator.MoveNext();
+						targetObj = enumerator.Current;
+					}
 					else {
 						var itemType = targetObj.GetType().GetItemType();
-						targetObj = itemType.Construct();
-						list.Add(targetObj);
+						object newItem = itemType.Construct();
+						collectionType.GetMethod(nameof(ICollection<object>.Add)).Invoke(targetObj, newItem);
+						targetObj = newItem;
 					}
 				}
 				if (field.Length == 1) {
 					if (stProp.Rank > 0)
-						(targetObj as IList)!.Add(datum);
+						((dynamic)targetObj)!.Add(datum);
 					else
 						field.EndingInfo.SetValueWithConversion(targetObj, datum);
 				}
