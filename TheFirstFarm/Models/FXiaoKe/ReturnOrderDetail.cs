@@ -4,6 +4,7 @@ using FXiaoKe.Models;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Shared.Serialization;
+using TheFirstFarm.Models.Common;
 
 namespace TheFirstFarm.Models.FXiaoKe {
 	[Model("object_wVB1X__c", Custom = true, SubjectTo = typeof(ReturnOrder))]
@@ -74,6 +75,7 @@ namespace TheFirstFarm.Models.FXiaoKe {
 		///     退货类型
 		/// </summary>
 		[JsonProperty("field_0v7Wa__c")]
+		[JsonConverter(typeof(MultipleStringEnumConverter), Platform.FXiaoKe)]
 		[Required]
 		public ReturnType ReturnType { get; set; }
 
@@ -85,20 +87,5 @@ namespace TheFirstFarm.Models.FXiaoKe {
 		[ForeignKey(typeof(Staff))]
 		[Required]
 		public string OwnerId { get; set; }
-	}
-
-	[JsonConverter(typeof(StringEnumConverter))]
-	public enum ReturnType {
-		/// <summary>
-		///     退货（指退货不补货）
-		/// </summary>
-		[EnumMember(Value = "yoC0q11kf")]
-		ReturnOnly,
-
-		/// <summary>
-		///     退货补货（指退货且补货）
-		/// </summary>
-		[EnumMember(Value = "07Z2px89e")]
-		ReturnAndReplenish
 	}
 }

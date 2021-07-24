@@ -3,11 +3,12 @@
 // ReSharper disable InconsistentNaming
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Runtime.Serialization;
 using System.Text.Json.Serialization;
 using Kingdee.Forms;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Converters;
+using Shared.Serialization;
+using TheFirstFarm.Models.Common;
+using JsonConverterAttribute = Newtonsoft.Json.JsonConverterAttribute;
 
 namespace TheFirstFarm.Models.Kingdee {
 	public class ReturnOrderDetail {
@@ -74,10 +75,10 @@ namespace TheFirstFarm.Models.Kingdee {
 		/// <summary>
 		/// 退货类型
 		/// </summary>
-		[JsonProperty("FRETURNTYPE")]
+		[JsonProperty("FReturnType")]
 		[JsonInclude]
 		[Required]
-		public NumberWrapper<ReturnType> ReturnType { get; set; }
+		public ReturnTypeWrapper ReturnType { get; set; }
 
 		[JsonProperty("FENTRYID")]
 		public int FENTRYID { get; set; }
@@ -87,9 +88,6 @@ namespace TheFirstFarm.Models.Kingdee {
 
 		[JsonProperty("FMapId")]
 		public NumberWrapper FMapId { get; set; }
-
-		[JsonProperty("FAuxpropId")]
-		public FAuxpropId FAuxpropId { get; set; }
 
 		[JsonProperty("FParentMatId")]
 		public NumberWrapper FParentMatId { get; set; }
@@ -212,18 +210,11 @@ namespace TheFirstFarm.Models.Kingdee {
 		public List<FTaxDetailSubEntity> FTaxDetailSubEntity { get; set; }
 	}
 
-	[Newtonsoft.Json.JsonConverter(typeof(StringEnumConverter))]
-	public enum ReturnType {
-		/// <summary>
-		///     退货（指退货不补货）
-		/// </summary>
-		[EnumMember(Value = "THLX01_SYS")]
-		ReturnOnly,
+	public class ReturnTypeWrapper : WrapperBase<ReturnType> {
+		[JsonProperty("FNumber")]
+		[JsonConverter(typeof(MultipleStringEnumConverter), Platform.Kingdee)]
+		public ReturnType Value { get; set; }
 
-		/// <summary>
-		///     退货补货（指退货且补货）
-		/// </summary>
-		[EnumMember(Value = "THLX02_SYS")]
-		ReturnAndReplenish
+		protected override string ValueName => nameof(Value);
 	}
 }

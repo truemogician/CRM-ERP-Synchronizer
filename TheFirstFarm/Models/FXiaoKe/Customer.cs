@@ -1,10 +1,12 @@
 ﻿// ReSharper disable StringLiteralTypo
 // ReSharper disable InconsistentNaming
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Runtime.Serialization;
 using FXiaoKe.Models;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
+using Shared.Serialization;
 
 namespace TheFirstFarm.Models.FXiaoKe {
 	/// <summary>
@@ -17,9 +19,15 @@ namespace TheFirstFarm.Models.FXiaoKe {
 		/// </summary>
 
 		[JsonProperty("account_no")]
-		[Generated]
+		[Required]
 		[RegularExpression(@"CUST\d{4,}")]
 		public string Id { get; set; }
+
+		/// <summary>
+		/// 金蝶主键Id
+		/// </summary>
+		[JsonProperty("erp_account_id__c")]
+		public string KingdeeId { get; set; }
 
 		/// <summary>
 		///     客户名称
@@ -34,6 +42,7 @@ namespace TheFirstFarm.Models.FXiaoKe {
 		/// </summary>
 
 		[JsonProperty("owner")]
+		[JsonConverter(typeof(ArrayWrapperConverter<string>))]
 		[Required]
 		[ForeignKey(typeof(Staff))]
 		public string OwnerId { get; set; }
@@ -51,32 +60,36 @@ namespace TheFirstFarm.Models.FXiaoKe {
 		/// </summary>
 
 		[JsonProperty("field_U8k97__c")]
+		[JsonConverter(typeof(MultipleStringEnumConverter), OrgSet.CreatorOrgId)]
 		[Required]
-		public Organization CreatorOrg { get; set; } = Organization.TheFirstFarm;
+		public Organization CreatorOrgId { get; set; } = Organization.TheFirstFarm;
 
 		/// <summary>
 		///     创建组织名称
 		/// </summary>
 
 		[JsonProperty("field_Qbln5__c")]
+		[JsonConverter(typeof(MultipleStringEnumConverter), OrgSet.CreatorOrgName)]
 		[Required]
-		public OrganizationName CreatorOrgName { get; set; } = OrganizationName.TheFirstFarm;
+		public Organization CreatorOrgName { get; set; } = Organization.TheFirstFarm;
 
 		/// <summary>
 		///     使用组织编码
 		/// </summary>
 
 		[JsonProperty("field_f267J__c")]
+		[JsonConverter(typeof(MultipleStringEnumConverter), OrgSet.UserOrgId)]
 		[Required]
-		public Organization UserOrg { get; set; } = Organization.TheFirstFarm;
+		public Organization UserOrgId { get; set; } = Organization.TheFirstFarm;
 
 		/// <summary>
 		///     使用组织名称
 		/// </summary>
 
 		[JsonProperty("field_7v1a2__c")]
+		[JsonConverter(typeof(MultipleStringEnumConverter), OrgSet.UserOrgName)]
 		[Required]
-		public OrganizationName UserOrgName { get; set; } = OrganizationName.TheFirstFarm;
+		public Organization UserOrgName { get; set; } = Organization.TheFirstFarm;
 
 		/// <summary>
 		///     是否需要同步到金蝶
@@ -98,6 +111,14 @@ namespace TheFirstFarm.Models.FXiaoKe {
 
 		[JsonProperty("sync_TorF__c")]
 		public bool SyncSuccess { get; set; }
+
+		[JsonIgnore]
+		[SubModel(Eager = true, Cascade = true)]
+		public List<CustomerAddress> Addresses { get; set; }
+
+		[JsonIgnore]
+		[SubModel(Eager = true, Cascade = true)]
+		public List<CustomerFinancialInfo> FinancialInfos { get; set; }
 	}
 
 	[JsonConverter(typeof(StringEnumConverter))]
@@ -151,57 +172,48 @@ namespace TheFirstFarm.Models.FXiaoKe {
 		Other
 	}
 
-	[JsonConverter(typeof(StringEnumConverter))]
-	public enum Organization {
+	public enum Organization : byte {
 		/// <summary>
 		///     江苏一号农场科技股份有限公司
 		/// </summary>
-		[EnumMember(Value = "823li72l1")]
+		[MultipleEnumMember("823li72l1", OrgSet.CreatorOrgId)]
+		[MultipleEnumMember("jO1vcYL3g", OrgSet.CreatorOrgName)]
+		[MultipleEnumMember("al70nWs58", OrgSet.UserOrgId)]
+		[MultipleEnumMember("PsdFo1W03", OrgSet.UserOrgName)]
 		TheFirstFarm,
-
-		/// <summary>
-		///     旅游酒店BD
-		/// </summary>
-		[EnumMember(Value = "0461V10u4")]
-		TourHotelBD,
 
 		/// <summary>
 		///     江苏海威科网络科技有限公司
 		/// </summary>
-		[EnumMember(Value = "option1")]
+		[MultipleEnumMember("0461V10u4", OrgSet.CreatorOrgId)]
+		[MultipleEnumMember("g5ySNf9e5", OrgSet.CreatorOrgName)]
+		[MultipleEnumMember("x52p2dk70", OrgSet.UserOrgId)]
+		[MultipleEnumMember("c52sR5sy9", OrgSet.UserOrgName)]
 		Hiwico,
+
+		/// <summary>
+		///     旅游酒店BD
+		/// </summary>
+		[MultipleEnumMember("option1", OrgSet.CreatorOrgId)]
+		[MultipleEnumMember("option1", OrgSet.CreatorOrgName)]
+		[MultipleEnumMember("option1", OrgSet.UserOrgId)]
+		[MultipleEnumMember("option1", OrgSet.UserOrgName)]
+		TourHotelBD,
 
 		/// <summary>
 		///     其他
 		/// </summary>
-		[EnumMember(Value = "other")]
+		[MultipleEnumMember("other", OrgSet.CreatorOrgId)]
+		[MultipleEnumMember("other", OrgSet.CreatorOrgName)]
+		[MultipleEnumMember("other", OrgSet.UserOrgId)]
+		[MultipleEnumMember("other", OrgSet.UserOrgName)]
 		Other
 	}
 
-	[JsonConverter(typeof(StringEnumConverter))]
-	public enum OrganizationName {
-		/// <summary>
-		///     江苏一号农场科技股份有限公司
-		/// </summary>
-		[EnumMember(Value = "jO1vcYL3g")]
-		TheFirstFarm,
-
-		/// <summary>
-		///     江苏海威科网络科技有限公司
-		/// </summary>
-		[EnumMember(Value = "g5ySNf9e5")]
-		Hiwico,
-
-		/// <summary>
-		///     旅游酒店BD
-		/// </summary>
-		[EnumMember(Value = "option1")]
-		TourHotelBD,
-
-		/// <summary>
-		///     其他
-		/// </summary>
-		[EnumMember(Value = "other")]
-		Other
+	internal enum OrgSet : byte {
+		CreatorOrgId,
+		CreatorOrgName,
+		UserOrgId,
+		UserOrgName
 	}
 }
