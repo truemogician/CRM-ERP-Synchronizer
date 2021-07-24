@@ -139,8 +139,6 @@ namespace TheFirstFarm.Models.Kingdee {
 		public int FExchangeRate { get; set; }
 	}
 
-	public class FAuxpropId { }
-
 	public class FTaxDetailSubEntity {
 		[JsonProperty("FDetailID")]
 		public int FDetailID { get; set; }

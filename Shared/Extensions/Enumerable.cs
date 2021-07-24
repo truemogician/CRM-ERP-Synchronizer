@@ -1,7 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
-using OneOf;
 using Shared.Exceptions;
 
 // ReSharper disable once CheckNamespace
@@ -23,7 +22,7 @@ namespace System.Linq {
 
 		public static TResult SameOrDefault<TSource, TResult>(this IEnumerable<TSource> enumerable, Func<TSource, TResult> predicate) {
 			TResult reference = default;
-			bool first = true;
+			var first = true;
 			foreach (var item in enumerable)
 				if (first) {
 					reference = predicate(item);
@@ -39,7 +38,7 @@ namespace System.Linq {
 
 		public static TResult Same<TSource, TResult>(this IEnumerable<TSource> enumerable, Func<TSource, TResult> predicate) {
 			TResult reference = default;
-			bool first = true;
+			var first = true;
 			foreach (var item in enumerable)
 				if (first) {
 					reference = predicate(item);
@@ -86,7 +85,7 @@ namespace System.Linq {
 		protected IEnumerable<T> Enumerable { get; }
 
 		public IEnumerator<(T Value, int Index)> GetEnumerator() {
-			int index = 0;
+			var index = 0;
 			foreach (var item in Enumerable)
 				yield return (item, index++);
 		}

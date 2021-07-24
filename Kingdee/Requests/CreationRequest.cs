@@ -1,7 +1,6 @@
 ﻿// ReSharper disable StringLiteralTypo
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using Kingdee.Converters;
 using Newtonsoft.Json;
 using Shared.Serialization;
 

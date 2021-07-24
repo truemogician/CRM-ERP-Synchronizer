@@ -1,8 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using System.Runtime.Serialization;
 using FXiaoKe.Models;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Converters;
 using Shared.Serialization;
 using TheFirstFarm.Models.Common;
 

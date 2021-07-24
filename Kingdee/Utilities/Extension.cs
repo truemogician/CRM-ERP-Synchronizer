@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -58,7 +57,7 @@ namespace Kingdee.Utilities {
 						stProp.SetValue(targetObj, stProp.PropertyType.Construct());//ToDo: interface construction
 					targetObj = stProp.GetValue(targetObj);
 				}
-				for (int k = 0; k < stProp.Rank; ++k) {
+				for (var k = 0; k < stProp.Rank; ++k) {
 					if (targetObj?.GetType().Implements(typeof(ICollection<>)) != true)
 						throw new InterfaceNotImplementedException(typeof(ICollection<>));
 					var collectionType = targetObj.GetType().GetGenericInterface(typeof(ICollection<>));

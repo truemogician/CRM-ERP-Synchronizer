@@ -1,6 +1,7 @@
 ﻿// ReSharper disable StringLiteralTypo
 using System;
 using FXiaoKe;
+using FXiaoKe.Responses;
 using Newtonsoft.Json;
 using NUnit.Framework;
 using Shared.Serialization;
@@ -20,7 +21,7 @@ namespace TheFirstFarm.Test {
 				"D63C0B6A42F171D173EF728CBFC12874"
 			);
 			FXiaoKeClient.RequestFailed += (_, args) => {
-				if (args.Response is FXiaoKe.Responses.BasicResponse resp)
+				if (args.Response is BasicResponse resp)
 					Console.WriteLine(resp.ErrorMessage);
 			};
 			KingdeeClient = new Kingdee.Client("http://120.27.55.22/k3cloud/");

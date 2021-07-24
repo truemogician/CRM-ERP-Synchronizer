@@ -40,7 +40,7 @@ namespace Shared.Serialization {
 				return null;
 			if (token.Type != JTokenType.String)
 				throw new JTokenTypeException(token, JTokenType.String);
-			string value = token.Value<string>();
+			var value = token.Value<string>();
 			if (string.IsNullOrEmpty(value))
 				return null;
 			if (value.Equals(TrueString, ComparisonOption))

@@ -8,12 +8,11 @@ using Kingdee.Forms;
 using Newtonsoft.Json;
 using Shared.Serialization;
 using TheFirstFarm.Models.Common;
-using JsonConverterAttribute = Newtonsoft.Json.JsonConverterAttribute;
 
 namespace TheFirstFarm.Models.Kingdee {
 	public class ReturnOrderDetail {
 		/// <summary>
-		/// 物料编码
+		///     物料编码
 		/// </summary>
 		[JsonProperty("FMaterialId")]
 		[JsonInclude]
@@ -21,7 +20,7 @@ namespace TheFirstFarm.Models.Kingdee {
 		public NumberWrapper MaterialId { get; set; }
 
 		/// <summary>
-		/// 物料名称
+		///     物料名称
 		/// </summary>
 		[JsonProperty("FMaterialName")]
 		[JsonInclude]
@@ -29,14 +28,14 @@ namespace TheFirstFarm.Models.Kingdee {
 		public string MaterialName { get; set; }
 
 		/// <summary>
-		/// 规格型号
+		///     规格型号
 		/// </summary>
 		[JsonProperty("FMaterialModel")]
 		[JsonInclude]
 		public string MaterialModel { get; set; }
 
 		/// <summary>
-		/// 销售单位
+		///     销售单位
 		/// </summary>
 		[JsonProperty("FUnitID")]
 		[JsonInclude]
@@ -44,7 +43,7 @@ namespace TheFirstFarm.Models.Kingdee {
 		public NumberWrapper SaleUnit { get; set; }
 
 		/// <summary>
-		/// 实退数量
+		///     实退数量
 		/// </summary>
 		[JsonProperty("FREALQTY")]
 		[JsonInclude]
@@ -52,28 +51,28 @@ namespace TheFirstFarm.Models.Kingdee {
 		public decimal ReturnAmount { get; set; }
 
 		/// <summary>
-		/// 含税单价
+		///     含税单价
 		/// </summary>
 		[JsonProperty("FTAXPRICE")]
 		[JsonInclude]
 		public decimal UnitPrice { get; set; }
 
 		/// <summary>
-		/// 税率
+		///     税率
 		/// </summary>
 		[JsonProperty("FTAXRATE")]
 		[JsonInclude]
 		public decimal TaxRate { get; set; }
 
 		/// <summary>
-		/// 金额
+		///     金额
 		/// </summary>
 		[JsonProperty("FAMOUNT")]
 		[JsonInclude]
 		public decimal Volumn { get; set; }
 
 		/// <summary>
-		/// 退货类型
+		///     退货类型
 		/// </summary>
 		[JsonProperty("FReturnType")]
 		[JsonInclude]
@@ -212,7 +211,7 @@ namespace TheFirstFarm.Models.Kingdee {
 
 	public class ReturnTypeWrapper : WrapperBase<ReturnType> {
 		[JsonProperty("FNumber")]
-		[JsonConverter(typeof(MultipleStringEnumConverter), Platform.Kingdee)]
+		[Newtonsoft.Json.JsonConverter(typeof(MultipleStringEnumConverter), Platform.Kingdee)]
 		public ReturnType Value { get; set; }
 
 		protected override string ValueName => nameof(Value);

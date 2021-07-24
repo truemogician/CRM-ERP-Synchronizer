@@ -11,7 +11,6 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Shared;
 using Shared.Exceptions;
-using Shared.Utilities;
 
 namespace FXiaoKe.Requests {
 	[Request("/cgi/crm/custom/v2/data/get", typeof(QueryByConditionResponse))]

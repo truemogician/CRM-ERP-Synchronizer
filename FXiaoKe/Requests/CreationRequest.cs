@@ -79,7 +79,7 @@ namespace FXiaoKe.Requests {
 			var builder = new StringBuilder();
 			using var stringWriter = new StringWriter(builder);
 			serializer.Serialize(stringWriter, value, value.GetType());
-			string json = builder.ToString();
+			var json = builder.ToString();
 			int index = json.LastIndexOf('}');
 			json = $"{json[..index]},\"dataObjectApiName\":\"{value.GetType().GetModelName()}\"}}";
 			writer.WriteRawValue(json);

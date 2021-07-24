@@ -217,7 +217,7 @@ namespace Kingdee {
 				return action();
 			}
 			catch (ServiceException ex) {
-				bool flag = false;
+				var flag = false;
 				if (onFail != null) {
 					onFail(ex);
 					flag = ex.Handled;

@@ -20,7 +20,7 @@ namespace Kingdee.Utilities {
 				cryptoStream.FlushFinalBlock();
 				streamWriter.Flush();
 				byte[] inArray = memoryStream.GetBuffer();
-				int length = (int)memoryStream.Length;
+				var length = (int)memoryStream.Length;
 				return Convert.ToBase64String(inArray, 0, length);
 			}
 			catch (Exception ex) {

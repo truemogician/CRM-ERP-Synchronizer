@@ -29,7 +29,7 @@ namespace Kingdee {
 				(var field, object datum) = (fields[i], data[i]);
 				var stProp = field.StartingInfo;
 				writer.WritePropertyName(stProp.GetJsonPropertyName());
-				for (int k = 0; k < stProp.Rank; ++k)
+				for (var k = 0; k < stProp.Rank; ++k)
 					writer.WriteStartArray();
 				if (field.Length == 1)
 					writer.WriteValue(datum);
@@ -41,7 +41,7 @@ namespace Kingdee {
 						writer
 					);
 				}
-				for (int k = 0; k < stProp.Rank; ++k)
+				for (var k = 0; k < stProp.Rank; ++k)
 					writer.WriteEndArray();
 			}
 			writer.WriteEndObject();
@@ -87,7 +87,7 @@ namespace Kingdee {
 		/// <param name="request"></param>
 		/// <returns></returns>
 		public OneOf<BasicResponse, List<T>> Query<T>(QueryRequest<T> request) where T : FormBase {
-			string json = Execute<string>(
+			var json = Execute<string>(
 				"Kingdee.BOS.WebApi.ServicesStub.DynamicFormService.ExecuteBillQuery",
 				JsonConvert.SerializeObject(request)
 			);

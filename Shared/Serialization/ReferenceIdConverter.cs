@@ -2,7 +2,6 @@
 using System.Linq;
 using System.Reflection;
 using Newtonsoft.Json;
-using Shared.Utilities;
 
 namespace Shared.Serialization {
 	public class ReferenceIdConverter<T> : JsonConverter<T> where T : new() {

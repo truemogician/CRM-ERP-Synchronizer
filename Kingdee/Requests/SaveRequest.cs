@@ -1,6 +1,6 @@
-﻿using Kingdee.Converters;
-using Kingdee.Forms;
+﻿using Kingdee.Forms;
 using Newtonsoft.Json;
+using Shared.Serialization;
 
 namespace Kingdee.Requests {
 	public class SaveRequest<T> : CreationRequest<T> where T : FormBase {

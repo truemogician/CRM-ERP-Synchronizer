@@ -18,7 +18,7 @@ namespace Kingdee.Converters {
 				return null;
 			if (token.Type != JTokenType.String)
 				throw new JTokenTypeException(token, JTokenType.String);
-			string dateString = token.Value<string>();
+			var dateString = token.Value<string>();
 			if (string.IsNullOrEmpty(dateString))
 				return null;
 			return Convert.ToDateTime(dateString);

@@ -1,5 +1,4 @@
 ﻿using Kingdee.Requests;
-using Shared.Exceptions;
 
 namespace Kingdee.Forms {
 	[Form]

@@ -169,12 +169,12 @@ namespace Shared {
 			parentKeySelector ??= node => keySelector(node.Parent);
 			var dict = new Dictionary<TKey, int>();
 			var index = new Dictionary<TNode, int>();
-			bool[] hasParent = new bool[nodes.Count];
-			for (int i = 0; i < nodes.Count; ++i) {
+			var hasParent = new bool[nodes.Count];
+			for (var i = 0; i < nodes.Count; ++i) {
 				dict[keySelector(nodes[i])] = i;
 				index[nodes[i]] = i;
 			}
-			for (int i = 0; i < nodes.Count; ++i) {
+			for (var i = 0; i < nodes.Count; ++i) {
 				var node = nodes[i];
 				var parentKey = parentKeySelector(node);
 				hasParent[i] = dict.ContainsKey(parentKey);
@@ -182,7 +182,7 @@ namespace Shared {
 					node.Parent = nodes[dict[parentKey]];
 			}
 			//Check cycle
-			int[] tags = new int[nodes.Count];
+			var tags = new int[nodes.Count];
 			for (int i = 0, tag = 0; i < nodes.Count; ++i) {
 				if (tags[i] > 0)
 					continue;
@@ -213,7 +213,7 @@ namespace Shared {
 				node1 = node2;
 				node2 = temp;
 			}
-			for (int i = 0; i < node2.Depth - node1.Depth; ++i)
+			for (var i = 0; i < node2.Depth - node1.Depth; ++i)
 				node2 = node2.Parent;
 			while (!node1.Equals(node2) && !node1.IsRoot && !node2.IsRoot) {
 				node1 = node1.Parent;

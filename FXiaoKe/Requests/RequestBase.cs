@@ -11,6 +11,21 @@ using Shared.Utilities;
 namespace FXiaoKe.Requests {
 	[Request(null, HttpMethod.Post)]
 	public abstract class RequestBase {
+		[JsonIgnore]
+		public RequestAttribute Attribute {
+			get {
+				var attrs = GetType().GetCustomAttributes<RequestAttribute>().AsList();
+				if (attrs.Count <= 1)
+					return attrs.SingleOrDefault();
+				return new RequestAttribute {
+					Url = attrs.FirstOrDefault(attr => attr.Path != "/")?.Url,
+					Method = attrs.FirstOrDefault(attr => attr.Method is not null)?.Method,
+					ResponseType = attrs.FirstOrDefault(attr => attr.ResponseType is not null)?.ResponseType,
+					ErrorMessage = attrs.FirstOrDefault(attr => !string.IsNullOrEmpty(attr.ErrorMessage))?.ErrorMessage
+				};
+			}
+		}
+
 		public static implicit operator HttpRequestMessage(RequestBase self) {
 			var attribute = self.Attribute;
 			var request = new HttpRequestMessage(attribute.Method, attribute.Url) {
@@ -21,20 +36,5 @@ namespace FXiaoKe.Requests {
 		}
 
 		public virtual List<ValidationResult> Validate() => Utility.Validate(this);
-
-		[JsonIgnore]
-		public RequestAttribute Attribute {
-			get {
-				var attrs = GetType().GetCustomAttributes<RequestAttribute>().AsList();
-				if (attrs.Count <= 1)
-					return attrs.SingleOrDefault();
-				return new RequestAttribute() {
-					Url = attrs.FirstOrDefault(attr => attr.Path != "/")?.Url,
-					Method = attrs.FirstOrDefault(attr => attr.Method is not null)?.Method,
-					ResponseType = attrs.FirstOrDefault(attr => attr.ResponseType is not null)?.ResponseType,
-					ErrorMessage = attrs.FirstOrDefault(attr => !string.IsNullOrEmpty(attr.ErrorMessage))?.ErrorMessage
-				};
-			}
-		}
 	}
 }

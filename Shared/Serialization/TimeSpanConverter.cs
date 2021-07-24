@@ -39,7 +39,7 @@ namespace Shared.Serialization {
 
 		protected override Func<T, TimeSpan> FromNumber
 			=> value => {
-				double db = value.ToDouble(null);
+				var db = value.ToDouble(null);
 				return Unit switch {
 					TimeSpanUnit.Tick        => TimeSpan.FromTicks(Convert.ToInt64(db)),
 					TimeSpanUnit.Millisecond => TimeSpan.FromMilliseconds(db),

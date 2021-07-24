@@ -1,6 +1,5 @@
 ﻿// ReSharper disable InconsistentNaming
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Reflection;
@@ -21,7 +20,7 @@ namespace Shared.Validators {
 			if (!value.GetType().Implements(typeof(ICollection<>)))
 				return false;
 			var collectionType = value.GetType().GetGenericInterface(typeof(ICollection<>));
-			int count = (int)collectionType.GetProperty(nameof(ICollection<object>.Count))!.GetValue(value)!;
+			var count = (int)collectionType.GetProperty(nameof(ICollection<object>.Count))!.GetValue(value)!;
 			return count >= MinCount && count <= MaxCount;
 		}
 

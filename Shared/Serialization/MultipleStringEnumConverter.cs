@@ -8,11 +8,10 @@ using Shared.Exceptions;
 
 namespace Shared.Serialization {
 	public class MultipleStringEnumConverter : JsonConverter {
-		private Type _enumType;
-
 		private readonly Dictionary<string, string> _attrName = new();
 
 		private readonly Dictionary<string, string> _enumName = new();
+		private Type _enumType;
 
 		public MultipleStringEnumConverter(object nameSelect) => NameSelect = nameSelect;
 
@@ -52,7 +51,7 @@ namespace Shared.Serialization {
 			var token = JToken.Load(reader);
 			if (token.Type != JTokenType.String)
 				throw new JTokenTypeException(token, JTokenType.String);
-			string attrName = token.Value<string>();
+			var attrName = token.Value<string>();
 			return Enum.Parse(EnumType, _enumName[attrName!]);
 		}
 

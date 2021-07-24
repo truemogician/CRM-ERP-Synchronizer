@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Reflection;
 using FXiaoKe.Models;
-using Shared.Utilities;
 
 namespace FXiaoKe.Utilities {
 	public static class ModelMeta<T> where T : ModelBase {

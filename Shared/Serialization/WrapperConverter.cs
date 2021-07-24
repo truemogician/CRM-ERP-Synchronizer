@@ -9,7 +9,7 @@ using Shared.Exceptions;
 namespace Shared.Serialization {
 	public class CustomObjectWrapperConverter<TWrapper, TTarget> : JsonConverter<TTarget> where TWrapper : IWrapper {
 		public override void WriteJson(JsonWriter writer, TTarget value, JsonSerializer serializer) {
-			int depth = 0;
+			var depth = 0;
 			var wrapperType = typeof(TWrapper);
 			while (true) {
 				++depth;
@@ -72,6 +72,8 @@ namespace Shared.Serialization {
 	}
 
 	public interface IWrapper<T> : IWrapper {
+		public new T Value { get; set; }
+
 		object IWrapper.Value {
 			get => Value;
 			set {
@@ -81,8 +83,6 @@ namespace Shared.Serialization {
 					throw new InvariantTypeException(typeof(T), value.GetType());
 			}
 		}
-
-		public new T Value { get; set; }
 	}
 
 	public sealed class ObjectWrapperConverter : ObjectWrapperConverter<string> {

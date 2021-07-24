@@ -16,7 +16,6 @@ using FXiaoKe.Utilities;
 using Newtonsoft.Json;
 using Shared;
 using Shared.Exceptions;
-using Shared.Utilities;
 
 namespace FXiaoKe {
 	public class Client {

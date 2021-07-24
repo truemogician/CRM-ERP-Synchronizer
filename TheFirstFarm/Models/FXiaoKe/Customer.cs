@@ -24,7 +24,7 @@ namespace TheFirstFarm.Models.FXiaoKe {
 		public string Id { get; set; }
 
 		/// <summary>
-		/// 金蝶主键Id
+		///     金蝶主键Id
 		/// </summary>
 		[JsonProperty("erp_account_id__c")]
 		public string KingdeeId { get; set; }

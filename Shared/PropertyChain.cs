@@ -64,7 +64,7 @@ namespace Shared {
 				if (start > 0) {
 					using var enumerator = InfoChain.GetEnumerator();
 					enumerator.MoveNext();
-					for (int i = 0; i < start - 1; ++i, enumerator.MoveNext()) { }
+					for (var i = 0; i < start - 1; ++i, enumerator.MoveNext()) { }
 					result.StartingType = enumerator.Current?.ElementType;
 				}
 				return result;
@@ -156,7 +156,7 @@ namespace Shared {
 		public object GetValue(object obj, params int[][] indices) {
 			Utility.ValidatedOrThrow(this);
 			(var chain, object cur) = (this, obj);
-			int i = 0;
+			var i = 0;
 			while (chain.Length > 1 && chain.StartingType.IsInstanceOfType(cur)) {
 				if (chain.StartingInfo is var info && info.Rank > 0)
 					cur = info.GetIndexedValue(cur, indices[i++]);
@@ -174,7 +174,7 @@ namespace Shared {
 		public void SetValue(object obj, object value, params int[][] indices) {
 			Utility.ValidatedOrThrow(this);
 			(var chain, object cur) = (this, obj);
-			int i = 0;
+			var i = 0;
 			while (chain.Length > 1 && chain.StartingType.IsInstanceOfType(cur)) {
 				if (chain.StartingInfo is var info && info.Rank > 0)
 					cur = info.GetIndexedValue(cur, indices[i++]);
@@ -241,7 +241,7 @@ namespace Shared {
 			if (obj.GetType() != type)
 				throw new TypeNotMatchException(type, obj.GetType());
 			object result = Info.GetValue(obj);
-			for (int i = 0; i < Rank; ++i)
+			for (var i = 0; i < Rank; ++i)
 				result = (result as IList)![indices[i]];
 			return result;
 		}
@@ -253,7 +253,7 @@ namespace Shared {
 			if (!type.IsInstanceOfType(obj))
 				throw new InvariantTypeException(type, obj?.GetType());
 			object result = Info.GetValue(obj);
-			for (int i = 0; i < Rank; ++i) {
+			for (var i = 0; i < Rank; ++i) {
 				if (result!.GetType().Implements(typeof(IList)))
 					throw new TypeException(result?.GetType(), $"{nameof(IList)} required for setting value");
 				if (i < Rank - 1)

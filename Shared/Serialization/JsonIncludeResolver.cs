@@ -5,7 +5,6 @@ using System.Reflection;
 using System.Text.Json.Serialization;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
-using Shared.Utilities;
 using JsonIgnoreAttribute = Newtonsoft.Json.JsonIgnoreAttribute;
 
 namespace Shared.Serialization {

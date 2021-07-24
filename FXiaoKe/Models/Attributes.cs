@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Linq;
 using System.Reflection;
 using Shared.Exceptions;
-using Shared.Utilities;
 
 namespace FXiaoKe.Models {
 	public abstract class FXiaoKeAttribute : Attribute { }
