@@ -3,10 +3,28 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Shared.Exceptions;
 
-namespace Kingdee.Converters {
-	public class BoolConverter : JsonConverter<bool?> {
-		protected virtual string TrueString => "true";
-		protected virtual string FalseString => "false";
+namespace Shared.Serialization {
+	public class BoolConverter : BoolConverterBase {
+		public BoolConverter() : this("true", "false") { }
+
+		public BoolConverter(string trueString, string falseString) : this(trueString, falseString, StringComparison.OrdinalIgnoreCase) { }
+
+		public BoolConverter(string trueString, string falseString, StringComparison comparisonOption) {
+			TrueString = trueString;
+			FalseString = falseString;
+			ComparisonOption = comparisonOption;
+		}
+
+		protected override string TrueString { get; }
+
+		protected override string FalseString { get; }
+
+		protected override StringComparison ComparisonOption { get; }
+	}
+
+	public abstract class BoolConverterBase : JsonConverter<bool?> {
+		protected abstract string TrueString { get; }
+		protected abstract string FalseString { get; }
 		protected virtual StringComparison ComparisonOption => StringComparison.OrdinalIgnoreCase;
 
 		public sealed override void WriteJson(JsonWriter writer, bool? value, JsonSerializer serializer) {
