@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
+using Shared.Exceptions;
 
 namespace Shared {
 	public class TreeNode : TreeNodeBase<TreeNode> {
@@ -191,7 +192,7 @@ namespace Shared {
 					if (tags[j] == 0)
 						tags[j] = tag;
 					else if (tags[j] == tag)
-						throw new InvalidOperationException("Cycle detected");
+						throw new InfiniteLoopException("Cycle detected");
 					else
 						break;
 					if (!hasParent[j])
