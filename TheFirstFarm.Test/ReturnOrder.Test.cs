@@ -11,11 +11,7 @@ using FXiaoKe.Utilities;
 using Kingdee.Forms;
 using Newtonsoft.Json;
 using NUnit.Framework;
-using NUnit.Framework.Interfaces;
-using NUnit.Framework.Internal;
-using NUnit.Framework.Internal.Builders;
-using Shared.Serialization;
-using TheFirstFarm.Utilities;
+using TheFirstFarm.Models.Database;
 using FModels = TheFirstFarm.Models.FXiaoKe;
 using KModels = TheFirstFarm.Models.Kingdee;
 using FRequests = FXiaoKe.Requests;
@@ -24,27 +20,7 @@ using FResponses = FXiaoKe.Responses;
 using KResponses = Kingdee.Responses;
 
 namespace TheFirstFarm.Test {
-	public class ReturnOrderTests {
-		public Client FXiaoKeClient { get; set; }
-
-		public Kingdee.Client KingdeeClient { get; set; }
-
-		[SetUp]
-		public void Setup() {
-			JsonConvert.DefaultSettings = () => new JsonSerializerSettings {ContractResolver = new JsonIncludeResolver()};
-			FXiaoKeClient = new Client(
-				"FSAID_1319ebe",
-				"fe4fd3abb55a45d3ae5ed03b3bcb6fc8",
-				"D63C0B6A42F171D173EF728CBFC12874"
-			);
-			FXiaoKeClient.RequestFailed += (_, args) => {
-				if (args.Response is FResponses.BasicResponse resp)
-					Console.WriteLine(resp.ErrorMessage);
-			};
-			KingdeeClient = new Kingdee.Client("http://120.27.55.22/k3cloud/");
-			Assert.IsTrue(KingdeeClient.ValidateLogin("60b86b4a9ade83", "Administrator", "888888", 2052));
-		}
-
+	public class ReturnOrderTests : TestBase {
 		[TestCaseGeneric(GenericArgument = typeof(KModels.ReturnOrder), ExpectedResult = 18)]
 		public int KingdeeFieldsTest<T>() where T : FormBase {
 			var fields = FormMeta<T>.QueryFields;
@@ -61,10 +37,32 @@ namespace TheFirstFarm.Test {
 		}
 
 		[TestCaseGeneric(GenericArgument = typeof(FModels.ReturnOrder))]
+		[TestCaseGeneric(GenericArgument = typeof(FModels.Customer))]
+		[TestCaseGeneric(GenericArgument = typeof(FModels.Product))]
 		public async Task FXiaoKeQueryTest<T>(params FRequests.ModelFilter<T>[] filters) where T : ModelBase {
 			FXiaoKeClient.Operator = await FXiaoKeClient.GetStaffByPhoneNumber("18118359138");
 			var result = await FXiaoKeClient.QueryByCondition(filters);
-			Console.WriteLine($@"{result?.Count} {typeof(T).Name} found");
+			Console.WriteLine($@"{result?.Count} {typeof(T).Name}s found");
+		}
+
+		[Test]
+		public async Task CustomerMapTest() {
+			FXiaoKeClient.Operator = await FXiaoKeClient.GetStaffByPhoneNumber("18118359138");
+			var customers = await FXiaoKeClient.GetAll<FModels.Customer>();
+			await using var dbContext = new MapContext();
+			foreach (var customer in customers)
+				dbContext.Update(new CustomerMap(customer.Id, customer.KingdeeId));
+			Console.WriteLine($@"{await dbContext.SaveChangesAsync()} changes saved");
+		}
+
+		[Test]
+		public async Task StaffMapTest() {
+			var department = await FXiaoKeClient.GetDepartmentDetailTree();
+			var staffs = await FXiaoKeClient.GetStaffs(department);
+			await using var dbContext = new MapContext();
+			foreach (var staff in staffs)
+				dbContext.StaffMaps.Update(new StaffMap(staff.Id, staff.Number));
+			Console.WriteLine($@"{await dbContext.SaveChangesAsync()} changes saved");
 		}
 
 		[Test]
@@ -97,12 +95,13 @@ namespace TheFirstFarm.Test {
 			var department = await FXiaoKeClient.GetDepartmentDetailTree();
 			var staffs = await FXiaoKeClient.GetStaffs(department);
 			FXiaoKeClient.Operator = staffs.Single(staff => staff.Name == "周孝成");
+			var dbContext = new MapContext();
 			var fXiaoKeModels = kingdeeModels.Select(
 				model =>
 					new FModels.ReturnOrder {
-						CustomerId = model.CustomerId,
+						CustomerId = dbContext.CustomerMaps.SingleOrDefault(map => map.KingdeeId == model.CustomerId)?.FXiaoKeId,
 						Date = model.Date!.Value,
-						OwnerId = staffs.SingleOrDefault(staff => !string.IsNullOrEmpty(model.SalesmanId) && staff.Number == model.SalesmanId)?.Id ?? FXiaoKeClient.Operator.Id,
+						OwnerId = dbContext.StaffMaps.SingleOrDefault(map => map.KingdeeId == model.SalesmanId)?.FXiaoKeId,
 						Reason = model.ReturnReason,
 						Id = model.Number,
 						BusinessType = model.BusinessType,
@@ -116,42 +115,21 @@ namespace TheFirstFarm.Test {
 									UnitPrice = detail.UnitPrice,
 									TaxRate = detail.TaxRate,
 									Volume = detail.Volumn,
-									ReturnType = Utility.TransformEnum<KModels.ReturnType, FModels.ReturnType>(detail.ReturnType) ?? throw new Exception(),
+									ReturnType = detail.ReturnType,
 									OwnerId = model.SalesmanId
 								}
 							)
 							.ToList()
 					}
 			);
-			foreach (var model in fXiaoKeModels)
+			foreach (var model in fXiaoKeModels) {
+				if (model.OwnerId is null) {
+					var _ = FXiaoKeClient.SendTextMessage($"销售退货单缺少负责人，将使用默认负责人{FXiaoKeClient.Operator.Name}");
+					model.OwnerId = FXiaoKeClient.Operator.Id;
+				}
 				await FXiaoKeClient.Create(model);
-		}
-	}
-
-	[AttributeUsage(AttributeTargets.Method, AllowMultiple = true)]
-	public class TestCaseGenericAttribute : TestCaseAttribute, ITestBuilder {
-		public TestCaseGenericAttribute(params object[] arguments)
-			: base(arguments) { }
-
-		public Type GenericArgument {
-			get => GenericArguments.SingleOrDefault();
-			set => GenericArguments = new[] {value};
-		}
-
-		public Type[] GenericArguments { get; set; }
-
-		IEnumerable<TestMethod> ITestBuilder.BuildFrom(IMethodInfo method, NUnit.Framework.Internal.Test suite) {
-			if (!method.IsGenericMethodDefinition)
-				return BuildFrom(method, suite);
-
-			if (GenericArguments == null || GenericArguments.Length != method.GetGenericArguments().Length) {
-				var @params = new TestCaseParameters {RunState = RunState.NotRunnable};
-				@params.Properties.Set("_SKIPREASON", $"{nameof(GenericArguments)} should have {method.GetGenericArguments().Length} elements");
-				return new[] {new NUnitTestCaseBuilder().BuildTestMethod(method, suite, @params)};
 			}
-
-			var genMethod = method.MakeGenericMethod(GenericArguments);
-			return BuildFrom(genMethod, suite);
+			await dbContext.DisposeAsync();
 		}
 	}
 }
