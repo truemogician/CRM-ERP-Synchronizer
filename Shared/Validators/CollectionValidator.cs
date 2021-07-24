@@ -20,7 +20,7 @@ namespace Shared.Validators {
 		public override bool IsValid(object value) {
 			if (!value.GetType().Implements(typeof(ICollection<>)))
 				return false;
-			var collectionType = value.GetType().GetCollectionType(typeof(ICollection<>));
+			var collectionType = value.GetType().GetGenericInterface(typeof(ICollection<>));
 			int count = (int)collectionType.GetProperty(nameof(ICollection<object>.Count))!.GetValue(value)!;
 			return count >= MinCount && count <= MaxCount;
 		}

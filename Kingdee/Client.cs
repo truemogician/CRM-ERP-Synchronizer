@@ -63,7 +63,7 @@ namespace Kingdee {
 					);
 					if (type.Implements(typeof(ICollection<>))) {
 						object propObj = subFormInfo.GetValue(list[0]);//ICollection<T>
-						var collectionType = propObj.GetType().GetCollectionType(typeof(ICollection<>));
+						var collectionType = propObj.GetType().GetGenericInterface(typeof(ICollection<>));
 						collectionType.GetMethod(nameof(ICollection<object>.Clear))!.Invoke(propObj, null);
 						foreach (object subForm in subForms)
 							collectionType.GetMethod(nameof(ICollection<object>.Add))!.Invoke(propObj, subForm);
@@ -105,7 +105,7 @@ namespace Kingdee {
 					return JsonConvert.DeserializeObject<T>(builder.ToString());
 				}
 			);
-			return MergeForms(forms.OfType<object>().AsList()).Cast<T>().AsList();
+			return MergeForms(forms).AsType<T>().AsList();
 		}
 
 		/// <summary>

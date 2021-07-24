@@ -61,7 +61,7 @@ namespace Kingdee.Utilities {
 				for (int k = 0; k < stProp.Rank; ++k) {
 					if (targetObj?.GetType().Implements(typeof(ICollection<>)) != true)
 						throw new InterfaceNotImplementedException(typeof(ICollection<>));
-					var collectionType = targetObj.GetType().GetCollectionType(typeof(ICollection<>));
+					var collectionType = targetObj.GetType().GetGenericInterface(typeof(ICollection<>));
 					if ((int)collectionType.GetProperty(nameof(ICollection<object>.Count))!.GetValue(targetObj)! > 0) {
 						dynamic enumerator = collectionType.GetMethod(nameof(ICollection<object>.GetEnumerator)).Invoke(targetObj);
 						enumerator.MoveNext();

@@ -63,12 +63,6 @@ namespace System.Reflection {
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static Type GetCollectionType(this Type type, Type genericTypeDefinition = null) {
-			genericTypeDefinition ??= typeof(ICollection<>);
-			return genericTypeDefinition.MakeGenericType(type.GetItemType(genericTypeDefinition));
-		}
-
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static bool Implements(this Type type, Type interfaceType)
 			=> (interfaceType.IsGenericTypeDefinition
 				? type.GetGenericInterface(interfaceType)
@@ -88,15 +82,25 @@ namespace System.Reflection {
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static Type[] GetGenericInterfaceArguments(this Type type, Type genericTypeDefinition) => type.GetGenericInterface(genericTypeDefinition)?.GetGenericArguments();
 
-		public static bool IsAssignableToGeneric(this Type type, Type genericType) {
+		public static Type[] GetGenericTypes(this Type type, Type genericTypeDefinition) {
+			if (!genericTypeDefinition.IsGenericTypeDefinition)
+				throw new TypeException(genericTypeDefinition, "Required to be a generic type definition");
+			if (genericTypeDefinition.IsInterface)
+				return type.GetGenericInterfaces(genericTypeDefinition);
 			do {
 				var cur = type?.IsGenericType == true ? type.GetGenericTypeDefinition() : type;
-				if (genericType == cur)
-					return true;
+				if (genericTypeDefinition == cur)
+					return new[] {type};
 				type = type?.BaseType;
 			} while (type != null && type != typeof(object));
-			return false;
+			return Array.Empty<Type>();
 		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static Type GetGenericType(this Type type, Type genericTypeDefinition) => type.GetGenericTypes(genericTypeDefinition).SingleOrDefault();
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static bool IsAssignableToGeneric(this Type type, Type genericType) => type.GetGenericTypes(genericType).Length > 0;
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static PropertyInfo[] GetIndexers(this Type type) => type.GetProperties().Where(p => p.GetIndexParameters().Length > 0).AsArray();

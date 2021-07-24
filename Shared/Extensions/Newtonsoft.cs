@@ -37,4 +37,12 @@ namespace Newtonsoft.Json {
 			return members.SingleOrDefault(prop => prop.GetJsonPropertyName() == jsonPropertyName);
 		}
 	}
+
+	public static class JsonConverterExtensions {
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static void WriteValue<T>(this JsonWriter writer, T value) => writer.WriteRawValue(JsonConvert.SerializeObject(value));
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static void WriteValue<T>(this JsonWriter writer, T value, JsonSerializer serializer) => serializer.Serialize(writer, value, typeof(T));
+	}
 }
