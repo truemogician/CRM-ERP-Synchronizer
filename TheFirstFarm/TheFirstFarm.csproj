@@ -10,14 +10,22 @@
 	<ItemGroup>
 		<Compile Remove="Libs\**" />
 		<Compile Remove="Requirement\**" />
+		<Compile Remove="SQLite\**" />
 		<EmbeddedResource Remove="Libs\**" />
 		<EmbeddedResource Remove="Requirement\**" />
+		<EmbeddedResource Remove="SQLite\**" />
 		<None Remove="Libs\**" />
 		<None Remove="Requirement\**" />
+		<None Remove="SQLite\**" />
 	</ItemGroup>
 
 	<ItemGroup>
 		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="5.0.8" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="5.0.8" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="5.0.8">
+		  <PrivateAssets>all</PrivateAssets>
+		  <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
 		<PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
 	</ItemGroup>
 
@@ -37,8 +45,6 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <Folder Include="Models\Common\" />
-	  <Folder Include="Database\" />
 	  <Folder Include="Utilities\" />
 	</ItemGroup>
 
