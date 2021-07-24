@@ -25,7 +25,7 @@ namespace Kingdee.Requests.Query {
 			=> new(DataType.Bit, radix switch {
 				BitRadix.Binary      => BinaryPattern.IsMatch(value) ? $"B'{value}'" : throw new RegexNotMatchException(value, BinaryPattern),
 				BitRadix.Hexadecimal => HexadecimalPattern.IsMatch(value) ? $"X'{value}'" : throw new RegexNotMatchException(value, HexadecimalPattern),
-				_                    => throw new EnumValueOutOfRangeException<BitRadix>()
+				_                    => throw new EnumValueOutOfRangeException(typeof(BitRadix), radix)
 			});
 
 		public static implicit operator Literal(string value) => String(value);
@@ -40,7 +40,7 @@ namespace Kingdee.Requests.Query {
 				DataType.Float   => ((double)Value).ToString(CultureInfo.InvariantCulture),
 				DataType.Integer => ((long)Value).ToString(),
 				DataType.String  => $"'{((string)Value).Replace("'", "''")}'",
-				_                => throw new EnumValueOutOfRangeException<DataType>()
+				_                => throw new EnumValueOutOfRangeException(typeof(DataType), Type)
 			};
 	}
 

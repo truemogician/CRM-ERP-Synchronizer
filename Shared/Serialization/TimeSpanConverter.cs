@@ -33,7 +33,7 @@ namespace Shared.Serialization {
 					TimeSpanUnit.Minute      => timeSpan.TotalMinutes,
 					TimeSpanUnit.Hour        => timeSpan.TotalHours,
 					TimeSpanUnit.Day         => timeSpan.TotalDays,
-					_                        => throw new EnumValueOutOfRangeException<TimeSpanUnit>(Unit)
+					_                        => throw new EnumValueOutOfRangeException(typeof(TimeSpanUnit), Unit)
 				}
 			);
 
@@ -47,7 +47,7 @@ namespace Shared.Serialization {
 					TimeSpanUnit.Minute      => TimeSpan.FromMinutes(db),
 					TimeSpanUnit.Hour        => TimeSpan.FromHours(db),
 					TimeSpanUnit.Day         => TimeSpan.FromDays(db),
-					_                        => throw new EnumValueOutOfRangeException<TimeSpanUnit>(Unit)
+					_                        => throw new EnumValueOutOfRangeException(typeof(TimeSpanUnit), Unit)
 				};
 			};
 
