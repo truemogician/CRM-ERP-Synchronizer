@@ -223,6 +223,9 @@ namespace FXiaoKe.Requests {
 			if (source.Type != typeof(T))
 				throw new TypeNotMatchException(typeof(T), source.Type);
 		}
+
+		public static ModelFilter Equal(string propertyName, object value) => Equal(typeof(T), propertyName, value);
+		public static ModelFilter In(string propertyName, params object[] values) => In(typeof(T), propertyName, values);
 	}
 
 	public class ModelFilter : IType {
@@ -267,14 +270,9 @@ namespace FXiaoKe.Requests {
 			get => Property.StartingType;
 			set => Property.StartingType = value;
 		}
-	}
 
-	public class ModelEqualityFilter<T> : ModelFilter<T> where T : ModelBase {
-		public ModelEqualityFilter(string propertyName, object value) : base(propertyName, QueryOperator.Equal, value) { }
-	}
-
-	public class ModelEqualityFilter : ModelFilter {
-		public ModelEqualityFilter(Type type, string propertyName, object value) : base(type, propertyName, QueryOperator.Equal, value) { }
+		public static ModelFilter Equal(Type type, string propertyName, object value) => new(type, propertyName, QueryOperator.Equal, value);
+		public static ModelFilter In(Type type, string propertyName, params object[] values) => new(type, propertyName, QueryOperator.In, values);
 	}
 
 	public class ModelOrder<T> : ModelOrder where T : ModelBase {

@@ -1,10 +1,13 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Reflection;
+using DataAnnotationsValidator;
 using FXiaoKe.Utilities;
 using Newtonsoft.Json;
 using Shared.Utilities;
+using OneOf;
 
 namespace FXiaoKe.Models {
 	[Model]
@@ -14,13 +17,12 @@ namespace FXiaoKe.Models {
 		public virtual string DataId { get; set; }
 
 		[JsonIgnore]
-		public List<ModelBase> CascadeSubModels
-			=> GetType()
-				.GetCascadeSubModels()
-				.Select(
-					member => (member is FieldInfo field ? field.GetValue(this) : (member as PropertyInfo)!.GetValue(this)) as ModelBase
-				)
-				.ToList();
+		public IEnumerable<ModelBase> SubModels {
+			get {
+				var infos = GetType().GetSubModelInfos(false);
+				return infos.SelectSingleOrMany<MemberInfo, ModelBase>(info => info.GetValue(this)).ToList();
+			}
+		}
 
 		public virtual List<ValidationResult> Validate() => Utility.Validate(this);
 	}

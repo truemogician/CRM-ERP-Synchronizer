@@ -97,11 +97,15 @@ namespace FXiaoKe {
 			return resp.Staffs.SingleOrDefault();
 		}
 
-		private async Task<List<ModelBase>> QueryByCondition(QueryByConditionRequest request) {
+		private async Task<List<ModelBase>> QueryByCondition(QueryByConditionRequest request, bool? eager) {
 			var response = await ReceiveResponse(request, typeof(QueryByConditionResponse<>).MakeGenericType(request.Data.Type));
 			var results = (((dynamic)response).Data.DataList as IList)!.AsType<ModelBase>().AsList();
+			if (eager == false || results.Count == 0)
+				return results;
 			var resultType = results[0].GetType();
-			var subModelInfos = resultType.GetEagerSubModels();
+			var subModelInfos = eager.HasValue
+				? resultType.GetSubModelInfos()
+				: resultType.GetSubModelInfos().Where(info => info.GetCustomAttribute<SubModelAttribute>()!.Eager).AsList();
 			if (subModelInfos.Count == 0)
 				return results;
 			foreach (var subModelInfo in subModelInfos) {
@@ -113,51 +117,49 @@ namespace FXiaoKe {
 				var (masterKeyMember, masterKey) = subModelType.GetMemberAndAttribute<MasterKeyAttribute>();
 				if (masterKey is null)
 					throw new AttributeNotFoundException(typeof(MasterKeyAttribute));
-				var tasks = new Task[results.Count];
 				var keyInfo = masterKey.GetKey(subModelType);
-				for (int i = 0; i < results.Count; ++i) {
-					var result = results[i];
-					var condition = new QueryCondition(new ModelEqualityFilter(subModelType, masterKeyMember.Name, keyInfo.GetValue(result)));
-					var subReq = subModelType.IsCustomModel()
-						? new QueryCustomByConditionRequest(condition)
-						: new QueryByConditionRequest(condition);
-					tasks[i] = QueryByCondition(subReq)
-						.ContinueWith(
-							task => {
-								if (!many)
-									subModelInfo.SetValue(result, task.Result.SingleOrDefault());
-								else {
-									object target = subModelInfo.GetValue(result);
-									if (target is null) {
-										var constrType = subModelInfo.GetCustomAttribute<DefaultConstructorAttribute>()?.ConstructingType;
-										if (constrType is not null && !constrType.IsAssignableTo(rawType))
-											throw new InvariantTypeException(rawType, constrType);
-										constrType ??= rawType;
-										target = constrType.Construct();
-										subModelInfo.SetValue(result, target);
-									}
-									dynamic collection = target;//ICollection<>
-									collection.Clear();
-									foreach (var res in task.Result)
-										collection.Add(res);
-								}
-							}
-						);
+				var condition = new QueryCondition(ModelFilter.In(subModelType, masterKeyMember.Name, results.Select(res => keyInfo.GetValue(res)).ToHashSet().AsArray()));
+				var subReq = subModelType.IsCustomModel()
+					? new QueryCustomByConditionRequest(condition)
+					: new QueryByConditionRequest(condition);
+				var subResults = await QueryByCondition(subReq, eager);
+				foreach (var group in subResults.GroupBy(subRes => masterKeyMember.GetValue(subRes))) {
+					var target = results.Single(res => keyInfo.GetValue(res).Equals(group.Key));
+					if (!many)
+						subModelInfo.SetValue(target, group.SingleOrDefault());
+					else {
+						object collection = subModelInfo.GetValue(target);
+						if (collection is null) {
+							var constrType = subModelInfo.GetCustomAttribute<DefaultConstructorAttribute>()?.ConstructingType;
+							if (constrType is not null && !constrType.IsAssignableTo(rawType))
+								throw new InvariantTypeException(rawType, constrType);
+							constrType ??= rawType;
+							collection = constrType.Construct();
+							subModelInfo.SetValue(target, collection);
+						}
+						var collectionType = collection.GetType().GetGenericInterface(typeof(ICollection<>));
+						collectionType.GetMethod(nameof(ICollection<object>.Clear)).Invoke(collection);
+						foreach (var subRes in group)
+							collectionType.GetMethod(nameof(ICollection<object>.Add)).Invoke(collection, subRes);
+					}
 				}
-				await Task.WhenAll(tasks);
 			}
 			return results;
 		}
 
-		public async Task<List<T>> QueryByCondition<T>(QueryCondition<T> condition) where T : ModelBase {
+		public async Task<List<T>> QueryByCondition<T>(QueryCondition<T> condition, bool? eager = null) where T : ModelBase {
 			var request = ModelMeta<T>.IsCustomModel
 				? new QueryCustomByConditionRequest(condition)
 				: new QueryByConditionRequest(condition);
-			var response = await QueryByCondition(request);
+			var response = await QueryByCondition(request, eager);
 			return response.Cast<T>().AsList();
 		}
 
-		public Task<List<T>> QueryByCondition<T>(ModelFilter<T>[] filters) where T : ModelBase => QueryByCondition(new QueryCondition<T>(filters));
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public Task<List<T>> QueryByCondition<T>(ModelFilter<T>[] filters, bool? eager = null) where T : ModelBase => QueryByCondition(new QueryCondition<T>(filters), eager);
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public Task<List<T>> GetAll<T>(int limit = 0, int offset = 0, bool? eager = null) where T : ModelBase => QueryByCondition(new QueryCondition<T> {Limit = limit, Offset = offset}, eager);
 
 		public async Task<T> QueryById<T>(string id) where T : ModelBase {
 			var response = await (ModelMeta<T>.IsCustomModel
@@ -166,26 +168,32 @@ namespace FXiaoKe {
 			return response.Data;
 		}
 
-		private async Task<CreationResponse> Create(ModelBase model) {
+		private async Task<CreationResponse> Create(ModelBase model, bool? cascade = null) {
 			var response = await (model.GetType().IsCustomModel()
 				? ReceiveResponse<CreationResponse, CustomCreationRequest<ModelBase>>(new CustomCreationRequest<ModelBase> {Data = model})
 				: ReceiveResponse<CreationResponse, CreationRequest<ModelBase>>(new CreationRequest<ModelBase> {Data = model}));
-			if (!response)
+			if (!response || cascade == false)
 				return response;
-			var cascadeModels = model.CascadeSubModels;
-			foreach (var cascade in cascadeModels) {
-				if (cascade.GetType().GetModelAttribute().SubjectTo is var srcType && srcType != model.GetType())
+			IEnumerable<ModelBase> cascadeModels;
+			if (cascade.HasValue)
+				cascadeModels = model.SubModels;
+			else {
+				var infos = model.GetType().GetSubModelInfos().Where(info => info.GetCustomAttribute<SubModelAttribute>()!.Cascade);
+				cascadeModels = infos.SelectSingleOrMany<MemberInfo, ModelBase>(info => info.GetValue(model));
+			}
+			foreach (var subModel in cascadeModels) {
+				if (subModel!.GetType().GetModelAttribute().SubjectTo is var srcType && srcType != model.GetType())
 					throw new TypeNotMatchException(model.GetType(), srcType);
-				var info = cascade.GetType().GetMemberWithAttribute<MasterKeyAttribute>() ?? throw new AttributeNotFoundException(typeof(MasterKeyAttribute));
-				info.SetValue(cascade, response.DataId);
-				if (await Create(cascade) is var resp && !resp)
+				var info = subModel.GetType().GetMemberWithAttribute<MasterKeyAttribute>() ?? throw new AttributeNotFoundException(typeof(MasterKeyAttribute));
+				info.SetValue(subModel, response.DataId);
+				if (await Create(subModel, cascade) is var resp && !resp)
 					return resp;
 			}
 			return response;
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public Task<CreationResponse> Create<T>(T model) where T : ModelBase => Create((ModelBase)model);
+		public Task<CreationResponse> Create<T>(T model, bool? cascade = null) where T : ModelBase => Create((ModelBase)model, cascade);
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public Task<BasicResponse> SendMessage<T>(T request) where T : MessageRequest => ReceiveResponse<BasicResponse, T>(request);

@@ -15,10 +15,6 @@ namespace FXiaoKe.Utilities {
 
 		public static MemberInfo MasterKey => typeof(T).GetMemberWithAttribute<MasterKeyAttribute>();
 
-		public static List<MemberInfo> SubModels => typeof(T).GetSubModels(false);
-
-		public static List<MemberInfo> CascadeSubModels => typeof(T).GetCascadeSubModels(false);
-
-		public static List<MemberInfo> EagerSubModels => typeof(T).GetEagerSubModels(false);
+		public static List<MemberInfo> SubModelInfos => typeof(T).GetSubModelInfos(false);
 	}
 }

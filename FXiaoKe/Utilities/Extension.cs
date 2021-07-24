@@ -45,21 +45,11 @@ namespace FXiaoKe.Utilities {
 			return result ?? throw new MissingKeyException(type);
 		}
 
-		public static List<MemberInfo> GetSubModels(this Type type, bool verify = true) {
+		public static List<MemberInfo> GetSubModelInfos(this Type type, bool verify = true) {
 			if (verify)
 				Utility.VerifyInheritance(type, typeof(ModelBase));
-			var members = (type.GetProperties() as MemberInfo[]).Concat(type.GetFields()).ToList();
-			return members.Where(member => member.IsDefined(typeof(SubModelAttribute))).ToList();
+			var members = type.GetMembers(MemberTypes.Field | MemberTypes.Property);
+			return members.Where(member => member.IsDefined(typeof(SubModelAttribute))).AsList();
 		}
-
-		public static List<MemberInfo> GetCascadeSubModels(this Type type, bool verify = true)
-			=> type.GetSubModels(verify)
-				.Where(member => member.GetCustomAttribute<SubModelAttribute>()!.Cascade)
-				.ToList();
-
-		public static List<MemberInfo> GetEagerSubModels(this Type type, bool verify = true)
-			=> type.GetSubModels(verify)
-				.Where(member => member.GetCustomAttribute<SubModelAttribute>()!.Eager)
-				.ToList();
 	}
 }
