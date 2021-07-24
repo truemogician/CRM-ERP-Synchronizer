@@ -75,10 +75,7 @@ namespace FXiaoKe.Requests {
 	}
 
 	public class CreationDataModelConverter : JsonConverter<ModelBase> {
-		public Type ModelType { get; set; }
-
 		public override void WriteJson(JsonWriter writer, ModelBase value, JsonSerializer serializer) {
-			ModelType = value.GetType();
 			var builder = new StringBuilder();
 			using var stringWriter = new StringWriter(builder);
 			serializer.Serialize(stringWriter, value, value.GetType());
@@ -89,20 +86,18 @@ namespace FXiaoKe.Requests {
 		}
 
 		public override ModelBase ReadJson(JsonReader reader, Type objectType, ModelBase existingValue, bool hasExistingValue, JsonSerializer serializer) {
-			if (ModelType is null)
-				throw new NotImplementedException();
 			var token = JToken.Load(reader);
 			if (token.Type is JTokenType.Null or JTokenType.Undefined)
 				return default;
 			if (token.Type != JTokenType.Object)
 				throw new JTokenTypeException(token, JTokenType.Object);
 			if ((token as JObject)!.Property("dataObjectApiName") is { } prop) {
-				if (prop.Value.Value<string>() != ModelType.GetModelName())
-					throw new JTokenException(prop, $"Model name mismatched: {ModelType.GetModelName()} expected");
+				if (prop.Value.Value<string>() != objectType.GetModelName())
+					throw new JTokenException(prop, $"Model name mismatched: {objectType.GetModelName()} expected");
 				prop.Remove();
 			}
 			var stringReader = new StringReader(token.ToString());
-			return (dynamic)serializer.Deserialize(stringReader, ModelType);
+			return (dynamic)serializer.Deserialize(stringReader, objectType);
 		}
 	}
 }
