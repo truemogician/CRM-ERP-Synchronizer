@@ -36,7 +36,7 @@ namespace TheFirstFarm.Models.FXiaoKe {
 		///     负责人
 		/// </summary>
 		[JsonProperty("owner")]
-		[JsonConverter(typeof(ArrayWrapperConverter<string>))]
+		[JsonConverter(typeof(ArrayWrapperConverter))]
 		[ForeignKey(typeof(Staff))]
 		[Required]
 		public string OwnerId { get; set; }

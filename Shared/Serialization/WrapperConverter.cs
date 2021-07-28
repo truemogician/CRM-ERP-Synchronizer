@@ -133,7 +133,13 @@ namespace Shared.Serialization {
 		}
 	}
 
-	public sealed class ArrayWrapperConverter<T> : JsonConverter<T> {
+	public sealed class ArrayWrapperConverter : ArrayWrapperConverter<string> {
+		public ArrayWrapperConverter() { }
+
+		public ArrayWrapperConverter(params JsonConverter[] converters) : base(converters) { }
+	}
+
+	public class ArrayWrapperConverter<T> : JsonConverter<T> {
 		public ArrayWrapperConverter() : this(Array.Empty<JsonConverter>()) { }
 
 		public ArrayWrapperConverter(params JsonConverter[] converters) => Converters = converters;
