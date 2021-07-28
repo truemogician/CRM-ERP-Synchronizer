@@ -103,7 +103,10 @@ namespace System.Reflection {
 		public static bool IsAssignableToGeneric(this Type type, Type genericType) => type.GetGenericTypes(genericType).Length > 0;
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static PropertyInfo[] GetIndexers(this Type type) => type.GetProperties().Where(p => p.GetIndexParameters().Length > 0).AsArray();
+		public static bool IsIndexer(this PropertyInfo property) => property.GetIndexParameters().Length > 0;
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static PropertyInfo[] GetIndexers(this Type type) => type.GetProperties().Where(IsIndexer).AsArray();
 
 		public static PropertyInfo GetIndexer(this Type type, params Type[] parameterTypes)
 			=> type.GetProperties()
@@ -160,6 +163,21 @@ namespace System.Reflection {
 			return members.SingleOrDefault(member => memberTypes.HasFlag(member.MemberType));
 		}
 
+		public static PropertyInfo GetMostDerivedProperty(this Type type, string name) {
+			var properties = type.GetProperties().Where(p => p.Name == name).AsArray();
+			if (properties.Length <= 1)
+				return properties.Length == 0 ? null : properties[0];
+			return properties.Sort(p => p.DeclaringType, new TypeInheritanceComparer()).FirstOrDefault();
+		}
+
+		public static PropertyInfo[] GetMostDerivedProperties(this Type type) {
+			var comparer = new TypeInheritanceComparer();
+			return type.GetProperties()
+				.GroupBy(p => p.Name)
+				.Select(group => group.Sort(p => p.DeclaringType, comparer).FirstOrDefault())
+				.AsArray();
+		}
+
 		public static TResult[] GetAttributeValues<TAttribute, TResult>(this Type type, Func<TAttribute, TResult> selector) where TAttribute : Attribute {
 			var properties = type.GetProperties();
 			return properties.Select(p => selector(p.GetCustomAttribute<TAttribute>())).ToArray();
@@ -170,5 +188,22 @@ namespace System.Reflection {
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static object Invoke(this MethodInfo method, object obj, params object[] parameters) => method.Invoke(obj, parameters);
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static BindingFlags GetBindingFlags(this MemberInfo member) => (BindingFlags)member.GetType().GetProperty("BindingFlags", BindingFlags.Instance | BindingFlags.NonPublic)!.GetValue(member)!;
+
+		public static FieldInfo GetEnumMember(this Enum enumValue) => enumValue.GetType().GetField(enumValue.ToString());
+	}
+
+	public class TypeInheritanceComparer : IComparer<Type> {
+		public int Compare(Type x, Type y) {
+			if (x is null)
+				return y is null ? 0 : -1;
+			if (y is null)
+				return 1;
+			if (x.IsSubclassOf(y))
+				return -1;
+			return y.IsSubclassOf(x) ? 1 : 0;
+		}
 	}
 }

@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Runtime.CompilerServices;
 using Shared.Exceptions;
 
@@ -50,6 +51,25 @@ namespace System.Linq {
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static bool Unique<T>(this IEnumerable<T> enumerable) => enumerable.Unique(null);
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static bool Unique<T>(this IEnumerable<T> enumerable, IEqualityComparer<T> comparer) => enumerable.Unique(x => x, comparer);
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static bool Unique<TSource, TResult>(this IEnumerable<TSource> enumerable, Func<TSource, TResult> predicate) => enumerable.Unique(predicate, null);
+
+		public static bool Unique<TSource, TResult>(this IEnumerable<TSource> enumerable, Func<TSource, TResult> predicate, IEqualityComparer<TResult> comparer) {
+			var count = 0;
+			var set = comparer is null ? new HashSet<TResult>() : new HashSet<TResult>(comparer);
+			foreach (var item in enumerable) {
+				++count;
+				set.Add(predicate(item));
+			}
+			return count == set.Count;
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static void Each<T>(this IEnumerable<T> enumerable, Action<T> action) {
 			foreach (var item in enumerable)
 				action(item);
@@ -65,6 +85,7 @@ namespace System.Linq {
 			foreach (var item in enumerable) {
 				object result = selector(item);
 				switch (result) {
+					case null: continue;
 					case IEnumerable<TResult> subEnumerable: {
 						foreach (var subItem in subEnumerable)
 							yield return subItem;
@@ -73,10 +94,16 @@ namespace System.Linq {
 					case TResult res:
 						yield return res;
 						break;
-					default: throw new TypeException(result.GetType(), $"Should be covariant with {typeof(TResult).FullName} or {typeof(IEnumerable<TResult>).FullName}");
+					default: throw new TypeException(result?.GetType(), $"Should be covariant with {typeof(TResult).FullName} or {typeof(IEnumerable<TResult>).FullName}");
 				}
 			}
 		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static IEnumerable<TSource> Sort<TSource, TKey>(this IEnumerable<TSource> enumerable, Func<TSource, TKey> keySelector, IComparer<TKey> comparer) => enumerable.ToImmutableSortedDictionary(keySelector, x => x, comparer).Values;
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static IEnumerable<TSource> Sort<TSource, TKey>(this IEnumerable<TSource> enumerable, Func<TSource, TKey> keySelector) => enumerable.ToImmutableSortedDictionary(keySelector, x => x).Values;
 	}
 
 	public class IndexedEnumerable<T> : IEnumerable<(T Value, int Index)> {
