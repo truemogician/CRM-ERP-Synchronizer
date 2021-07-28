@@ -160,6 +160,8 @@ namespace FXiaoKe {
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public Task<List<T>> GetAll<T>(int limit = 0, int offset = 0, bool? eager = null) where T : ModelBase => QueryByCondition(new QueryCondition<T> {Limit = limit, Offset = offset}, eager);
 
+		public Task<bool> Exists<T>(T model) where T : ModelBase => QueryByCondition(new[] {ModelFilter<T>.Equal(model.KeyInfo.Name, model.KeyInfo.GetValue(model))}, false).ContinueWith(task => task.Result?.Count > 0);
+
 		public async Task<T> QueryById<T>(string id) where T : ModelBase {
 			var response = await (ModelMeta<T>.IsCustomModel
 				? ReceiveResponse<QueryByIdResponse<T>, CustomQueryByIdRequest<T>>(new CustomQueryByIdRequest<T>(id))

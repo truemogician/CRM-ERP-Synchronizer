@@ -9,9 +9,11 @@ using FXiaoKe.Models;
 using FXiaoKe.Requests.Message;
 using FXiaoKe.Utilities;
 using Kingdee.Forms;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Newtonsoft.Json;
 using NUnit.Framework;
-using TheFirstFarm.Models.Database;
+using TheFirstFarm.Transform;
+using TheFirstFarm.Transform.Models;
 using FModels = TheFirstFarm.Models.FXiaoKe;
 using KModels = TheFirstFarm.Models.Kingdee;
 using FRequests = FXiaoKe.Requests;
@@ -51,7 +53,7 @@ namespace TheFirstFarm.Test {
 			var customers = await FXiaoKeClient.GetAll<FModels.Customer>();
 			await using var dbContext = new MapContext();
 			foreach (var customer in customers)
-				dbContext.Update(new CustomerMap(customer.Id, customer.KingdeeId));
+				dbContext.CustomerMaps.Update(new CustomerMap(customer.Id, customer.KingdeeId));
 			Console.WriteLine($@"{await dbContext.SaveChangesAsync()} changes saved");
 		}
 
@@ -60,13 +62,12 @@ namespace TheFirstFarm.Test {
 			var department = await FXiaoKeClient.GetDepartmentDetailTree();
 			var staffs = await FXiaoKeClient.GetStaffs(department);
 			await using var dbContext = new MapContext();
-			foreach (var staff in staffs)
-				dbContext.StaffMaps.Update(new StaffMap(staff.Id, staff.Number));
+			dbContext.StaffMaps.AddOrUpdateRange(staffs.Select(staff => new StaffMap(staff.Id, staff.Number)));
 			Console.WriteLine($@"{await dbContext.SaveChangesAsync()} changes saved");
 		}
 
 		[Test]
-		public async Task RecordOrderSaveTest() {
+		public async Task ReturnOrderSaveTest() {
 			FXiaoKeClient.RequestFailed += (sender, args) => {
 				var reqType = args.Request.GetType();
 				if (args.Request is MessageRequest) {
@@ -96,39 +97,51 @@ namespace TheFirstFarm.Test {
 			var staffs = await FXiaoKeClient.GetStaffs(department);
 			FXiaoKeClient.Operator = staffs.Single(staff => staff.Name == "周孝成");
 			var dbContext = new MapContext();
-			var fXiaoKeModels = kingdeeModels.Select(
-				model =>
-					new FModels.ReturnOrder {
-						CustomerId = dbContext.CustomerMaps.SingleOrDefault(map => map.KingdeeId == model.CustomerId)?.FXiaoKeId,
-						Date = model.Date!.Value,
-						OwnerId = dbContext.StaffMaps.SingleOrDefault(map => map.KingdeeId == model.SalesmanId)?.FXiaoKeId,
-						Reason = model.ReturnReason,
-						Id = model.Number,
-						BusinessType = model.BusinessType,
-						Details = model.Details.Select(
-								detail => new FModels.ReturnOrderDetail {
-									ProductId = detail.MaterialId,
-									ProductName = detail.MaterialName,
-									Specification = detail.MaterialModel,
-									SaleUnit = detail.SaleUnit,
-									ReturnAmount = detail.ReturnAmount,
-									UnitPrice = detail.UnitPrice,
-									TaxRate = detail.TaxRate,
-									Volume = detail.Volumn,
-									ReturnType = detail.ReturnType,
-									OwnerId = model.SalesmanId
-								}
-							)
-							.ToList()
+			dbContext.StaffMaps.UpdateRange(staffs.Select(staff => new StaffMap(staff.Id, staff.Number)));
+			await dbContext.SaveChangesAsync();
+			var transformer = new IdTransformer(FXiaoKeClient, KingdeeClient, dbContext);
+			var fXiaoKeModels = await Task.WhenAll(
+				kingdeeModels.Select(
+					async model => {
+						string ownerId = await transformer.ToFXiaoKeId<Staff>(model.SalesmanId);
+						return new FModels.ReturnOrder {
+							CustomerId = await transformer.ToFXiaoKeId<FModels.Customer>(model.CustomerId),
+							Date = model.Date!.Value,
+							OwnerId = ownerId,
+							Reason = model.ReturnReason,
+							Id = model.Number,
+							BusinessType = model.BusinessType,
+							Details = model.Details.Select(
+									detail => new FModels.ReturnOrderDetail {
+										ProductId = detail.MaterialId,
+										//ProductName = detail.MaterialName,
+										//Specification = detail.MaterialModel,
+										//SaleUnit = detail.SaleUnit,
+										ReturnAmount = detail.ReturnAmount,
+										UnitPrice = detail.UnitPrice,
+										TaxRate = detail.TaxRate,
+										Volume = detail.Volumn,
+										ReturnType = detail.ReturnType,
+										OwnerId = ownerId
+									}
+								)
+								.AsList()
+						};
 					}
+				)
 			);
 			foreach (var model in fXiaoKeModels) {
-				if (model.OwnerId is null) {
-					var _ = FXiaoKeClient.SendTextMessage($"销售退货单缺少负责人，将使用默认负责人{FXiaoKeClient.Operator.Name}");
+				bool useDefaultOwner = model.OwnerId is null;
+				if (useDefaultOwner)
 					model.OwnerId = FXiaoKeClient.Operator.Id;
+				if (!await FXiaoKeClient.Exists(model)) {
+					if (useDefaultOwner) {
+						var _ = FXiaoKeClient.SendTextMessage($"销售退货单缺少负责人，将使用默认负责人{FXiaoKeClient.Operator.Name}");
+					}
+					await FXiaoKeClient.Create(model, true);
 				}
-				await FXiaoKeClient.Create(model);
 			}
+			await dbContext.SaveChangesAsync();
 			await dbContext.DisposeAsync();
 		}
 	}
