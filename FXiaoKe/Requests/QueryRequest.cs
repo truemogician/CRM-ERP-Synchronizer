@@ -16,12 +16,14 @@ namespace FXiaoKe.Requests {
 	[Request("/cgi/crm/custom/v2/data/get", typeof(QueryByConditionResponse))]
 	public class CustomQueryByIdRequest<T> : QueryByIdRequest<T> where T : ModelBase {
 		public CustomQueryByIdRequest() { }
+
 		public CustomQueryByIdRequest(string id) : base(id) { }
 	}
 
 	[Request("/cgi/crm/v2/data/get", typeof(QueryByConditionResponse))]
 	public class QueryByIdRequest<T> : CrmRequest<IdInfo<T>> where T : ModelBase {
 		public QueryByIdRequest() { }
+
 		public QueryByIdRequest(string id) : base(new IdInfo<T>(id)) { }
 	}
 
@@ -38,18 +40,22 @@ namespace FXiaoKe.Requests {
 
 	public class QueryCustomByConditionRequest<T> : QueryCustomByConditionRequest where T : ModelBase {
 		public QueryCustomByConditionRequest() { }
+
 		public QueryCustomByConditionRequest(ConditionInfo<T> data) => Data = data;
+
 		public override ConditionInfo<T> Data { get; }
 	}
 
 	[Request("/cgi/crm/custom/v2/data/query", typeof(QueryByConditionResponse))]
 	public class QueryCustomByConditionRequest : QueryByConditionRequest {
 		public QueryCustomByConditionRequest() { }
+
 		public QueryCustomByConditionRequest(ConditionInfo data) : base(data) { }
 	}
 
 	public class QueryByConditionRequest<T> : QueryByConditionRequest where T : ModelBase {
 		public QueryByConditionRequest() { }
+
 		public QueryByConditionRequest(ConditionInfo<T> data) => Data = data;
 
 		public override ConditionInfo<T> Data { get; }
@@ -58,6 +64,7 @@ namespace FXiaoKe.Requests {
 	[Request("/cgi/crm/v2/data/query", typeof(QueryByConditionResponse))]
 	public class QueryByConditionRequest : CovariantCrmRequest<ConditionInfo> {
 		public QueryByConditionRequest() { }
+
 		public QueryByConditionRequest(ConditionInfo data) : base(data) { }
 	}
 
@@ -216,6 +223,7 @@ namespace FXiaoKe.Requests {
 
 	public class ModelFilter<T> : ModelFilter where T : ModelBase {
 		public ModelFilter(string propertyName) : base(typeof(T), propertyName) { }
+
 		public ModelFilter(string propertyName, QueryOperator @operator, params object[] values) : base(typeof(T), propertyName, @operator, values) { }
 
 		public ModelFilter(ModelFilter source) : this(source.Property.Names.Single(), source.Operator, source.Values) {
@@ -223,8 +231,13 @@ namespace FXiaoKe.Requests {
 				throw new TypeNotMatchException(typeof(T), source.Type);
 		}
 
-		public static ModelFilter Equal(string propertyName, object value) => Equal(typeof(T), propertyName, value);
-		public static ModelFilter In(string propertyName, params object[] values) => In(typeof(T), propertyName, values);
+		public static ModelFilter<T> Equal(string propertyName, object value) => new(propertyName, QueryOperator.Equal, value);
+
+		public static ModelFilter<T> NotEqual(string propertyName, object value) => new(propertyName, QueryOperator.NotEqual, value);
+
+		public static ModelFilter<T> In(string propertyName, params object[] values) => new(propertyName, QueryOperator.In, values);
+
+		public static ModelFilter<T> NotIn(string propertyName, params object[] values) => new(propertyName, QueryOperator.NotIn, values);
 	}
 
 	public class ModelFilter : IType {
@@ -271,7 +284,12 @@ namespace FXiaoKe.Requests {
 		}
 
 		public static ModelFilter Equal(Type type, string propertyName, object value) => new(type, propertyName, QueryOperator.Equal, value);
+
+		public static ModelFilter NotEqual(Type type, string propertyName, object value) => new(type, propertyName, QueryOperator.NotEqual, value);
+
 		public static ModelFilter In(Type type, string propertyName, params object[] values) => new(type, propertyName, QueryOperator.In, values);
+
+		public static ModelFilter NotIn(Type type, string propertyName, params object[] values) => new(type, propertyName, QueryOperator.NotIn, values);
 	}
 
 	public class ModelOrder<T> : ModelOrder where T : ModelBase {
