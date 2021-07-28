@@ -24,26 +24,27 @@ namespace TheFirstFarm.Models.FXiaoKe {
 		///     物料编码
 		/// </summary>
 		[JsonProperty("field_iflIH__c")]
+		[ForeignKey(typeof(Product))]
 		[Required]
 		public string ProductId { get; set; }
 
 		/// <summary>
 		///     物料名称
 		/// </summary>
-		[JsonProperty("field_7sq4o__c")]
-		public string ProductName { get; set; }
+		//[JsonProperty("field_7sq4o__c")]
+		//public string ProductName { get; set; }
 
 		/// <summary>
 		///     规格型号
 		/// </summary>
-		[JsonProperty("field_7L1DK__c")]
-		public string Specification { get; set; }
+		//[JsonProperty("field_7L1DK__c")]
+		//public string Specification { get; set; }
 
 		/// <summary>
 		///     销售单位
 		/// </summary>
-		[JsonProperty("field_t6f4r__c")]
-		public string SaleUnit { get; set; }
+		//[JsonProperty("field_t6f4r__c")]
+		//public string SaleUnit { get; set; }
 
 		/// <summary>
 		///     实退数量
@@ -73,7 +74,7 @@ namespace TheFirstFarm.Models.FXiaoKe {
 		///     退货类型
 		/// </summary>
 		[JsonProperty("field_0v7Wa__c")]
-		[JsonConverter(typeof(MultipleStringEnumConverter), Platform.FXiaoKe)]
+		[JsonConverter(typeof(EnumValueConverter), Platform.FXiaoKe)]
 		[Required]
 		public ReturnType ReturnType { get; set; }
 
@@ -81,7 +82,7 @@ namespace TheFirstFarm.Models.FXiaoKe {
 		///     负责人
 		/// </summary>
 		[JsonProperty("owner")]
-		[JsonConverter(typeof(ArrayWrapperConverter<string>))]
+		[JsonConverter(typeof(ArrayWrapperConverter))]
 		[ForeignKey(typeof(Staff))]
 		[Required]
 		public string OwnerId { get; set; }

@@ -22,25 +22,25 @@ namespace TheFirstFarm.Models.Kingdee {
 		/// <summary>
 		///     物料名称
 		/// </summary>
-		[JsonProperty("FMaterialName")]
-		[JsonInclude]
-		[Required]
-		public string MaterialName { get; set; }
+		//[JsonProperty("FMaterialName")]
+		//[JsonInclude]
+		//[Required]
+		//public string MaterialName { get; set; }
 
 		/// <summary>
 		///     规格型号
 		/// </summary>
-		[JsonProperty("FMaterialModel")]
-		[JsonInclude]
-		public string MaterialModel { get; set; }
+		//[JsonProperty("FMaterialModel")]
+		//[JsonInclude]
+		//public string MaterialModel { get; set; }
 
 		/// <summary>
 		///     销售单位
 		/// </summary>
-		[JsonProperty("FUnitID")]
-		[JsonInclude]
-		[Required]
-		public NumberWrapper SaleUnit { get; set; }
+		//[JsonProperty("FUnitID")]
+		//[JsonInclude]
+		//[Required]
+		//public NumberWrapper SaleUnit { get; set; }
 
 		/// <summary>
 		///     实退数量
@@ -211,7 +211,7 @@ namespace TheFirstFarm.Models.Kingdee {
 
 	public class ReturnTypeWrapper : WrapperBase<ReturnType> {
 		[JsonProperty("FNumber")]
-		[Newtonsoft.Json.JsonConverter(typeof(MultipleStringEnumConverter), Platform.Kingdee)]
+		[Newtonsoft.Json.JsonConverter(typeof(EnumValueConverter), Platform.Kingdee)]
 		public ReturnType Value { get; set; }
 
 		protected override string ValueName => nameof(Value);
