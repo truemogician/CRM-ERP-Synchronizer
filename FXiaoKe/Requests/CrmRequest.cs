@@ -1,8 +1,10 @@
 ﻿using Newtonsoft.Json;
+using Shared.Validation;
 
 namespace FXiaoKe.Requests {
 	public abstract class CrmRequestBase<T> : RequestWithAdvancedAuth {
 		[JsonIgnore]
+		[ValidationIgnore]
 		protected T Content;
 
 		protected CrmRequestBase() { }

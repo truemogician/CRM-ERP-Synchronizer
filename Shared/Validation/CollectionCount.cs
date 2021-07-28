@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Reflection;
 
-namespace Shared.Validators {
+namespace Shared.Validation {
 	[AttributeUsage(AttributeTargets.Property | AttributeTargets.Field | AttributeTargets.Parameter)]
 	public class CollectionCountAttribute : ValidationAttribute {
 		public CollectionCountAttribute(int minCount, int maxCount) {

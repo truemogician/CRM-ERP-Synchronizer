@@ -9,7 +9,7 @@ using System.Text;
 using Newtonsoft.Json;
 using Shared.Exceptions;
 using Shared.Utilities;
-using Shared.Validators;
+using Shared.Validation;
 
 namespace Shared {
 	public class PropertyChain : IList<EnumerablePropertyInfo>, IFormattable {

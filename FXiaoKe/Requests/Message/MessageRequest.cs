@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 using FXiaoKe.Responses;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
-using Shared.Validators;
+using Shared.Validation;
 
 namespace FXiaoKe.Requests.Message {
 	[Request("/cgi/message/send", typeof(BasicResponse))]

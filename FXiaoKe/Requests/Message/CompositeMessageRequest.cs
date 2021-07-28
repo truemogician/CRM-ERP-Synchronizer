@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using Newtonsoft.Json;
 using Shared.Serialization;
-using Shared.Validators;
+using Shared.Validation;
 
 namespace FXiaoKe.Requests.Message {
 	public class CompositeMessageRequest : MessageRequest {

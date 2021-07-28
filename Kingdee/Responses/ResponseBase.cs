@@ -4,6 +4,6 @@ using Shared.Utilities;
 
 namespace Kingdee.Responses {
 	public abstract class ResponseBase {
-		public virtual List<ValidationResult> Validate() => Utility.Validate(this);
+		public virtual List<ValidationResult> Validate(bool recursive = true) => Utility.Validate(this, true);
 	}
 }

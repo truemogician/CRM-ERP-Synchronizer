@@ -1,10 +1,12 @@
 ﻿using System;
 using FXiaoKe.Responses;
 using Shared.Exceptions;
+using Shared.Validation;
 using SystemHttpMethod = System.Net.Http.HttpMethod;
 
 namespace FXiaoKe.Requests {
 	[AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
+	[ValidationIgnore]
 	public class RequestAttribute : Attribute {
 		private readonly Type _responseType;
 

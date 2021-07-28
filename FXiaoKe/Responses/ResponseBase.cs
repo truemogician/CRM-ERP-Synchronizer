@@ -9,6 +9,6 @@ namespace FXiaoKe.Responses {
 		[JsonIgnore]
 		public HttpResponseMessage ResponseMessage { get; set; }
 
-		public virtual List<ValidationResult> Validate() => Utility.Validate(this);
+		public virtual List<ValidationResult> Validate(bool recursive = true) => Utility.Validate(this, recursive);
 	}
 }

@@ -35,6 +35,6 @@ namespace FXiaoKe.Requests {
 			return request;
 		}
 
-		public virtual List<ValidationResult> Validate() => Utility.Validate(this);
+		public virtual List<ValidationResult> Validate(bool recursive = true) => Utility.Validate(this, recursive);
 	}
 }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
 using Newtonsoft.Json;
+using Shared.Validation;
 
 namespace FXiaoKe.Responses {
 	public class BasicResponse : ResponseBase {
@@ -12,6 +13,7 @@ namespace FXiaoKe.Responses {
 		public int RawErrorCode { get; set; }
 
 		[JsonIgnore]
+		[ValidationIgnore]
 		public ErrorCode ErrorCode {
 			get {
 				try {

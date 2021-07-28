@@ -21,6 +21,9 @@ namespace FXiaoKe.Models {
 			}
 		}
 
-		public virtual List<ValidationResult> Validate() => Utility.Validate(this);
+		[JsonIgnore]
+		public MemberInfo KeyInfo => GetType().GetMemberWithAttribute<KeyAttribute>();
+
+		public virtual List<ValidationResult> Validate(bool recursive = true) => Utility.Validate(this, recursive);
 	}
 }
