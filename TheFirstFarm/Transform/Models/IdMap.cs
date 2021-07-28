@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace TheFirstFarm.Models.Database {
+namespace TheFirstFarm.Transform.Models {
 	public abstract class IdMap<TF, TK> {
 		protected IdMap() { }
 

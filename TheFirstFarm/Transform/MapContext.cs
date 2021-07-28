@@ -1,9 +1,10 @@
-﻿using System.Data.Common;
+﻿using System.Collections.Generic;
+using System.Data.Common;
 using System.IO;
 using Microsoft.EntityFrameworkCore;
-using TheFirstFarm.Models.Database;
+using TheFirstFarm.Transform.Models;
 
-namespace TheFirstFarm {
+namespace TheFirstFarm.Transform {
 	public class MapContext : DbContext {
 		public MapContext() {
 			var builder = new DbConnectionStringBuilder();
