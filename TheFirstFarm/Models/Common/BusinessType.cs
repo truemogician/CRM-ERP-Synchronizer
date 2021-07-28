@@ -1,50 +1,56 @@
-﻿using System.Runtime.Serialization;
+﻿// ReSharper disable StringLiteralTypo
 using Newtonsoft.Json;
-using Newtonsoft.Json.Converters;
+using Shared.Serialization;
 
 namespace TheFirstFarm.Models.Common {
-	[JsonConverter(typeof(StringEnumConverter))]
+	[JsonConverter(typeof(EnumValueConverter))]
 	public enum BusinessType {
 		/// <summary>
 		///     分销调拨
 		/// </summary>
-		[EnumMember(Value = "DRPTRANS")]
+		[EnumValue("DRPTRANS")]
 		DrpTrans,
 
 		/// <summary>
 		///     受托加工销售
 		/// </summary>
-		[EnumMember(Value = "COMMISSIONED")]
+		[EnumValue("COMMISSIONED")]
 		Commissioned,
 
 		/// <summary>
 		///     分销购销
 		/// </summary>
-		[EnumMember(Value = "DRPSALE")]
+		[EnumValue("DRPSALE")]
 		DrpSale,
 
 		/// <summary>
 		///     寄售
 		/// </summary>
-		[EnumMember(Value = "CONSIGNMENT")]
+		[EnumValue("CONSIGNMENT")]
 		Consignment,
 
 		/// <summary>
 		///     VMI业务
 		/// </summary>
-		[EnumMember(Value = "VMI")]
+		[EnumValue("VMI")]
 		VMI,
 
 		/// <summary>
 		///     普通销售
 		/// </summary>
-		[EnumMember(Value = "NORMAL")]
+		[EnumValue("NORMAL")]
 		Normal,
 
 		/// <summary>
 		///     其他
 		/// </summary>
-		[EnumMember(Value = "other")]
-		Other
+		[EnumValue("other")]
+		Other,
+
+		/// <summary>
+		///		非法值
+		/// </summary>
+		[EnumDefault]
+		Invalid
 	}
 }

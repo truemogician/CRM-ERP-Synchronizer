@@ -138,12 +138,12 @@ namespace FXiaoKe.Models {
 		public string LeaderId { get; set; }
 	}
 
-	[JsonConverter(typeof(StringEnumConverter))]
+	[JsonConverter(typeof(EnumValueConverter))]
 	public enum Gender : byte {
-		[EnumMember(Value = "M")]
+		[EnumValue("M")]
 		Male,
 
-		[EnumMember(Value = "F")]
+		[EnumValue("F")]
 		Female
 	}
 }

@@ -1,9 +1,8 @@
 ﻿// ReSharper disable StringLiteralTypo
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Runtime.Serialization;
 using FXiaoKe.Models;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Converters;
 using Shared.Serialization;
 
 namespace TheFirstFarm.Models.FXiaoKe {
@@ -104,121 +103,128 @@ namespace TheFirstFarm.Models.FXiaoKe {
 		///     产品图片
 		/// </summary>
 		[JsonProperty("picture_path")]
-		public string Image { get; set; }
+		public List<ImageInfo> Images { get; set; }
 
 		/// <summary>
 		///     负责人
 		/// </summary>
 		[JsonProperty("owner")]
+		[JsonConverter(typeof(ArrayWrapperConverter))]
 		[Required]
 		public string OwnerId { get; set; }
 	}
 
-	[JsonConverter(typeof(StringEnumConverter))]
+	[JsonConverter(typeof(EnumValueConverter))]
 	public enum ShelfLifeUnit : byte {
 		/// <summary>
 		///     日
 		/// </summary>
-		[EnumMember(Value = "2n51d7uyh")]
+		[EnumValue("2n51d7uyh")]
 		Day,
 
 		/// <summary>
 		///     月
 		/// </summary>
-		[EnumMember(Value = "Cg0qbSi63")]
+		[EnumValue("Cg0qbSi63")]
 		Month,
 
 		/// <summary>
 		///     年
 		/// </summary>
-		[EnumMember(Value = "option1")]
+		[EnumValue("option1")]
 		Year,
 
 		/// <summary>
 		///     其他
 		/// </summary>
-		[EnumMember(Value = "other")]
-		Other
+		[EnumValue("other")]
+		Other,
+
+		[EnumDefault]
+		Invalid
 	}
 
-	[JsonConverter(typeof(StringEnumConverter))]
+	[JsonConverter(typeof(EnumValueConverter))]
 	public enum ProductProperty {
 		/// <summary>
 		///     外购
 		/// </summary>
-		[EnumMember(Value = "1")]
+		[EnumValue("1")]
 		OutPurchased,
 
 		/// <summary>
 		///     自制
 		/// </summary>
-		[EnumMember(Value = "2")]
+		[EnumValue("2")]
 		SelfMade,
 
 		/// <summary>
 		///     委外
 		/// </summary>
-		[EnumMember(Value = "3")]
+		[EnumValue("3")]
 		Outsource,
 
 		/// <summary>
 		///     配置
 		/// </summary>
-		[EnumMember(Value = "9")]
+		[EnumValue("9")]
 		Configuration,
 
 		/// <summary>
 		///     资产
 		/// </summary>
-		[EnumMember(Value = "10")]
+		[EnumValue("10")]
 		Asset,
 
 		/// <summary>
 		///     特征
 		/// </summary>
-		[EnumMember(Value = "4")]
+		[EnumValue("4")]
 		Characteristic,
 
 		/// <summary>
 		///     费用
 		/// </summary>
-		[EnumMember(Value = "11")]
+		[EnumValue("11")]
 		Expense,
 
 		/// <summary>
 		///     虚拟
 		/// </summary>
-		[EnumMember(Value = "5")]
+		[EnumValue("5")]
 		Virtual,
 
 		/// <summary>
 		///     服务
 		/// </summary>
-		[EnumMember(Value = "6")]
+		[EnumValue("6")]
 		Service,
 
 		/// <summary>
 		///     一次性
 		/// </summary>
-		[EnumMember(Value = "7")]
+		[EnumValue("7")]
 		Disposable,
 
 		/// <summary>
 		///     模型
 		/// </summary>
-		[EnumMember(Value = "12")]
+		[EnumValue("12")]
 		Model,
 
 		/// <summary>
 		///     产品系列
 		/// </summary>
-		[EnumMember(Value = "13")]
+		[EnumValue("13")]
 		ProductSeries,
 
 		/// <summary>
 		///     其他
 		/// </summary>
-		[EnumMember(Value = "other")]
-		Other
+		[EnumValue("other")]
+		Other,
+
+		[EnumDefault]
+		Invalid
 	}
 }

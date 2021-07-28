@@ -42,7 +42,7 @@ namespace TheFirstFarm.Models.FXiaoKe {
 		/// </summary>
 
 		[JsonProperty("owner")]
-		[JsonConverter(typeof(ArrayWrapperConverter<string>))]
+		[JsonConverter(typeof(ArrayWrapperConverter))]
 		[Required]
 		[ForeignKey(typeof(Staff))]
 		public string OwnerId { get; set; }
@@ -60,7 +60,7 @@ namespace TheFirstFarm.Models.FXiaoKe {
 		/// </summary>
 
 		[JsonProperty("field_U8k97__c")]
-		[JsonConverter(typeof(MultipleStringEnumConverter), OrgSet.CreatorOrgId)]
+		[JsonConverter(typeof(EnumValueConverter), OrgSet.CreatorOrgId)]
 		[Required]
 		public Organization CreatorOrgId { get; set; } = Organization.TheFirstFarm;
 
@@ -69,7 +69,7 @@ namespace TheFirstFarm.Models.FXiaoKe {
 		/// </summary>
 
 		[JsonProperty("field_Qbln5__c")]
-		[JsonConverter(typeof(MultipleStringEnumConverter), OrgSet.CreatorOrgName)]
+		[JsonConverter(typeof(EnumValueConverter), OrgSet.CreatorOrgName)]
 		[Required]
 		public Organization CreatorOrgName { get; set; } = Organization.TheFirstFarm;
 
@@ -78,7 +78,7 @@ namespace TheFirstFarm.Models.FXiaoKe {
 		/// </summary>
 
 		[JsonProperty("field_f267J__c")]
-		[JsonConverter(typeof(MultipleStringEnumConverter), OrgSet.UserOrgId)]
+		[JsonConverter(typeof(EnumValueConverter), OrgSet.UserOrgId)]
 		[Required]
 		public Organization UserOrgId { get; set; } = Organization.TheFirstFarm;
 
@@ -87,7 +87,7 @@ namespace TheFirstFarm.Models.FXiaoKe {
 		/// </summary>
 
 		[JsonProperty("field_7v1a2__c")]
-		[JsonConverter(typeof(MultipleStringEnumConverter), OrgSet.UserOrgName)]
+		[JsonConverter(typeof(EnumValueConverter), OrgSet.UserOrgName)]
 		[Required]
 		public Organization UserOrgName { get; set; } = Organization.TheFirstFarm;
 
@@ -176,37 +176,37 @@ namespace TheFirstFarm.Models.FXiaoKe {
 		/// <summary>
 		///     江苏一号农场科技股份有限公司
 		/// </summary>
-		[MultipleEnumMember("823li72l1", OrgSet.CreatorOrgId)]
-		[MultipleEnumMember("jO1vcYL3g", OrgSet.CreatorOrgName)]
-		[MultipleEnumMember("al70nWs58", OrgSet.UserOrgId)]
-		[MultipleEnumMember("PsdFo1W03", OrgSet.UserOrgName)]
+		[EnumValue("823li72l1", OrgSet.CreatorOrgId)]
+		[EnumValue("jO1vcYL3g", OrgSet.CreatorOrgName)]
+		[EnumValue("al70nWs58", OrgSet.UserOrgId)]
+		[EnumValue("PsdFo1W03", OrgSet.UserOrgName)]
 		TheFirstFarm,
 
 		/// <summary>
 		///     江苏海威科网络科技有限公司
 		/// </summary>
-		[MultipleEnumMember("0461V10u4", OrgSet.CreatorOrgId)]
-		[MultipleEnumMember("g5ySNf9e5", OrgSet.CreatorOrgName)]
-		[MultipleEnumMember("x52p2dk70", OrgSet.UserOrgId)]
-		[MultipleEnumMember("c52sR5sy9", OrgSet.UserOrgName)]
+		[EnumValue("0461V10u4", OrgSet.CreatorOrgId)]
+		[EnumValue("g5ySNf9e5", OrgSet.CreatorOrgName)]
+		[EnumValue("x52p2dk70", OrgSet.UserOrgId)]
+		[EnumValue("c52sR5sy9", OrgSet.UserOrgName)]
 		Hiwico,
 
 		/// <summary>
 		///     旅游酒店BD
 		/// </summary>
-		[MultipleEnumMember("option1", OrgSet.CreatorOrgId)]
-		[MultipleEnumMember("option1", OrgSet.CreatorOrgName)]
-		[MultipleEnumMember("option1", OrgSet.UserOrgId)]
-		[MultipleEnumMember("option1", OrgSet.UserOrgName)]
+		[EnumValue("option1", OrgSet.CreatorOrgId)]
+		[EnumValue("option1", OrgSet.CreatorOrgName)]
+		[EnumValue("option1", OrgSet.UserOrgId)]
+		[EnumValue("option1", OrgSet.UserOrgName)]
 		TourHotelBD,
 
 		/// <summary>
 		///     其他
 		/// </summary>
-		[MultipleEnumMember("other", OrgSet.CreatorOrgId)]
-		[MultipleEnumMember("other", OrgSet.CreatorOrgName)]
-		[MultipleEnumMember("other", OrgSet.UserOrgId)]
-		[MultipleEnumMember("other", OrgSet.UserOrgName)]
+		[EnumValue("other", OrgSet.CreatorOrgId)]
+		[EnumValue("other", OrgSet.CreatorOrgName)]
+		[EnumValue("other", OrgSet.UserOrgId)]
+		[EnumValue("other", OrgSet.UserOrgName)]
 		Other
 	}
 
