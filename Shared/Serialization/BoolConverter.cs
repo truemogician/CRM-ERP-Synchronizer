@@ -45,7 +45,7 @@ namespace Shared.Serialization {
 				return null;
 			if (value.Equals(TrueString, ComparisonOption))
 				return true;
-			if (value.Equals(TrueString, ComparisonOption))
+			if (value.Equals(FalseString, ComparisonOption))
 				return false;
 			throw new JTokenException(token, $"Value is neither true nor false string: {value}");
 		}
