@@ -163,20 +163,32 @@ namespace System.Reflection {
 			return members.SingleOrDefault(member => memberTypes.HasFlag(member.MemberType));
 		}
 
-		public static PropertyInfo GetMostDerivedProperty(this Type type, string name) {
-			var properties = type.GetProperties().Where(p => p.Name == name).AsArray();
-			if (properties.Length <= 1)
-				return properties.Length == 0 ? null : properties[0];
-			return properties.Sort(p => p.DeclaringType, new TypeInheritanceComparer()).FirstOrDefault();
+		private static MemberInfo GetMostDerivedMember(Type type, string name, Func<Type, IEnumerable<MemberInfo>> getMembers) {
+			var members = getMembers(type).Where(p => p.Name == name).ToArray();
+			if (members.Length <= 1)
+				return members.Length == 0 ? null : members[0];
+			return members.Sort(p => p.DeclaringType, new TypeInheritanceComparer()).FirstOrDefault();
 		}
 
-		public static PropertyInfo[] GetMostDerivedProperties(this Type type) {
+		private static MemberInfo[] GetMostDerivedMembers(Type type, Func<Type, IEnumerable<MemberInfo>> getMembers) {
 			var comparer = new TypeInheritanceComparer();
-			return type.GetProperties()
+			return getMembers(type)
 				.GroupBy(p => p.Name)
 				.Select(group => group.Sort(p => p.DeclaringType, comparer).FirstOrDefault())
-				.AsArray();
+				.ToArray();
 		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static MemberInfo GetMostDerivedMember(this Type type, string name) => GetMostDerivedMember(type, name, t => t.GetMembers());
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static MemberInfo[] GetMostDerivedMembers(this Type type) => GetMostDerivedMembers(type, t => t.GetMembers());
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static PropertyInfo GetMostDerivedProperty(this Type type, string name) => GetMostDerivedMember(type, name, t => t.GetProperties()) as PropertyInfo;
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static PropertyInfo[] GetMostDerivedProperties(this Type type) => GetMostDerivedMembers(type, t => t.GetProperties()) as PropertyInfo[];
 
 		public static TResult[] GetAttributeValues<TAttribute, TResult>(this Type type, Func<TAttribute, TResult> selector) where TAttribute : Attribute {
 			var properties = type.GetProperties();
