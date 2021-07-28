@@ -4,7 +4,7 @@ using System.Net;
 
 namespace Kingdee {
 	internal class HttpClient {
-		public string Send(ApiRequest request) {
+		public static string Send(ApiRequest request) {
 			using (var requestStream = request.HttpRequest.GetRequestStream()) {
 				byte[] bytes = request.Encoder.GetBytes(request.ToJsonString());
 				requestStream.Write(bytes, 0, bytes.Length);
@@ -18,10 +18,10 @@ namespace Kingdee {
 		public void SendAsync(
 			ApiRequest request,
 			Action<AsyncResult<string>> callback,
-			Action aftersent = null
+			Action afterSent = null
 		) {
 			lock (this) {
-				var requestState = new RequestState(request, callback, aftersent);
+				var requestState = new RequestState(request, callback, afterSent);
 				request.HttpRequest.BeginGetRequestStream(BeginGetRequestCallback, requestState);
 			}
 		}
@@ -31,7 +31,7 @@ namespace Kingdee {
 			SafeDo(
 				request,
 				() => {
-					request.EndSendRequest(ar);
+					request!.EndSendRequest(ar);
 					request.SentCallback?.Invoke();
 					request.Request.HttpRequest.BeginGetResponse(GetResponseCallback, ar.AsyncState);
 				}
@@ -43,8 +43,8 @@ namespace Kingdee {
 			SafeDo(
 				request,
 				() => {
-					var callback = request.Callback;
-					using var response = (HttpWebResponse)((RequestState)ar.AsyncState).Request.HttpRequest.EndGetResponse(ar);
+					var callback = request!.Callback;
+					using var response = (HttpWebResponse)((RequestState)ar.AsyncState)!.Request.HttpRequest.EndGetResponse(ar);
 					if (response.StatusCode == HttpStatusCode.OK) {
 						using var responseStream = response.GetResponseStream();
 						using var streamReader = new StreamReader(responseStream!, request.Request.Encoder);
@@ -63,12 +63,12 @@ namespace Kingdee {
 			if (!responseText.StartsWith("response_error:"))
 				return responseText;
 			string str = responseText.TrimStart("response_error:".ToCharArray());
-			if (str == null || str == "")
+			if (string.IsNullOrEmpty(str))
 				throw new ServiceException("返回的异常信息为空");
 			throw new ServiceException(str.Replace("\"", ""));
 		}
 
-		private void SafeDo(RequestState reqs, Action action) {
+		private static void SafeDo(RequestState reqs, Action action) {
 			try {
 				action();
 			}
@@ -84,11 +84,11 @@ namespace Kingdee {
 			public RequestState(
 				ApiRequest request,
 				Action<AsyncResult<string>> callback,
-				Action aftersent
+				Action afterSent
 			) {
 				Request = request;
 				Callback = callback;
-				SentCallback = aftersent;
+				SentCallback = afterSent;
 			}
 
 			public Action SentCallback { get; }

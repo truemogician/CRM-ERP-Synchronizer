@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Net;
 using System.Text;
+using System.Threading.Tasks;
 using Kingdee.Forms;
 using Kingdee.Requests;
 using Kingdee.Responses;
@@ -112,6 +113,19 @@ namespace Kingdee {
 				reportInterval
 			);
 
+		public Task<TForm> ExecuteAsync<TResponse, TForm>(
+			string serviceName,
+			RequestBase request,
+			FailCallbackHandler onFail = null,
+			int timeout = 0
+		) where TForm : FormBase
+			=> ExecuteAsync<TForm>(
+				serviceName,
+				new object[] {FormMeta<TForm>.Name, JsonConvert.SerializeObject(request)},
+				onFail,
+				timeout
+			);
+
 		public ApiRequest ExecuteAsync<T>(
 			string serviceName,
 			Action<T> onSucceed,
@@ -121,53 +135,65 @@ namespace Kingdee {
 			int timeout = 0,
 			int reportInterval = 5
 		) {
-			return ExecuteAsyncInternal(
-				serviceName,
-				(Action<AsyncResult<T>>)(ret => {
+			var asyncRequest = CreateAsyncRequest(serviceName, parameters);
+			asyncRequest.HttpRequest.Timeout = timeout * 1000;
+			CallAsync<T>(
+				asyncRequest,
+				ret => {
 					if (ret.Successful)
 						onSucceed(ret.ReturnValue);
 					else {
-						var reallyFailCallback = GetReallyFailCallback(onFail);
-						if (reallyFailCallback != null)
-							reallyFailCallback(ret.Exception);
+						var failCallback = OnFailOrDefault(onFail);
+						if (failCallback != null)
+							failCallback(ret.Exception);
 						else
 							ret.ThrowEx();
 					}
-				}),
-				parameters,
+				},
 				onProgressChange,
 				timeout,
 				reportInterval
 			);
-		}
-
-		private ApiRequest ExecuteAsyncInternal<T>(
-			string serviceName,
-			Action<AsyncResult<T>> callback,
-			object[] parameters = null,
-			ProgressChangedHandler onProgressChange = null,
-			int timeout = 0,
-			int reportInterval = 5
-		) {
-			var asyncRequest = CreateAsyncRequest(serviceName, parameters);
-			asyncRequest.HttpRequest.Timeout = timeout * 1000;
-			CallAsync(asyncRequest, callback, onProgressChange, timeout, reportInterval);
 			return asyncRequest;
 		}
 
-		public string Call(ApiRequest request, FailCallbackHandler onFail = null) => SafeDo(() => _httpClient.Send(request), GetReallyFailCallback(onFail));
+		public Task<T> ExecuteAsync<T>(
+			string serviceName,
+			object[] parameters = null,
+			FailCallbackHandler onFail = null,
+			int timeout = 0
+		) {
+			var asyncRequest = CreateAsyncRequest(serviceName, parameters);
+			asyncRequest.HttpRequest.Timeout = timeout * 1000;
+			return CallAsync<T>(asyncRequest, onFail);
+		}
+
+		public string Call(ApiRequest request, FailCallbackHandler onFail = null) => SafeDo(() => HttpClient.Send(request), OnFailOrDefault(onFail));
 
 		public T Call<T>(ApiRequest request, FailCallbackHandler onFail = null)
 			=> SafeDo(
 				() => {
-					string json = _httpClient.Send(request);
+					string json = HttpClient.Send(request);
 					return string.IsNullOrEmpty(json)
 						? default
 						: typeof(T) == typeof(string)
 							? (dynamic)json
 							: JsonConvert.DeserializeObject<T>(json);
 				},
-				GetReallyFailCallback(onFail)
+				OnFailOrDefault(onFail)
+			);
+
+		public Task<T> CallAsync<T>(ApiRequest request, FailCallbackHandler onFail = null)
+			=> SafeDoAsync(
+				() => {
+					var taskSource = new TaskCompletionSource<T>();
+					_httpClient.SendAsync(
+						request,
+						result => taskSource.SetResult(typeof(T) == typeof(string) ? (dynamic)result.ReturnValue : JsonConvert.DeserializeObject<T>(result.ReturnValue))
+					);
+					return taskSource.Task;
+				},
+				onFail
 			);
 
 		public void CallAsync<T>(
@@ -196,7 +222,7 @@ namespace Kingdee {
 					}
 					catch (WebException ex) {
 						if (ex.Status == WebExceptionStatus.RequestCanceled)
-							throw new TimeoutException(string.Format("请求超时{0}秒，请求被终止", timeout));
+							throw new TimeoutException($"请求超时{timeout}秒，请求被终止");
 					}
 				},
 				request,
@@ -204,28 +230,30 @@ namespace Kingdee {
 			).Invoke();
 		}
 
-		private FailCallbackHandler GetReallyFailCallback(
-			FailCallbackHandler onFail
-		) {
-			if (onFail != null)
-				return onFail;
-			return _defaultFailCallback;
-		}
+		private FailCallbackHandler OnFailOrDefault(FailCallbackHandler onFail) => onFail ?? _defaultFailCallback;
 
 		private static T SafeDo<T>(Func<T> action, FailCallbackHandler onFail) {
 			try {
 				return action();
 			}
 			catch (ServiceException ex) {
-				var flag = false;
-				if (onFail != null) {
-					onFail(ex);
-					flag = ex.Handled;
-				}
-				if (!flag)
+				onFail?.Invoke(ex);
+				if (onFail is null || !ex.Handled)
 					throw;
+				return default;
 			}
-			return default;
+		}
+
+		private static async Task<T> SafeDoAsync<T>(Func<Task<T>> action, FailCallbackHandler onFail) {
+			try {
+				return await action();
+			}
+			catch (ServiceException ex) {
+				onFail?.Invoke(ex);
+				if (onFail is null || !ex.Handled)
+					throw;
+				return default;
+			}
 		}
 
 		public string ValidateLogin2(

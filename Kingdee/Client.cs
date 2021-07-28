@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using System.Threading.Tasks;
 using Kingdee.Forms;
 using Kingdee.Requests;
 using Kingdee.Responses;
@@ -76,6 +77,24 @@ namespace Kingdee {
 			);
 		}
 
+		private OneOf<BasicResponse, List<T>> DeserializeQueryResponse<T>(IEnumerable<Field> fields, string json) where T : FormBase {
+			var token = JToken.Parse(json);
+			if (token.Type == JTokenType.Object)
+				return token.Value<BasicResponse>();
+			var contents = token is JArray array
+				? array.Values<JArray>().Select(arr => arr.Values<JValue>().Select(v => v.Value))
+				: throw new JTokenTypeException(token, JTokenType.Array);
+			var builder = new StringBuilder();
+			var forms = contents.Select(
+				data => {
+					builder.Clear();
+					FormatFields(fields.AsList(), data.AsArray(), new JsonTextWriter(new StringWriter(builder)));
+					return JsonConvert.DeserializeObject<T>(builder.ToString());
+				}
+			);
+			return MergeForms(forms).AsType<T>().AsList();
+		}
+
 		#region Sync Requests
 		public List<DataCenter> GetDataCenters() => Execute<List<DataCenter>>("Kingdee.BOS.ServiceFacade.ServicesStub.Account.AccountService.GetDataCenterList", Array.Empty<object>());
 
@@ -91,21 +110,7 @@ namespace Kingdee {
 				"Kingdee.BOS.WebApi.ServicesStub.DynamicFormService.ExecuteBillQuery",
 				JsonConvert.SerializeObject(request)
 			);
-			var token = JToken.Parse(json);
-			if (token.Type == JTokenType.Object)
-				return token.Value<BasicResponse>();
-			var contents = token is JArray array
-				? array.Values<JArray>().Select(arr => arr.Values<JValue>().Select(v => v.Value))
-				: throw new JTokenTypeException(token, JTokenType.Array);
-			var builder = new StringBuilder();
-			var forms = contents.Select(
-				data => {
-					builder.Clear();
-					FormatFields(request.Fields.AsList(), data.AsArray(), new JsonTextWriter(new StringWriter(builder)));
-					return JsonConvert.DeserializeObject<T>(builder.ToString());
-				}
-			);
-			return MergeForms(forms).AsType<T>().AsList();
+			return DeserializeQueryResponse<T>(request.Fields, json);
 		}
 
 		/// <summary>
@@ -208,21 +213,21 @@ namespace Kingdee {
 		) where T : FormBase {
 			ExecuteAsync<string>(
 				"Kingdee.BOS.WebApi.ServicesStub.DynamicFormService.ExecuteBillQuery",
-				json => {
-					var token = JToken.Parse(json);
-					if (token.Type == JTokenType.Object)
-						onSucceed(token.Value<BasicResponse>());
-					else {
-						var contents = token.Value<List<List<object>>>();
-						onSucceed(contents?.Select(data => FormMeta<T>.CreateFromQueryFields(request.Fields, data)).ToList());
-					}
-				},
+				json => onSucceed(DeserializeQueryResponse<T>(request.Fields, json)),
 				new object[] {JsonConvert.SerializeObject(request)},
 				onProgressChange,
 				onFail,
 				10,
 				reportInterval
 			);
+		}
+
+		public async Task<OneOf<BasicResponse, List<T>>> QueryAsync<T>(QueryRequest<T> request) where T : FormBase {
+			var json = await ExecuteAsync<string>(
+				"Kingdee.BOS.WebApi.ServicesStub.DynamicFormService.ExecuteBillQuery",
+				new object[] {JsonConvert.SerializeObject(request)}
+			);
+			return DeserializeQueryResponse<T>(request.Fields, json);
 		}
 
 		public void SaveAsync<T>(
@@ -242,6 +247,12 @@ namespace Kingdee {
 				reportInterval
 			);
 		}
+
+		public Task<T> SaveAsync<T>(QueryRequest<T> request) where T : FormBase
+			=> ExecuteAsync<SaveResponse, T>(
+				"Kingdee.BOS.WebApi.ServicesStub.DynamicFormService.Save",
+				request
+			);
 
 		public void BatchSaveAsync<T>(
 			BatchSaveRequest<T> request,
