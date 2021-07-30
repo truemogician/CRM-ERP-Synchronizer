@@ -25,30 +25,34 @@ namespace FXiaoKe.Utilities {
 			return attr!.Custom;
 		}
 
-		public static MemberInfo GetKey(this Type type, bool verify = true) {
+		#nullable enable
+		public static MemberInfo? GetKey(this Type type, bool verify = true) {
 			if (verify)
 				Utility.VerifyInheritance(type, typeof(ModelBase));
-			MemberInfo result = null;
-			var members = (type.GetProperties() as MemberInfo[]).Concat(type.GetFields()).ToList();
-			foreach (var member in members.Where(member => member.GetCustomAttribute<KeyAttribute>() is { }))
-				if (result is null)
-					result = member;
-				else
-					throw new DuplicateKeyException(type);
+			var members = type.GetMembers(MemberTypes.Property | MemberTypes.Field);
+			var result = members.SingleOrDefault(member => member.IsDefined(typeof(KeyAttribute)));
 			if (result is not null)
 				return result;
 			result = members.FirstOrDefault(member => member.Name.Equals("Id", StringComparison.OrdinalIgnoreCase));
 			if (result is not null)
 				return result;
 			result = members.FirstOrDefault(member => member.Name.Equals($"{type.Name}Id", StringComparison.OrdinalIgnoreCase));
-			return result ?? throw new MissingKeyException(type);
+			return result;
 		}
+		#nullable disable
 
-		public static List<MemberInfo> GetSubModelInfos(this Type type, bool verify = true) {
-			if (verify)
-				Utility.VerifyInheritance(type, typeof(ModelBase));
+		public static List<MemberInfo> GetSubModelMembers(this Type type, bool? eager = null, bool? cascade = null) {
+			Utility.VerifyInheritance(type, typeof(CrmModelBase));
 			var members = type.GetMembers(MemberTypes.Field | MemberTypes.Property);
-			return members.Where(member => member.IsDefined(typeof(SubModelAttribute))).AsList();
+			return members.Where(
+					member => {
+						var attr = member.GetCustomAttribute<SubModelAttribute>();
+						return attr is not null &&
+							(!eager.HasValue || eager.Value == attr.Eager) &&
+							(!cascade.HasValue || cascade.Value == attr.Cascade);
+					}
+				)
+				.AsList();
 		}
 	}
 }
