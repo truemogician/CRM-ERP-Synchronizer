@@ -59,7 +59,7 @@ namespace Shared.Serialization {
 		}
 
 		public override void WriteJson(JsonWriter writer, Enum value, JsonSerializer serializer) {
-			if (value == null) {
+			if (value == null || value.GetEnumMember().IsDefined(typeof(EnumDefaultAttribute))) {
 				writer.WriteNull();
 				return;
 			}
