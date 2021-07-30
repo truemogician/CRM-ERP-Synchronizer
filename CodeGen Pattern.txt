@@ -1,18 +1,4 @@
-纷享销客请求：^(?<name>\S+)\t(?<type>\w+)\t(?<required>\S+)\t(?<desc>.*)	\t\t/// <summary>\r\n\t\t/// $<desc>\r\n\t\t/// </summary>\r\n\t\t[JsonProperty("$<name>")]\r\n\t\t[Required]//$<required>\r\n\t\tpublic $<type> $<name> { get; set; }\r\n
-
-纷享销客响应：^data\.(?<name>\w+)\t(?<required>\S+)\t(?<desc>.*)	\t\t/// <summary>\r\n\t\t/// $<desc>\r\n\t\t/// </summary>\r\n\t\t[JsonProperty("$<name>")]\r\n\t\t[Required]//$<required>\r\n\t\tpublic T $<name> { get; set; }\r\n
-
-纷享销客对象：^(?<name>\S+)\s+\S+\s+(?<prop>\w+)\s+(?:\S+\s*)??(?<required>\S+)$	\t\t/// <summary>\r\n\t\t/// $<name>\r\n\t\t/// </summary>\r\n\t\t[JsonProperty("$<prop>")]\r\n\t\t[Required]//$<required>\r\n\t\tpublic string $<name> { get; set; }\r\n
-
-纷享销客枚举：
-function generateEnum(name, options){
-	let result = `public enum ${name} {\r\n`;
-	options.forEach(option => 
-		result+=`\t\t/// <summary>\r\n\t\t/// ${option.label}\r\n\t\t/// </summary>\r\n\t\t[EnumMember(Value = "${option.value}")]\r\n\t\t${option.label},\r\n\r\n`
-	);
-	result+=`}`
-	console.log(result);
-}
+表格： ^(?<desc>\S+)\s+(?<type>\S+)\s+(?<name>\S+)\s+(?<required>\S+)?^(?<desc>\S+)\s+(?<type>\S+)\s+(?<name>\S+)\s+(?<required>\S+)? \t\t/// <summary>\n\t\t/// \t$<desc>\n\t\t/// </summary>\n\t\t[JsonProperty("$<name>")]\n\t\t[Required]//$<required>\n\t\tpublic string $<name> { get; set;}\n
 
 金蝶枚举：
 function generateEnum(name, options){
