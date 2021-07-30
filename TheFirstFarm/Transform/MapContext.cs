@@ -1,8 +1,14 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Data.Common;
 using System.IO;
+using System.Linq;
+using System.Reflection;
+using FXiaoKe.Models;
+using Kingdee.Forms;
 using Microsoft.EntityFrameworkCore;
-using TheFirstFarm.Transform.Models;
+using Shared.Exceptions;
+using TheFirstFarm.Transform.Entities;
 
 namespace TheFirstFarm.Transform {
 	public class MapContext : DbContext {
@@ -18,6 +24,28 @@ namespace TheFirstFarm.Transform {
 		public DbSet<CustomerMap> CustomerMaps { get; set; }
 
 		public DbSet<StaffMap> StaffMaps { get; set; }
+
+		public DbSet<ProductMap> ProductMaps { get; set; }
+
+		public DbSet<ReturnOrderMap> ReturnOrderMap { get; set; }
+
+		public static IEnumerable<PropertyInfo> MapInfos {
+			get {
+				var props = typeof(MapContext).GetProperties();
+				return props.Where(p => p.PropertyType.IsGenericType && p.PropertyType.GetGenericTypeDefinition() == typeof(DbSet<>));
+			}
+		}
+
+		public static IEnumerable<Type> MapTypes => MapInfos.Select(p => p.PropertyType.GetGenericArguments()[0]);
+
+		#nullable enable
+		public static Type? GetMapType(Type modelType) {
+			bool isFModel = modelType.IsAssignableTo(typeof(ModelBase));
+			if (!modelType.IsAssignableTo(typeof(FormBase)))
+				throw new TypeException(modelType, $"{modelType.Name} neither derives from {nameof(ModelBase)} nor {nameof(FormBase)}");
+			return MapTypes.SingleOrDefault(type => type.GetCustomAttribute<MapAttribute>() is { } attr && (isFModel ? attr.FModel == modelType : attr.KModel == modelType));
+		}
+		#nullable disable
 
 		protected override void OnConfiguring(DbContextOptionsBuilder options) => options.UseSqlite(ConnectionString);
 	}
