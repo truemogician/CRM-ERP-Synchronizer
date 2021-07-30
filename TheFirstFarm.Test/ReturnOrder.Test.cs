@@ -13,7 +13,7 @@ using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Newtonsoft.Json;
 using NUnit.Framework;
 using TheFirstFarm.Transform;
-using TheFirstFarm.Transform.Models;
+using TheFirstFarm.Transform.Entities;
 using FModels = TheFirstFarm.Models.FXiaoKe;
 using KModels = TheFirstFarm.Models.Kingdee;
 using FRequests = FXiaoKe.Requests;
@@ -41,7 +41,7 @@ namespace TheFirstFarm.Test {
 		[TestCaseGeneric(GenericArgument = typeof(FModels.ReturnOrder))]
 		[TestCaseGeneric(GenericArgument = typeof(FModels.Customer))]
 		[TestCaseGeneric(GenericArgument = typeof(FModels.Product))]
-		public async Task FXiaoKeQueryTest<T>(params FRequests.ModelFilter<T>[] filters) where T : ModelBase {
+		public async Task FXiaoKeQueryTest<T>(params FRequests.ModelFilter<T>[] filters) where T : CrmModelBase {
 			FXiaoKeClient.Operator = await FXiaoKeClient.GetStaffByPhoneNumber("18118359138");
 			var result = await FXiaoKeClient.QueryByCondition(filters);
 			Console.WriteLine($@"{result?.Count} {typeof(T).Name}s found");
@@ -53,7 +53,7 @@ namespace TheFirstFarm.Test {
 			var customers = await FXiaoKeClient.GetAll<FModels.Customer>();
 			await using var dbContext = new MapContext();
 			foreach (var customer in customers)
-				dbContext.CustomerMaps.Update(new CustomerMap(customer.Id, customer.KingdeeId));
+				dbContext.CustomerMaps.Update(new CustomerMap(customer.DataId, customer.Number, customer.KingdeeId));
 			Console.WriteLine($@"{await dbContext.SaveChangesAsync()} changes saved");
 		}
 
@@ -99,32 +99,31 @@ namespace TheFirstFarm.Test {
 			var dbContext = new MapContext();
 			dbContext.StaffMaps.UpdateRange(staffs.Select(staff => new StaffMap(staff.Id, staff.Number)));
 			await dbContext.SaveChangesAsync();
-			var transformer = new IdTransformer(FXiaoKeClient, KingdeeClient, dbContext);
+			var transformer = new MapManager(FXiaoKeClient, KingdeeClient, dbContext);
 			var fXiaoKeModels = await Task.WhenAll(
 				kingdeeModels.Select(
 					async model => {
-						string ownerId = await transformer.ToFXiaoKeId<Staff>(model.SalesmanId);
+						string ownerId = transformer.GetByMapProperty<StaffMap>(nameof(StaffMap.Number), model.SalesmanNumber.Number).FXiaoKeId;
 						return new FModels.ReturnOrder {
-							CustomerId = await transformer.ToFXiaoKeId<FModels.Customer>(model.CustomerId),
+							CustomerId = (await transformer.FromMapPropertyF<CustomerMap>(nameof(CustomerMap.Number), model.CustomerNumber)).FXiaoKeId,
 							Date = model.Date!.Value,
 							OwnerId = ownerId,
 							Reason = model.ReturnReason,
-							Id = model.Number,
+							Number = model.Number,
 							BusinessType = model.BusinessType,
-							Details = model.Details.Select(
-									detail => new FModels.ReturnOrderDetail {
-										ProductId = detail.MaterialId,
-										//ProductName = detail.MaterialName,
-										//Specification = detail.MaterialModel,
-										//SaleUnit = detail.SaleUnit,
-										ReturnAmount = detail.ReturnAmount,
-										UnitPrice = detail.UnitPrice,
-										TaxRate = detail.TaxRate,
-										Volume = detail.Volumn,
-										ReturnType = detail.ReturnType,
-										OwnerId = ownerId
-									}
-								)
+							Details = (await Task.WhenAll(
+									model.Details.Select(
+										async detail => new FModels.ReturnOrderDetail {
+											ProductId = (await transformer.FromMapPropertyK<ProductMap>(nameof(ProductMap.Number), detail.MaterialNumber.Number)).FXiaoKeId,
+											ReturnAmount = detail.ReturnAmount,
+											UnitPrice = detail.UnitPrice,
+											TaxRate = detail.TaxRate,
+											Volume = detail.Money,
+											ReturnType = detail.ReturnType,
+											OwnerId = ownerId
+										}
+									)
+								))
 								.AsList()
 						};
 					}
@@ -134,7 +133,7 @@ namespace TheFirstFarm.Test {
 				bool useDefaultOwner = model.OwnerId is null;
 				if (useDefaultOwner)
 					model.OwnerId = FXiaoKeClient.Operator.Id;
-				if (!await FXiaoKeClient.Exists(model)) {
+				if (!await transformer.HasFXiaoKeId<ReturnOrderMap>(model.DataId)) {
 					if (useDefaultOwner) {
 						var _ = FXiaoKeClient.SendTextMessage($"销售退货单缺少负责人，将使用默认负责人{FXiaoKeClient.Operator.Name}");
 					}
