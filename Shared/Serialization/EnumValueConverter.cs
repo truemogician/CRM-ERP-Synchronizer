@@ -45,15 +45,9 @@ namespace Shared.Serialization {
 						//Default attribute
 						if (attrs.Count == 0)
 							attrs.Add(field);
+						//Verification
+						attrs.AsArray().MatchIndex(Index, value);
 
-						if (attrs.Count > 1) {
-							if (attrs.Any(attr => attr.Index is null))
-								throw new TypeException(value, $"{nameof(EnumValueAttribute.Index)} must be specified when attaching multiple {nameof(EnumValueAttribute)}");
-							if (!attrs.Unique(attr => attr.Index))
-								throw new TypeException(value, $"{nameof(EnumValueAttribute.Index)} must be unique when attaching multiple {nameof(EnumValueAttribute)}");
-						}
-						if (Index is null && (attrs.Count > 1 || attrs[0].Index is not null))
-							throw new ArgumentNullException(nameof(Index), $"{nameof(Index)} must be specified before converting enum with multi-value members");
 						_attributes.Add(field, attrs);
 						string stringValue = Index is null ? attrs[0].Value : attrs.SingleOrDefault(attr => Index.Equals(attr.Index))?.Value;
 						if (stringValue is not null && _stringValue.ContainsValue(stringValue))

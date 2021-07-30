@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Runtime.CompilerServices;
 using Shared.Exceptions;
+using Shared.Serialization;
 
 // ReSharper disable once CheckNamespace
 namespace System.Reflection {
@@ -204,7 +205,27 @@ namespace System.Reflection {
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static BindingFlags GetBindingFlags(this MemberInfo member) => (BindingFlags)member.GetType().GetProperty("BindingFlags", BindingFlags.Instance | BindingFlags.NonPublic)!.GetValue(member)!;
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static FieldInfo GetEnumMember(this Enum enumValue) => enumValue.GetType().GetField(enumValue.ToString());
+
+		#nullable enable
+		internal static EnumValueAttribute? MatchIndex(this EnumValueAttribute[] attrs, object? index, Type? enumType = null) {
+			switch (attrs.Length) {
+				case 0:                                              return null;
+				case > 1 when attrs.Any(attr => attr.Index is null): throw new TypeException(enumType, $"{nameof(EnumValueAttribute.Index)} must be specified when attaching multiple {nameof(EnumValueAttribute)}");
+				case > 1 when !attrs.Unique(attr => attr.Index):     throw new TypeException(enumType, $"{nameof(EnumValueAttribute.Index)} must be unique when attaching multiple {nameof(EnumValueAttribute)}");
+			}
+			if (index is null && (attrs.Length > 1 || attrs[0].Index is not null))
+				throw new ArgumentNullException(nameof(Index), $"{nameof(Index)} must be specified before converting enum with multi-value members");
+			return index is null ? attrs[0] : attrs.FirstOrDefault(attr => attr.Index.Equals(index));
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static EnumValueAttribute? GetEnumValue(this FieldInfo enumField, object? index = null) => enumField.GetCustomAttributes<EnumValueAttribute>().AsArray().MatchIndex(index, enumField.DeclaringType);
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static string? GetValue(this Enum enumObj, object? index = null) => enumObj.GetEnumMember().GetEnumValue(index)?.Value;
+		#nullable disable
 	}
 
 	public class TypeInheritanceComparer : IComparer<Type> {
