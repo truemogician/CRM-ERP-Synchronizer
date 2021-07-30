@@ -45,6 +45,6 @@ namespace Kingdee.Requests {
 		/// </summary>
 		[JsonProperty("NetworkCtrl")]
 		[JsonConverter(typeof(BoolConverter))]
-		public bool? NetworkControl { get; set; }
+		public bool NetworkControl { get; set; }
 	}
 }

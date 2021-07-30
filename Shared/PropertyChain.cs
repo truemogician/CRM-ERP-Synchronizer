@@ -201,6 +201,8 @@ namespace Shared {
 		}
 
 		protected bool Equals(PropertyChain other) => Equals(NameChain, other.NameChain) && StartingType == other.StartingType;
+
+		public static implicit operator PropertyChain(PropertyInfo prop) => new(prop.Name) {StartingType = prop.DeclaringType};
 	}
 
 	public class PropertyChain<T> : PropertyChain {

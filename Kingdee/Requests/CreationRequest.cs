@@ -27,7 +27,7 @@ namespace Kingdee.Requests {
 		/// </summary>
 		[JsonProperty("IsDeleteEntry")]
 		[JsonConverter(typeof(BoolConverter))]
-		public bool? DeleteExistingEntry { get; set; } = true;
+		public bool DeleteExistingEntry { get; set; } = true;
 
 		/// <summary>
 		///     表单所在的子系统内码
@@ -40,21 +40,21 @@ namespace Kingdee.Requests {
 		/// </summary>
 		[JsonProperty("IsEntryBatchFill")]
 		[JsonConverter(typeof(BoolConverter))]
-		public bool? BatchFill { get; set; } = true;
+		public bool BatchFill { get; set; } = true;
 
 		/// <summary>
 		///     是否验证标志，默认为true
 		/// </summary>
 		[JsonProperty("ValidateFlag")]
 		[JsonConverter(typeof(BoolConverter))]
-		public bool? ValidateFlags { get; set; } = true;
+		public bool ValidateFlags { get; set; } = true;
 
 		/// <summary>
 		///     是否用编码搜索基础资料，默认为true
 		/// </summary>
 		[JsonProperty("NumberSearch")]
 		[JsonConverter(typeof(BoolConverter))]
-		public bool? SearchByNumber { get; set; } = true;
+		public bool SearchByNumber { get; set; } = true;
 
 		/// <summary>
 		///     交互标志集合

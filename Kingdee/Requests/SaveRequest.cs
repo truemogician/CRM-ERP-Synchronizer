@@ -12,6 +12,6 @@ namespace Kingdee.Requests {
 		/// </summary>
 		[JsonProperty("IsVerifyBaseDataField")]
 		[JsonConverter(typeof(BoolConverter))]
-		public bool? ValidateEffectiveness { get; set; } = false;
+		public bool ValidateEffectiveness { get; set; } = false;
 	}
 }

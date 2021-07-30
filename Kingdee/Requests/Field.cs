@@ -78,6 +78,8 @@ namespace Kingdee.Requests {
 		public static Clause operator <(Field left, Expression right) => (Expression)left < right;
 		public static Clause operator >=(Field left, Expression right) => (Expression)left >= right;
 		#endregion
+
+		public static implicit operator Field(PropertyInfo prop) => new(prop);
 	}
 
 	public class Field<T> : Field {
