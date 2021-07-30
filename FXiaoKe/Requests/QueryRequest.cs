@@ -14,20 +14,20 @@ using Shared.Exceptions;
 
 namespace FXiaoKe.Requests {
 	[Request("/cgi/crm/custom/v2/data/get", typeof(QueryByConditionResponse))]
-	public class CustomQueryByIdRequest<T> : QueryByIdRequest<T> where T : ModelBase {
+	public class CustomQueryByIdRequest<T> : QueryByIdRequest<T> where T : CrmModelBase {
 		public CustomQueryByIdRequest() { }
 
 		public CustomQueryByIdRequest(string id) : base(id) { }
 	}
 
 	[Request("/cgi/crm/v2/data/get", typeof(QueryByConditionResponse))]
-	public class QueryByIdRequest<T> : CrmRequest<IdInfo<T>> where T : ModelBase {
+	public class QueryByIdRequest<T> : CrmRequest<IdInfo<T>> where T : CrmModelBase {
 		public QueryByIdRequest() { }
 
 		public QueryByIdRequest(string id) : base(new IdInfo<T>(id)) { }
 	}
 
-	public class IdInfo<T> : DataBase<T> where T : ModelBase {
+	public class IdInfo<T> : DataBase<T> where T : CrmModelBase {
 		public IdInfo(string id) => Id = id;
 
 		/// <summary>
@@ -38,7 +38,7 @@ namespace FXiaoKe.Requests {
 		public string Id { get; set; }
 	}
 
-	public class QueryCustomByConditionRequest<T> : QueryCustomByConditionRequest where T : ModelBase {
+	public class QueryCustomByConditionRequest<T> : QueryCustomByConditionRequest where T : CrmModelBase {
 		public QueryCustomByConditionRequest() { }
 
 		public QueryCustomByConditionRequest(ConditionInfo<T> data) => Data = data;
@@ -53,7 +53,7 @@ namespace FXiaoKe.Requests {
 		public QueryCustomByConditionRequest(ConditionInfo data) : base(data) { }
 	}
 
-	public class QueryByConditionRequest<T> : QueryByConditionRequest where T : ModelBase {
+	public class QueryByConditionRequest<T> : QueryByConditionRequest where T : CrmModelBase {
 		public QueryByConditionRequest() { }
 
 		public QueryByConditionRequest(ConditionInfo<T> data) => Data = data;
@@ -68,7 +68,7 @@ namespace FXiaoKe.Requests {
 		public QueryByConditionRequest(ConditionInfo data) : base(data) { }
 	}
 
-	public class ConditionInfo<T> : ConditionInfo where T : ModelBase {
+	public class ConditionInfo<T> : ConditionInfo where T : CrmModelBase {
 		public ConditionInfo() { }
 
 		public ConditionInfo(QueryCondition<T> condition) {
@@ -125,7 +125,7 @@ namespace FXiaoKe.Requests {
 		public static implicit operator ConditionInfo(List<ModelFilter> filters) => new(filters.ToArray());
 	}
 
-	public class QueryCondition<T> : QueryCondition where T : ModelBase {
+	public class QueryCondition<T> : QueryCondition where T : CrmModelBase {
 		public QueryCondition() { }
 
 		public QueryCondition(params ModelFilter<T>[] filters) => Filters = filters;
@@ -221,7 +221,7 @@ namespace FXiaoKe.Requests {
 		public static implicit operator QueryCondition(List<ModelFilter> filters) => new(filters.ToArray());
 	}
 
-	public class ModelFilter<T> : ModelFilter where T : ModelBase {
+	public class ModelFilter<T> : ModelFilter where T : CrmModelBase {
 		public ModelFilter(string propertyName) : base(typeof(T), propertyName) { }
 
 		public ModelFilter(string propertyName, QueryOperator @operator, params object[] values) : base(typeof(T), propertyName, @operator, values) { }
@@ -292,7 +292,7 @@ namespace FXiaoKe.Requests {
 		public static ModelFilter NotIn(Type type, string propertyName, params object[] values) => new(type, propertyName, QueryOperator.NotIn, values);
 	}
 
-	public class ModelOrder<T> : ModelOrder where T : ModelBase {
+	public class ModelOrder<T> : ModelOrder where T : CrmModelBase {
 		/// <summary>
 		/// </summary>
 		/// <param name="propertyName">属性名称，建议使用nameof获取</param>
@@ -340,7 +340,7 @@ namespace FXiaoKe.Requests {
 		}
 	}
 
-	public class AscendingModelOrder<T> : ModelOrder<T> where T : ModelBase {
+	public class AscendingModelOrder<T> : ModelOrder<T> where T : CrmModelBase {
 		public AscendingModelOrder(string propertyName) : base(propertyName, true) { }
 	}
 
@@ -348,7 +348,7 @@ namespace FXiaoKe.Requests {
 		public AscendingModelOrder(Type type, string propertyName) : base(type, propertyName, true) { }
 	}
 
-	public class DescendingModelOrder<T> : ModelOrder<T> where T : ModelBase {
+	public class DescendingModelOrder<T> : ModelOrder<T> where T : CrmModelBase {
 		public DescendingModelOrder(string propertyName) : base(propertyName, false) { }
 	}
 

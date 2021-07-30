@@ -5,7 +5,7 @@ using FXiaoKe.Utilities;
 using Newtonsoft.Json;
 
 namespace FXiaoKe.Requests {
-	public abstract class DataBase<T> : DataBase where T : ModelBase {
+	public abstract class DataBase<T> : DataBase where T : CrmModelBase {
 		protected DataBase() : base(typeof(T)) { }
 	}
 

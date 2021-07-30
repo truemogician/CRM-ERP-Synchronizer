@@ -11,16 +11,16 @@ using Shared.Exceptions;
 
 namespace FXiaoKe.Requests {
 	[Request("/cgi/crm/custom/v2/data/create")]
-	public class CustomCreationRequest<T> : CreationRequest<T> where T : ModelBase { }
+	public class CustomCreationRequest<T> : CreationRequest<T> where T : CrmModelBase { }
 
 	[Request("/cgi/crm/custom/v2/data/create")]
-	public class CustomCreationRequest<T, TDetail> : CreationRequest<T, TDetail> where T : ModelBase where TDetail : ModelBase { }
+	public class CustomCreationRequest<T, TDetail> : CreationRequest<T, TDetail> where T : CrmModelBase where TDetail : CrmModelBase { }
 
 	[Request("/cgi/crm/v2/data/create")]
-	public class CreationRequest<T> : CreationRequestBase<CreationData<T>> where T : ModelBase { }
+	public class CreationRequest<T> : CreationRequestBase<CreationData<T>> where T : CrmModelBase { }
 
 	[Request("/cgi/crm/v2/data/create")]
-	public class CreationRequest<T, TDetail> : CreationRequestBase<CreationData<T, TDetail>> where T : ModelBase where TDetail : ModelBase { }
+	public class CreationRequest<T, TDetail> : CreationRequestBase<CreationData<T, TDetail>> where T : CrmModelBase where TDetail : CrmModelBase { }
 
 	[Request(null, typeof(CreationResponse), ErrorMessage = "创建对象时发生错误")]
 	public abstract class CreationRequestBase<T> : CrmRequest<T> {
@@ -49,7 +49,7 @@ namespace FXiaoKe.Requests {
 		public bool ReturnSubObjectIds { get; set; }
 	}
 
-	public class CreationData<T> where T : ModelBase {
+	public class CreationData<T> where T : CrmModelBase {
 		public CreationData() { }
 
 		public CreationData(T model) => Model = model;
@@ -66,7 +66,7 @@ namespace FXiaoKe.Requests {
 		public static implicit operator T(CreationData<T> data) => data.Model;
 	}
 
-	public class CreationData<T, TDetail> : CreationData<T> where T : ModelBase where TDetail : ModelBase {
+	public class CreationData<T, TDetail> : CreationData<T> where T : CrmModelBase where TDetail : CrmModelBase {
 		/// <summary>
 		///     明细对象数据map(和对象描述中字段一一对应)
 		/// </summary>
@@ -74,8 +74,8 @@ namespace FXiaoKe.Requests {
 		public TDetail Detail { get; set; }
 	}
 
-	public class CreationDataModelConverter : JsonConverter<ModelBase> {
-		public override void WriteJson(JsonWriter writer, ModelBase value, JsonSerializer serializer) {
+	public class CreationDataModelConverter : JsonConverter<CrmModelBase> {
+		public override void WriteJson(JsonWriter writer, CrmModelBase value, JsonSerializer serializer) {
 			var builder = new StringBuilder();
 			using var stringWriter = new StringWriter(builder);
 			serializer.Serialize(stringWriter, value, value.GetType());
@@ -85,7 +85,7 @@ namespace FXiaoKe.Requests {
 			writer.WriteRawValue(json);
 		}
 
-		public override ModelBase ReadJson(JsonReader reader, Type objectType, ModelBase existingValue, bool hasExistingValue, JsonSerializer serializer) {
+		public override CrmModelBase ReadJson(JsonReader reader, Type objectType, CrmModelBase existingValue, bool hasExistingValue, JsonSerializer serializer) {
 			var token = JToken.Load(reader);
 			if (token.Type is JTokenType.Null or JTokenType.Undefined)
 				return default;
