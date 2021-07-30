@@ -4,22 +4,6 @@ using Newtonsoft.Json.Linq;
 using Shared.Exceptions;
 
 namespace Shared.Serialization {
-	public abstract class TimeSpanConverter<T> : JsonConverter<TimeSpan> where T : IConvertible {
-		protected abstract Func<TimeSpan, T> ToNumber { get; }
-		protected abstract Func<T, TimeSpan> FromNumber { get; }
-
-		public override void WriteJson(JsonWriter writer, TimeSpan value, JsonSerializer serializer) {
-			writer.WriteValue(ToNumber(value));
-		}
-
-		public override TimeSpan ReadJson(JsonReader reader, Type objectType, TimeSpan existingValue, bool hasExistingValue, JsonSerializer serializer) {
-			var token = JToken.Load(reader);
-			if (token.Type is JTokenType.Integer or JTokenType.Float)
-				return FromNumber(token.Value<T>());
-			throw new JTokenTypeException(token, JTokenType.Integer, JTokenType.Float);
-		}
-	}
-
 	public class TimeSpanUnitConverter<T> : TimeSpanConverter<T> where T : IConvertible {
 		public TimeSpanUnitConverter(TimeSpanUnit unit) => Unit = unit;
 		public TimeSpanUnit Unit { get; }
@@ -67,6 +51,23 @@ namespace Shared.Serialization {
 				TypeCode.String => Convert.ToString(time),
 				_               => throw new NotImplementedException()
 			};
+		}
+	}
+
+	public abstract class TimeSpanConverter<T> : JsonConverter<TimeSpan> where T : IConvertible {
+		protected abstract Func<TimeSpan, T> ToNumber { get; }
+
+		protected abstract Func<T, TimeSpan> FromNumber { get; }
+
+		public override void WriteJson(JsonWriter writer, TimeSpan value, JsonSerializer serializer) {
+			writer.WriteValue(ToNumber(value));
+		}
+
+		public override TimeSpan ReadJson(JsonReader reader, Type objectType, TimeSpan existingValue, bool hasExistingValue, JsonSerializer serializer) {
+			var token = JToken.Load(reader);
+			if (token.Type is JTokenType.Integer or JTokenType.Float)
+				return FromNumber(token.Value<T>());
+			throw new JTokenTypeException(token, JTokenType.Integer, JTokenType.Float);
 		}
 	}
 

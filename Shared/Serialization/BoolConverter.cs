@@ -22,28 +22,19 @@ namespace Shared.Serialization {
 		protected override StringComparison ComparisonOption { get; }
 	}
 
-	public abstract class BoolConverterBase : JsonConverter<bool?> {
+	public abstract class BoolConverterBase : JsonConverter<bool> {
 		protected abstract string TrueString { get; }
 		protected abstract string FalseString { get; }
 		protected virtual StringComparison ComparisonOption => StringComparison.OrdinalIgnoreCase;
 
-		public sealed override void WriteJson(JsonWriter writer, bool? value, JsonSerializer serializer) {
-			if (value.HasValue)
-				writer.WriteValue(value.Value ? TrueString : FalseString);
-			else
-				writer.WriteNull();
-		}
+		public sealed override void WriteJson(JsonWriter writer, bool value, JsonSerializer serializer) => writer.WriteValue(value ? TrueString : FalseString);
 
-		public sealed override bool? ReadJson(JsonReader reader, Type objectType, bool? existingValue, bool hasExistingValue, JsonSerializer serializer) {
+		public sealed override bool ReadJson(JsonReader reader, Type objectType, bool existingValue, bool hasExistingValue, JsonSerializer serializer) {
 			var token = JToken.Load(reader);
-			if (token.Type is JTokenType.Null or JTokenType.Undefined)
-				return null;
 			if (token.Type != JTokenType.String)
 				throw new JTokenTypeException(token, JTokenType.String);
 			var value = token.Value<string>();
-			if (string.IsNullOrEmpty(value))
-				return null;
-			if (value.Equals(TrueString, ComparisonOption))
+			if (value!.Equals(TrueString, ComparisonOption))
 				return true;
 			if (value.Equals(FalseString, ComparisonOption))
 				return false;
