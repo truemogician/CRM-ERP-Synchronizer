@@ -7,15 +7,18 @@ using Shared.Serialization;
 using TheFirstFarm.Models.Common;
 
 namespace TheFirstFarm.Models.FXiaoKe {
+	/// <summary>
+	///		退换货单
+	/// </summary>
 	[Model("object_4qZkc__c", Custom = true)]
-	public class ReturnOrder : ModelBase {
+	public class ReturnOrder : CrmModelBase {
 		/// <summary>
 		///     单据编号
 		/// </summary>
 		[JsonProperty("name")]
-		[Key]
+		[MainField]
 		[Required]
-		public string Id { get; set; }
+		public string Number { get; set; }
 
 		/// <summary>
 		///     日期
@@ -31,15 +34,6 @@ namespace TheFirstFarm.Models.FXiaoKe {
 		[ForeignKey(typeof(Customer))]
 		[Required]
 		public string CustomerId { get; set; }
-
-		/// <summary>
-		///     负责人
-		/// </summary>
-		[JsonProperty("owner")]
-		[JsonConverter(typeof(ArrayWrapperConverter))]
-		[ForeignKey(typeof(Staff))]
-		[Required]
-		public string OwnerId { get; set; }
 
 		/// <summary>
 		///     业务类型（erp）

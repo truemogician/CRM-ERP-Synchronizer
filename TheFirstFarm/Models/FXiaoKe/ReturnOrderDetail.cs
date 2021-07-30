@@ -5,18 +5,18 @@ using Shared.Serialization;
 using TheFirstFarm.Models.Common;
 
 namespace TheFirstFarm.Models.FXiaoKe {
-	[Model("object_wVB1X__c", Custom = true, SubjectTo = typeof(ReturnOrder))]
-	public class ReturnOrderDetail : ModelBase {
+	[Model("object_wVB1X__c", Custom = true)]
+	public class ReturnOrderDetail : CrmModelBase {
 		/// <summary>
 		///     退换货明细编号
 		/// </summary>
 		[JsonProperty("name")]
-		[Key]
+		[MainField]
 		[Required]
-		public string Id { get; set; }
+		public string Number { get; set; }
 
 		[JsonProperty("field_1b2Y1__c")]
-		[MasterKey]
+		[MasterKey(typeof(ReturnOrder))]
 		[Required]
 		public string ReturnOrderId { get; set; }
 
@@ -77,14 +77,5 @@ namespace TheFirstFarm.Models.FXiaoKe {
 		[JsonConverter(typeof(EnumValueConverter), Platform.FXiaoKe)]
 		[Required]
 		public ReturnType ReturnType { get; set; }
-
-		/// <summary>
-		///     负责人
-		/// </summary>
-		[JsonProperty("owner")]
-		[JsonConverter(typeof(ArrayWrapperConverter))]
-		[ForeignKey(typeof(Staff))]
-		[Required]
-		public string OwnerId { get; set; }
 	}
 }

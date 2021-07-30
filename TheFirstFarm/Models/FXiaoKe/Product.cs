@@ -4,19 +4,22 @@ using System.ComponentModel.DataAnnotations;
 using FXiaoKe.Models;
 using Newtonsoft.Json;
 using Shared.Serialization;
+using TheFirstFarm.Models.Common;
+using TheFirstFarm.Models.Kingdee;
 
 namespace TheFirstFarm.Models.FXiaoKe {
 	/// <summary>
 	///     产品
 	/// </summary>
 	[Model("ProductObj")]
-	public class Product : ModelBase {
+	public class Product : CrmModelBase {
 		/// <summary>
 		///     产品编码
 		/// </summary>
 		[JsonProperty("name")]
+		[MainField]
 		[Required]
-		public string Id { get; set; }
+		public string Number { get; set; }
 
 		/// <summary>
 		///     产品名称
@@ -78,6 +81,7 @@ namespace TheFirstFarm.Models.FXiaoKe {
 		///     保质期单位
 		/// </summary>
 		[JsonProperty("field_a6e61__c")]
+		[JsonConverter(typeof(EnumValueConverter), Platform.FXiaoKe)]
 		public ShelfLifeUnit ShelfLifeUnit { get; set; }
 
 		/// <summary>
@@ -97,134 +101,12 @@ namespace TheFirstFarm.Models.FXiaoKe {
 		/// </summary>
 		[JsonProperty("field_15ox1__c")]
 		[JsonConverter(typeof(BoolConverter), "hSv12h4jJ", "option1")]
-		public bool? AllowReturn { get; set; }
+		public bool AllowReturn { get; set; }
 
 		/// <summary>
 		///     产品图片
 		/// </summary>
 		[JsonProperty("picture_path")]
 		public List<ImageInfo> Images { get; set; }
-
-		/// <summary>
-		///     负责人
-		/// </summary>
-		[JsonProperty("owner")]
-		[JsonConverter(typeof(ArrayWrapperConverter))]
-		[Required]
-		public string OwnerId { get; set; }
-	}
-
-	[JsonConverter(typeof(EnumValueConverter))]
-	public enum ShelfLifeUnit : byte {
-		/// <summary>
-		///     日
-		/// </summary>
-		[EnumValue("2n51d7uyh")]
-		Day,
-
-		/// <summary>
-		///     月
-		/// </summary>
-		[EnumValue("Cg0qbSi63")]
-		Month,
-
-		/// <summary>
-		///     年
-		/// </summary>
-		[EnumValue("option1")]
-		Year,
-
-		/// <summary>
-		///     其他
-		/// </summary>
-		[EnumValue("other")]
-		Other,
-
-		[EnumDefault]
-		Invalid
-	}
-
-	[JsonConverter(typeof(EnumValueConverter))]
-	public enum ProductProperty {
-		/// <summary>
-		///     外购
-		/// </summary>
-		[EnumValue("1")]
-		OutPurchased,
-
-		/// <summary>
-		///     自制
-		/// </summary>
-		[EnumValue("2")]
-		SelfMade,
-
-		/// <summary>
-		///     委外
-		/// </summary>
-		[EnumValue("3")]
-		Outsource,
-
-		/// <summary>
-		///     配置
-		/// </summary>
-		[EnumValue("9")]
-		Configuration,
-
-		/// <summary>
-		///     资产
-		/// </summary>
-		[EnumValue("10")]
-		Asset,
-
-		/// <summary>
-		///     特征
-		/// </summary>
-		[EnumValue("4")]
-		Characteristic,
-
-		/// <summary>
-		///     费用
-		/// </summary>
-		[EnumValue("11")]
-		Expense,
-
-		/// <summary>
-		///     虚拟
-		/// </summary>
-		[EnumValue("5")]
-		Virtual,
-
-		/// <summary>
-		///     服务
-		/// </summary>
-		[EnumValue("6")]
-		Service,
-
-		/// <summary>
-		///     一次性
-		/// </summary>
-		[EnumValue("7")]
-		Disposable,
-
-		/// <summary>
-		///     模型
-		/// </summary>
-		[EnumValue("12")]
-		Model,
-
-		/// <summary>
-		///     产品系列
-		/// </summary>
-		[EnumValue("13")]
-		ProductSeries,
-
-		/// <summary>
-		///     其他
-		/// </summary>
-		[EnumValue("other")]
-		Other,
-
-		[EnumDefault]
-		Invalid
 	}
 }

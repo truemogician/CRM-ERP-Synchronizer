@@ -7,19 +7,19 @@ namespace TheFirstFarm.Models.FXiaoKe {
 	/// <summary>
 	///     客户地址
 	/// </summary>
-	[Model("AccountAddrObj", SubjectTo = typeof(Customer))]
-	public class CustomerAddress : ModelBase {
+	[Model("AccountAddrObj")]
+	public class CustomerAddress : CrmModelBase {
 		/// <summary>
 		///     地址编号
 		/// </summary>
 		[JsonProperty("name")]
-		[Key]
-		[Required]
+		[MainField]
 		[RegularExpression(@"Addr\.\d{4}-\d{2}-\d{2}_\d{6,}")]
-		public string Id { get; set; }
+		[Required]
+		public string Number { get; set; }
 
 		[JsonProperty("account_id")]
-		[MasterKey]
+		[MasterKey(typeof(Customer))]
 		[Required]
 		public string CustomerId { get; set; }
 

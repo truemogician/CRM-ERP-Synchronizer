@@ -7,18 +7,18 @@ namespace TheFirstFarm.Models.FXiaoKe {
 	/// <summary>
 	///     客户财务信息
 	/// </summary>
-	[Model("AccountFinInfoObj", SubjectTo = typeof(Customer))]
-	public class CustomerFinancialInfo : ModelBase {
+	[Model("AccountFinInfoObj")]
+	public class CustomerFinancialInfo : CrmModelBase {
 		/// <summary>
 		///     发票抬头
 		/// </summary>
 		[JsonProperty("name")]
-		[Key]
+		[MainField(Unique = false)]
 		[Required]
 		public string Title { get; set; }
 
 		[JsonProperty("account_id")]
-		[MasterKey]
+		[MasterKey(typeof(Customer))]
 		[Required]
 		public string CustomerId { get; set; }
 

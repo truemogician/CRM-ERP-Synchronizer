@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Reflection;
+using FXiaoKe.Utilities;
+using Newtonsoft.Json;
 using Shared.Exceptions;
 
 namespace FXiaoKe.Models {
@@ -12,28 +14,32 @@ namespace FXiaoKe.Models {
 		public string Name { get; init; }
 
 		public bool Custom { get; init; }
-
-		public Type SubjectTo { get; init; }
 	}
 
 	[AttributeUsage(AttributeTargets.Property | AttributeTargets.Field)]
-	public class MasterKeyAttribute : FXiaoKeAttribute {
-		public MasterKeyAttribute() => KeyName = nameof(ModelBase.DataId);
-		public MasterKeyAttribute(string keyName) => KeyName = keyName;
-		public string KeyName { get; }
+	public class MainFieldAttribute : FXiaoKeAttribute {
+		public MainFieldAttribute() { }
 
-		public MemberInfo GetKey(Type declaringType) {
-			var masterType = declaringType.GetCustomAttribute<ModelAttribute>()!.SubjectTo;
-			if (masterType is null)
-				throw new NullReferenceException("Master type not specified");
-			return masterType.GetMember(KeyName, MemberTypes.Property | MemberTypes.Field);
-		}
+		public bool Unique { get; init; } = true;
+	}
+
+	public class MasterKeyAttribute : ReferenceAttributeBase {
+		public MasterKeyAttribute(Type type) : base(type) { }
+
+		public Type MasterType => ReferenceType;
+	}
+
+	public class ForeignKeyAttribute : ReferenceAttributeBase {
+		public ForeignKeyAttribute(Type type) : base(type) { }
+
+		public Type ForeignType => ReferenceType;
 	}
 
 	[AttributeUsage(AttributeTargets.Property | AttributeTargets.Field)]
-	public class ForeignKeyAttribute : FXiaoKeAttribute {
-		public ForeignKeyAttribute(Type type) => ForeignType = type;
-		public Type ForeignType { get; set; }
+	public abstract class ReferenceAttributeBase : FXiaoKeAttribute {
+		internal readonly Type ReferenceType;
+
+		protected ReferenceAttributeBase(Type type) => ReferenceType = type;
 	}
 
 	[AttributeUsage(AttributeTargets.Property | AttributeTargets.Field)]
@@ -52,7 +58,10 @@ namespace FXiaoKe.Models {
 
 	[AttributeUsage(AttributeTargets.Property | AttributeTargets.Field)]
 	public class SubModelAttribute : FXiaoKeAttribute {
-		public bool Eager { get; init; }
-		public bool Cascade { get; init; }
+		public bool Eager { get; init; } = true;
+
+		public bool Cascade { get; init; } = true;
+
+		public string ReverseKeyName { get; init; }
 	}
 }

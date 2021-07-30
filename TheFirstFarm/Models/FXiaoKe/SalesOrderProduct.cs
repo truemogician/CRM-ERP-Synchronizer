@@ -1,78 +1,64 @@
 ﻿// ReSharper disable StringLiteralTypo
+using System;
+using System.ComponentModel.DataAnnotations;
 using FXiaoKe.Models;
 using Newtonsoft.Json;
+using Shared.Serialization;
 
 namespace TheFirstFarm.Models.FXiaoKe {
 	/// <summary>
 	///     订单产品
 	/// </summary>
 	[Model("SalesOrderProductObj")]
-	public class SalesOrderProduct : ModelBase {
+	public class SalesOrderProduct : CrmModelBase {
 		/// <summary>
 		///     物料编码
 		/// </summary>
 		[JsonProperty("product_id")]
-		public string Id { get; set; }
+		[MainField]
+		[ForeignKey(typeof(Product))]
+		[Required]
+		public string Number { get; set; }
 
-		/// <summary>
-		///     物料名称
-		/// </summary>
-		[JsonProperty("field_cpaob__c")]
-		public string Name { get; set; }
-
-		/// <summary>
-		///     规格型号
-		/// </summary>
-		[JsonProperty("field_80y96__c")]
-		public string Model { get; set; }
-
-		/// <summary>
-		///     计量单位
-		/// </summary>
-		[JsonProperty("field_d767S__c")]
-		public string Unit { get; set; }
+		[JsonProperty("order_id")]
+		[MasterKey(typeof(SalesOrder))]
+		[Required]
+		public string SalesOrderId { get; set; }
 
 		/// <summary>
 		///     数量
 		/// </summary>
 		[JsonProperty("quantity")]
-		public string Quantity { get; set; }
+		public decimal Quantity { get; set; }
 
 		/// <summary>
 		///     含税单价
 		/// </summary>
 		[JsonProperty("sales_price")]
-		public string Price { get; set; }
+		public decimal Price { get; set; }
 
 		/// <summary>
 		///     税率
 		/// </summary>
 		[JsonProperty("field_q9GkX__c")]
-		public string TaxRate { get; set; }
+		public decimal TaxRate { get; set; }
 
 		/// <summary>
 		///     金额
 		/// </summary>
 		[JsonProperty("field_y66kY__c")]
-		public string Volume { get; set; }
+		public decimal Volume { get; set; }
 
 		/// <summary>
 		///     要货日期
 		/// </summary>
 		[JsonProperty("field_hvdcm__c")]
-		public string RequestDate { get; set; }
+		public DateTime? RequestDate { get; set; }
 
 		/// <summary>
 		///     备注
 		/// </summary>
 		[JsonProperty("remark")]
 		public string Remark { get; set; }
-
-		/// <summary>
-		///     负责人
-		/// </summary>
-		[JsonProperty("owner")]
-		[ForeignKey(typeof(Staff))]
-		public string OwnerId { get; set; }
 	}
 }

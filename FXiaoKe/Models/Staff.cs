@@ -1,9 +1,8 @@
 ﻿// ReSharper disable StringLiteralTypo
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Runtime.Serialization;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Converters;
 using Shared.Serialization;
 
 namespace FXiaoKe.Models {
@@ -80,7 +79,7 @@ namespace FXiaoKe.Models {
 		///     头像文件Id
 		/// </summary>
 		[JsonProperty("profileImageUrl")]
-		public string AvatarId { get; set; }
+		public string AvatarUrl { get; set; }
 
 		/// <summary>
 		///     所属部门及其父部门Id列表
@@ -129,12 +128,14 @@ namespace FXiaoKe.Models {
 		///     创建时间
 		/// </summary>
 		[JsonProperty("createTime")]
-		public long CreateTime { get; set; }
+		[JsonConverter(typeof(TimestampConverter))]
+		public DateTime CreateTime { get; set; }
 
 		/// <summary>
 		///     汇报对象Id
 		/// </summary>
 		[JsonProperty("leaderId")]
+		[ForeignKey(typeof(Staff))]
 		public string LeaderId { get; set; }
 	}
 

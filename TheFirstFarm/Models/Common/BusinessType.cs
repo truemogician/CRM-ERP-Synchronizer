@@ -9,7 +9,7 @@ namespace TheFirstFarm.Models.Common {
 		///     分销调拨
 		/// </summary>
 		[EnumValue("DRPTRANS")]
-		DrpTrans,
+		DistributionTransfer,
 
 		/// <summary>
 		///     受托加工销售
@@ -21,7 +21,7 @@ namespace TheFirstFarm.Models.Common {
 		///     分销购销
 		/// </summary>
 		[EnumValue("DRPSALE")]
-		DrpSale,
+		Distribution,
 
 		/// <summary>
 		///     寄售
@@ -33,7 +33,7 @@ namespace TheFirstFarm.Models.Common {
 		///     VMI业务
 		/// </summary>
 		[EnumValue("VMI")]
-		VMI,
+		Vmi,
 
 		/// <summary>
 		///     普通销售

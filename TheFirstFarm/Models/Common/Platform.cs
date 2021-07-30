@@ -1,6 +1,7 @@
 ﻿namespace TheFirstFarm.Models.Common {
-	internal enum Platform : byte {
+	public enum Platform : byte {
 		FXiaoKe,
+
 		Kingdee
 	}
 }
