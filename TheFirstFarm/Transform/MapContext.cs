@@ -47,6 +47,9 @@ namespace TheFirstFarm.Transform {
 		}
 		#nullable disable
 
-		protected override void OnConfiguring(DbContextOptionsBuilder options) => options.UseSqlite(ConnectionString);
+		protected override void OnConfiguring(DbContextOptionsBuilder options) {
+			options.UseSqlite(ConnectionString)
+				.EnableSensitiveDataLogging();
+		}
 	}
 }

@@ -53,7 +53,7 @@ namespace TheFirstFarm.Test {
 			var customers = await FXiaoKeClient.GetAll<FModels.Customer>();
 			await using var dbContext = new MapContext();
 			foreach (var customer in customers)
-				dbContext.CustomerMaps.Update(new CustomerMap(customer.DataId, customer.Number, customer.KingdeeId));
+				dbContext.CustomerMaps.AddOrUpdate(new CustomerMap(customer.DataId, customer.Number, customer.KingdeeId));
 			Console.WriteLine($@"{await dbContext.SaveChangesAsync()} changes saved");
 		}
 
@@ -92,7 +92,7 @@ namespace TheFirstFarm.Test {
 				}
 				args.Continue = args.Response.ResponseMessage.IsSuccessStatusCode;
 			};
-			var kingdeeModels = KingdeeClient.Query(new KRequests.QueryRequest<KModels.ReturnOrder>()).AsT1;
+			var kingdeeModels = (await KingdeeClient.QueryAsync(new KRequests.QueryRequest<KModels.ReturnOrder>())).AsT1;
 			var department = await FXiaoKeClient.GetDepartmentDetailTree();
 			var staffs = await FXiaoKeClient.GetStaffs(department);
 			FXiaoKeClient.Operator = staffs.Single(staff => staff.Name == "周孝成");
@@ -103,9 +103,9 @@ namespace TheFirstFarm.Test {
 			var fXiaoKeModels = await Task.WhenAll(
 				kingdeeModels.Select(
 					async model => {
-						string ownerId = transformer.GetByMapProperty<StaffMap>(nameof(StaffMap.Number), model.SalesmanNumber.Number).FXiaoKeId;
+						string ownerId = transformer.GetByMapProperty<StaffMap, string>(nameof(StaffMap.Number), model.SalesmanNumber)?.FXiaoKeId;
 						return new FModels.ReturnOrder {
-							CustomerId = (await transformer.FromMapPropertyF<CustomerMap>(nameof(CustomerMap.Number), model.CustomerNumber)).FXiaoKeId,
+							CustomerId = (await transformer.FromMapProperty<CustomerMap>(nameof(CustomerMap.Number), (string)model.CustomerNumber))?.FXiaoKeId,
 							Date = model.Date!.Value,
 							OwnerId = ownerId,
 							Reason = model.ReturnReason,
@@ -114,7 +114,7 @@ namespace TheFirstFarm.Test {
 							Details = (await Task.WhenAll(
 									model.Details.Select(
 										async detail => new FModels.ReturnOrderDetail {
-											ProductId = (await transformer.FromMapPropertyK<ProductMap>(nameof(ProductMap.Number), detail.MaterialNumber.Number)).FXiaoKeId,
+											ProductId = (await transformer.FromMapProperty<ProductMap>(nameof(ProductMap.Number), (string)detail.MaterialNumber))?.FXiaoKeId,
 											ReturnAmount = detail.ReturnAmount,
 											UnitPrice = detail.UnitPrice,
 											TaxRate = detail.TaxRate,
@@ -133,7 +133,7 @@ namespace TheFirstFarm.Test {
 				bool useDefaultOwner = model.OwnerId is null;
 				if (useDefaultOwner)
 					model.OwnerId = FXiaoKeClient.Operator.Id;
-				if (!await transformer.HasFXiaoKeId<ReturnOrderMap>(model.DataId)) {
+				if (!await transformer.HasMapProperty<ReturnOrderMap>(nameof(ReturnOrderMap.Number), model.Number)) {
 					if (useDefaultOwner) {
 						var _ = FXiaoKeClient.SendTextMessage($"销售退货单缺少负责人，将使用默认负责人{FXiaoKeClient.Operator.Name}");
 					}
