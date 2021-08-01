@@ -10,7 +10,7 @@ namespace Kingdee {
 		public DelayInvoker(Action<T> action, T state, int timeout) {
 			_action = action;
 			_state = state;
-			_timeout = timeout * 1000;
+			_timeout = timeout;
 		}
 
 		internal void Invoke() {

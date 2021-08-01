@@ -86,8 +86,8 @@ namespace Kingdee {
 		public static bool PortIsOpen(string hostName, int port) {
 			try {
 				var tcpClient = new TcpClient {
-					SendTimeout = 2000,
-					ReceiveTimeout = 2000
+					SendTimeout = 20000000,
+					ReceiveTimeout = 20000000
 				};
 				tcpClient.Connect(hostName, port);
 				if (!tcpClient.Connected)

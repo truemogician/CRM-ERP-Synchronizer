@@ -248,7 +248,7 @@ namespace Kingdee {
 			);
 		}
 
-		public Task<T> SaveAsync<T>(QueryRequest<T> request) where T : FormBase
+		public Task<SaveResponse> SaveAsync<T>(SaveRequest<T> request) where T : FormBase
 			=> ExecuteAsync<SaveResponse, T>(
 				"Kingdee.BOS.WebApi.ServicesStub.DynamicFormService.Save",
 				request

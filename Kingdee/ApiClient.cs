@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Net;
+using System.Threading;
 using System.Text;
 using System.Threading.Tasks;
 using Kingdee.Forms;
@@ -13,7 +14,9 @@ namespace Kingdee {
 	public class ApiClient {
 		private readonly CookieContainer _cookiesContainer;
 		private readonly FailCallbackHandler _defaultFailCallback;
-		private readonly int _defaultTimeout = 300;
+
+		private readonly int _defaultTimeout = 3000000;
+
 		private readonly Encoding _encoder;
 		private readonly HttpClient _httpClient;
 		private readonly string _serverUrl;
@@ -87,10 +90,10 @@ namespace Kingdee {
 			string serviceName,
 			object[] parameters = null,
 			FailCallbackHandler onFail = null,
-			int timeout = 100
+			int timeout = 1000000
 		) {
 			var request = CreateRequest(serviceName, parameters);
-			request.HttpRequest.Timeout = timeout * 1000;
+			request.HttpRequest.Timeout = timeout;
 			return Call<T>(request, onFail);
 		}
 
@@ -100,7 +103,7 @@ namespace Kingdee {
 			Action<TResponse> onSucceed,
 			ProgressChangedHandler onProgressChange = null,
 			FailCallbackHandler onFail = null,
-			int timeout = 0,
+			int timeout = Timeout.Infinite,
 			int reportInterval = 5
 		) where TForm : FormBase
 			=> ExecuteAsync(
@@ -113,13 +116,13 @@ namespace Kingdee {
 				reportInterval
 			);
 
-		public Task<TForm> ExecuteAsync<TResponse, TForm>(
+		public Task<TResponse> ExecuteAsync<TResponse, TForm>(
 			string serviceName,
 			RequestBase request,
 			FailCallbackHandler onFail = null,
-			int timeout = 0
+			int timeout = Timeout.Infinite
 		) where TForm : FormBase
-			=> ExecuteAsync<TForm>(
+			=> ExecuteAsync<TResponse>(
 				serviceName,
 				new object[] {FormMeta<TForm>.Name, JsonConvert.SerializeObject(request)},
 				onFail,
@@ -132,11 +135,11 @@ namespace Kingdee {
 			object[] parameters = null,
 			ProgressChangedHandler onProgressChange = null,
 			FailCallbackHandler onFail = null,
-			int timeout = 0,
+			int timeout = Timeout.Infinite,
 			int reportInterval = 5
 		) {
 			var asyncRequest = CreateAsyncRequest(serviceName, parameters);
-			asyncRequest.HttpRequest.Timeout = timeout * 1000;
+			asyncRequest.HttpRequest.Timeout = timeout;
 			CallAsync<T>(
 				asyncRequest,
 				ret => {
@@ -161,10 +164,10 @@ namespace Kingdee {
 			string serviceName,
 			object[] parameters = null,
 			FailCallbackHandler onFail = null,
-			int timeout = 0
+			int timeout = Timeout.Infinite
 		) {
 			var asyncRequest = CreateAsyncRequest(serviceName, parameters);
-			asyncRequest.HttpRequest.Timeout = timeout * 1000;
+			asyncRequest.HttpRequest.Timeout = timeout;
 			return CallAsync<T>(asyncRequest, onFail);
 		}
 
@@ -189,7 +192,7 @@ namespace Kingdee {
 					var taskSource = new TaskCompletionSource<T>();
 					_httpClient.SendAsync(
 						request,
-						result => taskSource.SetResult(typeof(T) == typeof(string) ? (dynamic)result.ReturnValue : JsonConvert.DeserializeObject<T>(result.ReturnValue))
+						result => { taskSource.SetResult(typeof(T) == typeof(string) ? (dynamic)result.ReturnValue : JsonConvert.DeserializeObject<T>(result.ReturnValue)); }
 					);
 					return taskSource.Task;
 				},
@@ -200,7 +203,7 @@ namespace Kingdee {
 			ApiRequest request,
 			Action<AsyncResult<T>> callback,
 			ProgressChangedHandler onProgressChange = null,
-			int timeout = 0,
+			int timeout = Timeout.Infinite,
 			int reportInterval = 5
 		) {
 			_httpClient.SendAsync(
@@ -222,7 +225,7 @@ namespace Kingdee {
 					}
 					catch (WebException ex) {
 						if (ex.Status == WebExceptionStatus.RequestCanceled)
-							throw new TimeoutException($"请求超时{timeout}秒，请求被终止");
+							throw new TimeoutException($"请求超时{timeout}毫秒，请求被终止");
 					}
 				},
 				request,
