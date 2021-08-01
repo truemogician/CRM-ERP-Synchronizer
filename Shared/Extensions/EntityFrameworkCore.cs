@@ -21,7 +21,12 @@ namespace Microsoft.EntityFrameworkCore.ChangeTracking {
 			string keyName = ctx.Model.FindEntityType(typeof(T)).FindPrimaryKey().Properties.Select(p => p.Name).Single();
 			var idProp = entity.GetType().GetMostDerivedProperty(keyName);
 			object id = idProp.GetValue(entity);
-			return dbSet.AsEnumerable().Any(x => idProp.GetValue(x)!.Equals(id)) ? dbSet.Update(entity) : dbSet.Add(entity);
+			var existingEntity = dbSet.AsEnumerable().FirstOrDefault(x => idProp.GetValue(x)!.Equals(id));
+			if (existingEntity is null)
+				return dbSet.Add(entity);
+			var entry = ctx.Entry(existingEntity);
+			entry.CurrentValues.SetValues(entity);
+			return entry;
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -35,10 +40,11 @@ namespace Microsoft.EntityFrameworkCore.ChangeTracking {
 			var idProp = typeof(T).GetMostDerivedProperty(keyName);
 			foreach (var entity in entities) {
 				object id = idProp.GetValue(entity);
-				if (dbSet.AsEnumerable().Any(x => idProp.GetValue(x)!.Equals(id)))
-					dbSet.Update(entity);
-				else
+				var existingEntity = dbSet.AsEnumerable().FirstOrDefault(x => idProp.GetValue(x)!.Equals(id));
+				if (existingEntity is null)
 					dbSet.Add(entity);
+				else
+					ctx.Entry(existingEntity).CurrentValues.SetValues(entity);
 			}
 		}
 
