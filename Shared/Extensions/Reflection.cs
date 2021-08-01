@@ -164,14 +164,14 @@ namespace System.Reflection {
 			return members.SingleOrDefault(member => memberTypes.HasFlag(member.MemberType));
 		}
 
-		private static MemberInfo GetMostDerivedMember(Type type, string name, Func<Type, IEnumerable<MemberInfo>> getMembers) {
+		private static T GetMostDerivedMember<T>(Type type, string name, Func<Type, IEnumerable<T>> getMembers) where T : MemberInfo {
 			var members = getMembers(type).Where(p => p.Name == name).ToArray();
 			if (members.Length <= 1)
 				return members.Length == 0 ? null : members[0];
 			return members.Sort(p => p.DeclaringType, new TypeInheritanceComparer()).FirstOrDefault();
 		}
 
-		private static MemberInfo[] GetMostDerivedMembers(Type type, Func<Type, IEnumerable<MemberInfo>> getMembers) {
+		private static T[] GetMostDerivedMembers<T>(Type type, Func<Type, IEnumerable<T>> getMembers) where T : MemberInfo {
 			var comparer = new TypeInheritanceComparer();
 			return getMembers(type)
 				.GroupBy(p => p.Name)
@@ -186,10 +186,10 @@ namespace System.Reflection {
 		public static MemberInfo[] GetMostDerivedMembers(this Type type) => GetMostDerivedMembers(type, t => t.GetMembers());
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static PropertyInfo GetMostDerivedProperty(this Type type, string name) => GetMostDerivedMember(type, name, t => t.GetProperties()) as PropertyInfo;
+		public static PropertyInfo GetMostDerivedProperty(this Type type, string name) => GetMostDerivedMember(type, name, t => t.GetProperties());
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static PropertyInfo[] GetMostDerivedProperties(this Type type) => GetMostDerivedMembers(type, t => t.GetProperties()) as PropertyInfo[];
+		public static PropertyInfo[] GetMostDerivedProperties(this Type type) => GetMostDerivedMembers(type, t => t.GetProperties());
 
 		public static TResult[] GetAttributeValues<TAttribute, TResult>(this Type type, Func<TAttribute, TResult> selector) where TAttribute : Attribute {
 			var properties = type.GetProperties();
@@ -217,7 +217,7 @@ namespace System.Reflection {
 			}
 			if (index is null && (attrs.Length > 1 || attrs[0].Index is not null))
 				throw new ArgumentNullException(nameof(Index), $"{nameof(Index)} must be specified before converting enum with multi-value members");
-			return index is null ? attrs[0] : attrs.FirstOrDefault(attr => attr.Index.Equals(index));
+			return index is null ? attrs[0] : attrs.FirstOrDefault(attr => index.Equals(attr.Index));
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -225,6 +225,12 @@ namespace System.Reflection {
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static string? GetValue(this Enum enumObj, object? index = null) => enumObj.GetEnumMember().GetEnumValue(index)?.Value;
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static bool IsDefault(this object obj) {
+			var type = obj.GetType();
+			return obj.Equals(type.Construct());
+		}
 		#nullable disable
 	}
 
