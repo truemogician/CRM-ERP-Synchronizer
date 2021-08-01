@@ -1,4 +1,5 @@
-﻿using System.Globalization;
+﻿using System;
+using System.Globalization;
 using System.Text.RegularExpressions;
 using Shared.Exceptions;
 
@@ -7,13 +8,24 @@ namespace Kingdee.Requests.Query {
 		private static readonly Regex BinaryPattern = new(@"^[01]*$", RegexOptions.Compiled);
 		private static readonly Regex HexadecimalPattern = new(@"^[\da-f]*$", RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
-		private Literal(DataType type, dynamic value) {
+		private Literal(DataType type, object value) {
 			Type = type;
 			Value = value;
 		}
 
+		public Literal(object value) {
+			Type = System.Type.GetTypeCode(value.GetType()) switch {
+				TypeCode.String                                                                                                                                => DataType.String,
+				TypeCode.Double or TypeCode.Single                                                                                                             => DataType.Float,
+				TypeCode.SByte or TypeCode.Int16 or TypeCode.Int32 or TypeCode.Int64 or TypeCode.Byte or TypeCode.UInt16 or TypeCode.UInt32 or TypeCode.UInt64 => DataType.Integer,
+				_                                                                                                                                              => throw new TypeException(value.GetType())
+			};
+			Value = value;
+		}
+
 		public DataType Type { get; }
-		public dynamic Value { get; }
+
+		public object Value { get; }
 
 		public static Literal String(string value) => new(DataType.String, value);
 
@@ -36,7 +48,7 @@ namespace Kingdee.Requests.Query {
 
 		public override string ToString()
 			=> Type switch {
-				DataType.Bit     => Value,
+				DataType.Bit     => Value as string,
 				DataType.Float   => ((double)Value).ToString(CultureInfo.InvariantCulture),
 				DataType.Integer => ((long)Value).ToString(),
 				DataType.String  => $"'{((string)Value).Replace("'", "''")}'",
