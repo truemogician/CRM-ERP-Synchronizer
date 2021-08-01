@@ -21,9 +21,11 @@ namespace FXiaoKe {
 	public class Client {
 		public const string Origin = "https://open.fxiaoke.com";
 
-		public Client() { }
+		protected JsonSerializerSettings SerializerSettings;
 
-		public Client(string appId, string appSecret, string permanentCode)
+		public Client() => SerializerSettings = new JsonSerializerSettings {ContractResolver = new ContractResolver()};
+
+		public Client(string appId, string appSecret, string permanentCode) : this()
 			=> AuthorizationInfo = new AuthorizationRequest {
 				AppId = appId,
 				AppSecret = appSecret,
@@ -68,7 +70,12 @@ namespace FXiaoKe {
 				return args.Continue ? response : throw new RequestFailedException(request, response);
 			}
 			string json = await respMessage.Content.ReadAsStringAsync();
-			response = JsonConvert.DeserializeObject(json, responseType) as ResponseBase;
+			bool isCreationRequest = typeof(TRequest).IsAssignableToGeneric(typeof(CreationRequestBase<>));
+			if (isCreationRequest)
+				(SerializerSettings.ContractResolver as ContractResolver)!.IgnoreGenerated = true;
+			response = JsonConvert.DeserializeObject(json, responseType, SerializerSettings) as ResponseBase;
+			if (isCreationRequest)
+				(SerializerSettings.ContractResolver as ContractResolver)!.IgnoreGenerated = false;
 			response!.ResponseMessage = respMessage;
 			if (response is BasicResponse resp && !resp) {
 				var args = new RequestFailedEventArgs(request, response);

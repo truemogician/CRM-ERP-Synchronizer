@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using Newtonsoft.Json.Serialization;
 using Shared.Exceptions;
 
 // ReSharper disable once CheckNamespace
@@ -44,5 +45,16 @@ namespace Newtonsoft.Json {
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static void WriteValue<T>(this JsonWriter writer, T value, JsonSerializer serializer) => serializer.Serialize(writer, value, typeof(T));
+	}
+
+	public static class ContractResolverExtensions {
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static bool IsDefined<T>(this JsonProperty property) where T : Attribute => property.IsDefined(typeof(T));
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static bool IsDefined(this JsonProperty property, Type attributeType) {
+			var attrs = property.AttributeProvider!.GetAttributes(attributeType, true);
+			return attrs.Count > 0;
+		}
 	}
 }
