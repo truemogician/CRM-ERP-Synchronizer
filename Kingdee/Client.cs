@@ -17,9 +17,9 @@ using Shared.Exceptions;
 
 namespace Kingdee {
 	public class Client : ApiClient {
-		public Client(string serverUrl) : base(serverUrl) { }
+		public Client(string serverUrl, string dbId, string username, string password, Language lcid = Language.ChineseChina) : base(serverUrl, dbId, username, password, lcid) { }
 
-		public Client(string serverUrl, int timeout) : base(serverUrl, timeout) { }
+		public Client(string serverUrl, int timeout, string dbId, string username, string password, Language lcid = Language.ChineseChina) : base(serverUrl, timeout, dbId, username, password, lcid) { }
 
 		private void FormatFields(List<Field> fields, ArraySegment<object> data, JsonWriter writer) {
 			if (fields.Count != data.Count)
@@ -106,7 +106,7 @@ namespace Kingdee {
 		/// <param name="request"></param>
 		/// <returns></returns>
 		public OneOf<BasicResponse, List<T>> Query<T>(QueryRequest<T> request) where T : FormBase {
-			var json = Execute<string>(
+			var json = ValidateAndExecute<string>(
 				"Kingdee.BOS.WebApi.ServicesStub.DynamicFormService.ExecuteBillQuery",
 				JsonConvert.SerializeObject(request)
 			);
@@ -117,25 +117,25 @@ namespace Kingdee {
 		///     保存
 		/// </summary>
 		/// <returns></returns>
-		public SaveResponse Save<T>(SaveRequest<T> request) where T : FormBase => Execute<SaveResponse, T>("Kingdee.BOS.WebApi.ServicesStub.DynamicFormService.Save", request);
+		public SaveResponse Save<T>(SaveRequest<T> request) where T : FormBase => ValidateAndExecute<SaveResponse, T>("Kingdee.BOS.WebApi.ServicesStub.DynamicFormService.Save", request);
 
 		/// <summary>
 		///     批量保存
 		/// </summary>
 		/// <returns></returns>
-		public BatchSaveResponse BatchSave<T>(BatchSaveRequest<T> request) where T : FormBase => Execute<BatchSaveResponse, T>("Kingdee.BOS.WebApi.ServicesStub.DynamicFormService.BatchSave", request);
+		public BatchSaveResponse BatchSave<T>(BatchSaveRequest<T> request) where T : FormBase => ValidateAndExecute<BatchSaveResponse, T>("Kingdee.BOS.WebApi.ServicesStub.DynamicFormService.BatchSave", request);
 
 		/// <summary>
 		///     暂存
 		/// </summary>
 		/// <returns></returns>
-		public SaveResponse Draft<T>(SaveRequest<T> request) where T : FormBase => Execute<SaveResponse, T>("Kingdee.BOS.WebApi.ServicesStub.DynamicFormService.Draft", request);
+		public SaveResponse Draft<T>(SaveRequest<T> request) where T : FormBase => ValidateAndExecute<SaveResponse, T>("Kingdee.BOS.WebApi.ServicesStub.DynamicFormService.Draft", request);
 
 		/// <summary>
 		///     审核
 		/// </summary>
 		/// <returns></returns>
-		public BasicResponse Audit<T>(AuditRequest<T> request) where T : FormBase => Execute<BasicResponse, T>("Kingdee.BOS.WebApi.ServicesStub.DynamicFormService.Audit", request);
+		public BasicResponse Audit<T>(AuditRequest<T> request) where T : FormBase => ValidateAndExecute<BasicResponse, T>("Kingdee.BOS.WebApi.ServicesStub.DynamicFormService.Audit", request);
 
 		/// <summary>
 		///     反审核
@@ -147,7 +147,7 @@ namespace Kingdee {
 		///     删除
 		/// </summary>
 		/// <returns></returns>
-		public BasicResponse Delete<T>(DeleteRequest<T> request) where T : FormBase => Execute<BasicResponse, T>("Kingdee.BOS.WebApi.ServicesStub.DynamicFormService.Delete", request);
+		public BasicResponse Delete<T>(DeleteRequest<T> request) where T : FormBase => ValidateAndExecute<BasicResponse, T>("Kingdee.BOS.WebApi.ServicesStub.DynamicFormService.Delete", request);
 
 		/// <summary>
 		///     提交
@@ -182,7 +182,35 @@ namespace Kingdee {
 		public string GroupSave(string formId, string data) => Execute<string>("Kingdee.BOS.WebApi.ServicesStub.DynamicFormService.GroupSave", formId, data);
 		#endregion
 
-		#region Async Requests
+		#region Async(Task) Requests
+		public async Task<OneOf<BasicResponse, List<T>>> QueryAsync<T>(QueryRequest<T> request) where T : FormBase {
+			var json = await ValidateAndExecuteAsync<string>(
+				"Kingdee.BOS.WebApi.ServicesStub.DynamicFormService.ExecuteBillQuery",
+				JsonConvert.SerializeObject(request)
+			);
+			return DeserializeQueryResponse<T>(request.Fields, json);
+		}
+
+		public Task<SaveResponse> SaveAsync<T>(SaveRequest<T> request) where T : FormBase
+			=> ValidateAndExecuteAsync<SaveResponse, T>(
+				"Kingdee.BOS.WebApi.ServicesStub.DynamicFormService.Save",
+				request
+			);
+
+		public Task<BasicResponse> AuditAsync<T>(AuditRequest<T> request) where T : FormBase
+			=> ValidateAndExecuteAsync<BasicResponse, T>(
+				"Kingdee.BOS.WebApi.ServicesStub.DynamicFormService.Audit",
+				request
+			);
+
+		public Task<BasicResponse> UnauditAsync<T>(AuditRequest<T> request) where T : FormBase
+			=> ValidateAndExecuteAsync<BasicResponse, T>(
+				"Kingdee.BOS.WebApi.ServicesStub.DynamicFormService.UnAudit",
+				request
+			);
+		#endregion
+
+		#region Asnyc(Callback) Requests
 		public void GetDataCentersAsync(
 			Action<List<DataCenter>> onSucceed,
 			FailCallbackHandler onFail = null,
@@ -222,14 +250,6 @@ namespace Kingdee {
 			);
 		}
 
-		public async Task<OneOf<BasicResponse, List<T>>> QueryAsync<T>(QueryRequest<T> request) where T : FormBase {
-			var json = await ExecuteAsync<string>(
-				"Kingdee.BOS.WebApi.ServicesStub.DynamicFormService.ExecuteBillQuery",
-				new object[] {JsonConvert.SerializeObject(request)}
-			);
-			return DeserializeQueryResponse<T>(request.Fields, json);
-		}
-
 		public void SaveAsync<T>(
 			SaveRequest<T> request,
 			Action<SaveResponse> onSucceed,
@@ -247,12 +267,6 @@ namespace Kingdee {
 				reportInterval
 			);
 		}
-
-		public Task<SaveResponse> SaveAsync<T>(SaveRequest<T> request) where T : FormBase
-			=> ExecuteAsync<SaveResponse, T>(
-				"Kingdee.BOS.WebApi.ServicesStub.DynamicFormService.Save",
-				request
-			);
 
 		public void BatchSaveAsync<T>(
 			BatchSaveRequest<T> request,
