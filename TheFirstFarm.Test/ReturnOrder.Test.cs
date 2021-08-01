@@ -23,7 +23,7 @@ using KResponses = Kingdee.Responses;
 
 namespace TheFirstFarm.Test {
 	public class ReturnOrderTests : TestBase {
-		[TestCaseGeneric(GenericArgument = typeof(KModels.ReturnOrder), ExpectedResult = 18)]
+		[TestCaseGeneric(GenericArgument = typeof(KModels.ReturnOrder), ExpectedResult = 15)]
 		public int KingdeeFieldsTest<T>() where T : FormBase {
 			var fields = FormMeta<T>.QueryFields;
 			Console.WriteLine(string.Join(", ", fields.Select(field => field.ToString("json"))));
@@ -32,7 +32,7 @@ namespace TheFirstFarm.Test {
 
 		[TestCaseGeneric(GenericArgument = typeof(KModels.ReturnOrder))]
 		public void KingdeeQueryTest<T>() where T : FormBase {
-			var response = KingdeeClient.Query(new KRequests.QueryRequest<T>());
+			var response = KClient.Query(new KRequests.QueryRequest<T>());
 			Assert.IsTrue(response.IsT1);
 			foreach (var resp in response.AsT1)
 				Console.WriteLine(JsonConvert.SerializeObject(resp, Formatting.Indented));
@@ -42,15 +42,15 @@ namespace TheFirstFarm.Test {
 		[TestCaseGeneric(GenericArgument = typeof(FModels.Customer))]
 		[TestCaseGeneric(GenericArgument = typeof(FModels.Product))]
 		public async Task FXiaoKeQueryTest<T>(params FRequests.ModelFilter<T>[] filters) where T : CrmModelBase {
-			FXiaoKeClient.Operator = await FXiaoKeClient.GetStaffByPhoneNumber("18118359138");
-			var result = await FXiaoKeClient.QueryByCondition(filters);
+			FClient.Operator = await FClient.GetStaffByPhoneNumber("18118359138");
+			var result = await FClient.QueryByCondition(filters);
 			Console.WriteLine($@"{result?.Count} {typeof(T).Name}s found");
 		}
 
 		[Test]
 		public async Task CustomerMapTest() {
-			FXiaoKeClient.Operator = await FXiaoKeClient.GetStaffByPhoneNumber("18118359138");
-			var customers = await FXiaoKeClient.GetAll<FModels.Customer>();
+			FClient.Operator = await FClient.GetStaffByPhoneNumber("18118359138");
+			var customers = await FClient.GetAll<FModels.Customer>();
 			await using var dbContext = new MapContext();
 			foreach (var customer in customers)
 				dbContext.CustomerMaps.AddOrUpdate(new CustomerMap(customer.DataId, customer.Number, customer.KingdeeId));
@@ -59,8 +59,8 @@ namespace TheFirstFarm.Test {
 
 		[Test]
 		public async Task StaffMapTest() {
-			var department = await FXiaoKeClient.GetDepartmentDetailTree();
-			var staffs = await FXiaoKeClient.GetStaffs(department);
+			var department = await FClient.GetDepartmentDetailTree();
+			var staffs = await FClient.GetStaffs(department);
 			await using var dbContext = new MapContext();
 			dbContext.StaffMaps.AddOrUpdateRange(staffs.Select(staff => new StaffMap(staff.Id, staff.Number)));
 			Console.WriteLine($@"{await dbContext.SaveChangesAsync()} changes saved");
@@ -68,7 +68,7 @@ namespace TheFirstFarm.Test {
 
 		[Test]
 		public async Task ReturnOrderSaveTest() {
-			FXiaoKeClient.RequestFailed += (sender, args) => {
+			FClient.RequestFailed += (sender, args) => {
 				var reqType = args.Request.GetType();
 				if (args.Request is MessageRequest) {
 					args.Continue = true;
@@ -88,18 +88,18 @@ namespace TheFirstFarm.Test {
 						composite.Form.Add(("对象", modelType.GetModelName()));
 					}
 					Console.WriteLine(composite.ToString());
-					var _ = FXiaoKeClient.SendCompositeMessage(composite);
+					var _ = FClient.SendCompositeMessage(composite);
 				}
 				args.Continue = args.Response.ResponseMessage.IsSuccessStatusCode;
 			};
-			var kingdeeModels = (await KingdeeClient.QueryAsync(new KRequests.QueryRequest<KModels.ReturnOrder>())).AsT1;
-			var department = await FXiaoKeClient.GetDepartmentDetailTree();
-			var staffs = await FXiaoKeClient.GetStaffs(department);
-			FXiaoKeClient.Operator = staffs.Single(staff => staff.Name == "周孝成");
+			var kingdeeModels = (await KClient.QueryAsync(new KRequests.QueryRequest<KModels.ReturnOrder>())).AsT1;
+			var department = await FClient.GetDepartmentDetailTree();
+			var staffs = await FClient.GetStaffs(department);
+			FClient.Operator = staffs.Single(staff => staff.Name == "周孝成");
 			var dbContext = new MapContext();
 			dbContext.StaffMaps.UpdateRange(staffs.Select(staff => new StaffMap(staff.Id, staff.Number)));
 			await dbContext.SaveChangesAsync();
-			var transformer = new MapManager(FXiaoKeClient, KingdeeClient, dbContext);
+			var transformer = new MapManager(FClient, KClient, dbContext);
 			var fXiaoKeModels = await Task.WhenAll(
 				kingdeeModels.Select(
 					async model => {
@@ -132,12 +132,12 @@ namespace TheFirstFarm.Test {
 			foreach (var model in fXiaoKeModels) {
 				bool useDefaultOwner = model.OwnerId is null;
 				if (useDefaultOwner)
-					model.OwnerId = FXiaoKeClient.Operator.Id;
+					model.OwnerId = FClient.Operator.Id;
 				if (!await transformer.HasMapProperty<ReturnOrderMap>(nameof(ReturnOrderMap.Number), model.Number)) {
 					if (useDefaultOwner) {
-						var _ = FXiaoKeClient.SendTextMessage($"销售退货单缺少负责人，将使用默认负责人{FXiaoKeClient.Operator.Name}");
+						var _ = FClient.SendTextMessage($"销售退货单缺少负责人，将使用默认负责人{FClient.Operator.Name}");
 					}
-					await FXiaoKeClient.Create(model, true);
+					await FClient.Create(model, true);
 				}
 			}
 			await dbContext.SaveChangesAsync();

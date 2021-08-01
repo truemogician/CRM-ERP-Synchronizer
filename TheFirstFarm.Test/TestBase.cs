@@ -1,31 +1,40 @@
 ﻿// ReSharper disable StringLiteralTypo
 using System;
-using FXiaoKe;
+using System.Configuration;
 using FXiaoKe.Responses;
-using Newtonsoft.Json;
+using Kingdee;
 using NUnit.Framework;
-using Shared.Serialization;
+using FClient = FXiaoKe.Client;
+using KClient = Kingdee.Client;
 
 namespace TheFirstFarm.Test {
-	public class TestBase {
-		public Client FXiaoKeClient { get; set; }
+	public abstract class TestBase {
+		protected FClient FClient { get; set; }
 
-		public Kingdee.Client KingdeeClient { get; set; }
+		protected KClient KClient { get; set; }
 
 		[SetUp]
 		public void Setup() {
-			JsonConvert.DefaultSettings = () => new JsonSerializerSettings {ContractResolver = new JsonIncludeResolver()};
-			FXiaoKeClient = new Client(
-				"FSAID_1319ebe",
-				"fe4fd3abb55a45d3ae5ed03b3bcb6fc8",
-				"D63C0B6A42F171D173EF728CBFC12874"
+			var fileMap = new ConfigurationFileMap(@"..\..\..\..\TheFirstFarm\App.config");
+			var configuration = ConfigurationManager.OpenMappedMachineConfiguration(fileMap);
+			var fSection = (configuration.GetSection("fXiaoKe") as AppSettingsSection)!.Settings;
+			FClient = new FClient(
+				fSection["appId"].Value,
+				fSection["appSecret"].Value,
+				fSection["permanentCode"].Value
 			);
-			FXiaoKeClient.RequestFailed += (_, args) => {
+			FClient.RequestFailed += (_, args) => {
 				if (args.Response is BasicResponse resp)
 					Console.WriteLine(resp.ErrorMessage);
 			};
-			KingdeeClient = new Kingdee.Client("http://120.27.55.22/k3cloud/");
-			Assert.IsTrue(KingdeeClient.ValidateLogin("60b86b4a9ade83", "Administrator", "888888", 2052));
+			var kSection = (configuration.GetSection("kingdee") as AppSettingsSection)!.Settings;
+			KClient = new KClient(
+				kSection["url"].Value,
+				kSection["databaseId"].Value,
+				kSection["username"].Value,
+				kSection["password"].Value,
+				(Language)Convert.ToInt32(kSection["languageId"].Value)
+			);
 		}
 	}
 }
