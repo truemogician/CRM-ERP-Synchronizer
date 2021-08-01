@@ -1,14 +1,17 @@
 ﻿using System;
 using System.Text.RegularExpressions;
+using Newtonsoft.Json;
 using Shared.Exceptions;
+using Shared.Serialization;
 
 namespace FXiaoKe.Models {
-	public class LocationInfo {
+	[JsonConverter(typeof(CastConverter<Location, string>))]
+	public class Location {
 		private static readonly Regex Pattern = new(@"^(?<longitude>\d{0,3}(?:\.\d+)?)#%\$(?<latitude>\d{0,3}(?:\.\d+)?)#%\$(?<name>.+)$", RegexOptions.Compiled);
 
-		public LocationInfo() { }
+		public Location() { }
 
-		public LocationInfo(string location) {
+		public Location(string location) {
 			var match = Pattern.Match(location);
 			if (!match.Success)
 				throw new RegexNotMatchException(location, Pattern);
@@ -25,8 +28,8 @@ namespace FXiaoKe.Models {
 
 		public override string ToString() => $"{Longitude:#.000000}#%${Latitude:#.000000}#%${Name}";
 
-		public static explicit operator string(LocationInfo info) => info.ToString();
+		public static explicit operator string(Location info) => info.ToString();
 
-		public static explicit operator LocationInfo(string location) => new(location);
+		public static explicit operator Location(string location) => new(location);
 	}
 }

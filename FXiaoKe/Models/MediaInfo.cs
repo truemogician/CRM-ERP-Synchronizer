@@ -2,7 +2,7 @@
 using Newtonsoft.Json;
 
 namespace FXiaoKe.Models {
-	public class ImageInfo {
+	public class MediaInfo {
 		[JsonProperty("path")]
 		[Required]
 		public string Id { get; set; }

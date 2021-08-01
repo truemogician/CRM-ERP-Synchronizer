@@ -107,6 +107,6 @@ namespace TheFirstFarm.Models.FXiaoKe {
 		///     产品图片
 		/// </summary>
 		[JsonProperty("picture_path")]
-		public List<ImageInfo> Images { get; set; }
+		public List<MediaInfo> Images { get; set; }
 	}
 }
