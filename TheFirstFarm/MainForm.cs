@@ -1,14 +1,27 @@
 ﻿using System;
+using System.Collections.Specialized;
+using System.Configuration;
 using System.Drawing;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using Kingdee;
 using Shared.Exceptions;
 using TheFirstFarm.Utilities;
+using FClient = FXiaoKe.Client;
+using KClient = Kingdee.Client;
 
 namespace TheFirstFarm {
 	public partial class MainForm : Form {
+		public FClient FClient { get; }
+
+		public KClient KClient { get; }
+
 		public MainForm() {
+			var fSection = (NameValueCollection)ConfigurationManager.GetSection("fXiaoKe");
+			var kSection = (NameValueCollection)ConfigurationManager.GetSection("kingdee");
+			FClient = new FClient(fSection["appId"], fSection["appSecret"], fSection["permanentCode"]);
+			KClient = new KClient(kSection["url"], kSection["databaseId"], kSection["username"], kSection["password"], (Language)Convert.ToInt32(kSection["languageId"]));
 			InitializeComponent();
 		}
 
