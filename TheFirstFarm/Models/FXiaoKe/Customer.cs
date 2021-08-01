@@ -5,7 +5,6 @@ using System.ComponentModel.DataAnnotations;
 using FXiaoKe.Models;
 using Newtonsoft.Json;
 using Shared.Serialization;
-using TheFirstFarm.Models.Common;
 
 namespace TheFirstFarm.Models.FXiaoKe {
 	/// <summary>
@@ -83,7 +82,7 @@ namespace TheFirstFarm.Models.FXiaoKe {
 		/// 	客户类型
 		/// </summary>
 		[JsonProperty("account_type")]
-		public CustomerType? CustomerType { get; set; }
+		public CustomerType CustomerType { get; set; }
 
 		/// <summary>
 		/// 	重要程度

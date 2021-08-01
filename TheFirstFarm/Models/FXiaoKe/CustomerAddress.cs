@@ -1,6 +1,7 @@
 ﻿// ReSharper disable StringLiteralTypo
 using System.ComponentModel.DataAnnotations;
 using FXiaoKe.Models;
+using FXiaoKe.Models.Region;
 using Newtonsoft.Json;
 
 namespace TheFirstFarm.Models.FXiaoKe {
@@ -24,10 +25,40 @@ namespace TheFirstFarm.Models.FXiaoKe {
 		public string CustomerId { get; set; }
 
 		/// <summary>
-		///     地区定位
+		///     国家
 		/// </summary>
-		[JsonProperty("regional_location")]
-		public string Location { get; set; }
+		[JsonProperty("country")]
+		public Country? Country { get; set; }
+
+		/// <summary>
+		///     省
+		/// </summary>
+		[JsonProperty("province")]
+		public Province? Province { get; set; }
+
+		/// <summary>
+		///     市
+		/// </summary>
+		[JsonProperty("city")]
+		public City? City { get; set; }
+
+		/// <summary>
+		///     区
+		/// </summary>
+		[JsonProperty("district")]
+		public int? District { get; set; }
+
+		/// <summary>
+		///     详细地址
+		/// </summary>
+		[JsonProperty("address")]
+		public string Address { get; set; }
+
+		/// <summary>
+		///		定位
+		/// </summary>
+		[JsonProperty("location")]
+		public Location Location { get; set; }
 
 		/// <summary>
 		///     默认收货地址

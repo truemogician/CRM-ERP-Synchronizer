@@ -19,14 +19,16 @@ namespace FXiaoKe.Models {
 		/// </summary>
 		[JsonProperty("last_modified_time")]
 		[JsonConverter(typeof(NullableConverter<TimestampConverter, DateTime>))]
+		[Generated]
 		public DateTime? LastModifiedTime { get; set; }
 
 		/// <summary>
 		/// 	创建时间
 		/// </summary>
 		[JsonProperty("create_time")]
-		[JsonConverter(typeof(TimestampConverter))]
-		public DateTime CreationTime { get; set; }
+		[JsonConverter(typeof(NullableConverter<TimestampConverter, DateTime>))]
+		[Generated]
+		public DateTime? CreationTime { get; set; }
 
 		/// <summary>
 		/// 	生命状态
@@ -47,6 +49,7 @@ namespace FXiaoKe.Models {
 		[JsonProperty("last_modified_by")]
 		[JsonConverter(typeof(ArrayWrapperConverter))]
 		[ForeignKey(typeof(Staff))]
+		[Generated]
 		public string LastModifierId { get; set; }
 
 		/// <summary>
@@ -55,6 +58,7 @@ namespace FXiaoKe.Models {
 		[JsonProperty("created_by")]
 		[JsonConverter(typeof(ArrayWrapperConverter))]
 		[ForeignKey(typeof(Staff))]
+		[Generated]
 		public string CreatorId { get; set; }
 
 		/// <summary>
