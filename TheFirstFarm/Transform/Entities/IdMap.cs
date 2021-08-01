@@ -2,18 +2,42 @@
 using Shared.Exceptions;
 
 namespace TheFirstFarm.Transform.Entities {
-	public abstract class IdMap : IdMap<string, int?> {
-		protected IdMap() { }
+	#nullable enable
+	public abstract class KIdMap : IdMap<string?, int> {
+		protected KIdMap() { }
 
-		protected IdMap(string fId, int? kId = null) : base(fId, kId) { }
+		protected KIdMap(int kId, string? fId = null) : base(fId, kId) { }
+
+		[Key]
+		public override int KingdeeId {
+			get => base.KingdeeId;
+			set => base.KingdeeId = value;
+		}
+	}
+	#nullable disable
+
+	public abstract class FIdMap : IdMap<string, int?> {
+		protected FIdMap() { }
+
+		protected FIdMap(string fId, int? kId = null) : base(fId, kId) { }
+
+		[Key]
+		public override string FXiaoKeId {
+			get => base.FXiaoKeId;
+			set => base.FXiaoKeId = value;
+		}
 	}
 
 	public abstract class IdMap<TF, TK> : IIdMap {
+		private TF _fXiaoKeId;
+
+		private TK _kingdeeId;
+
 		protected IdMap() { }
 
 		protected IdMap(TF fXiaoKeId, TK kingdeeId = default) {
-			FXiaoKeId = fXiaoKeId;
-			KingdeeId = kingdeeId;
+			_fXiaoKeId = fXiaoKeId;
+			_kingdeeId = kingdeeId;
 		}
 
 		object IIdMap.FXiaoKeId {
@@ -36,10 +60,15 @@ namespace TheFirstFarm.Transform.Entities {
 			}
 		}
 
-		[Key]
-		public TF FXiaoKeId { get; set; }
+		public virtual TF FXiaoKeId {
+			get => _fXiaoKeId;
+			set => _fXiaoKeId = value;
+		}
 
-		public TK KingdeeId { get; set; }
+		public virtual TK KingdeeId {
+			get => _kingdeeId;
+			set => _kingdeeId = value;
+		}
 	}
 
 	public interface IIdMap {

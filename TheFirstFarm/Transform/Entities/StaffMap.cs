@@ -1,8 +1,9 @@
-﻿using FXiaoKe.Models;
+﻿using System.ComponentModel.DataAnnotations;
+using FXiaoKe.Models;
 
 namespace TheFirstFarm.Transform.Entities {
 	[Map(typeof(Staff))]
-	public class StaffMap : IdMap {
+	public class StaffMap : FIdMap {
 		public StaffMap() { }
 
 		public StaffMap(string openUserId, string number) : base(openUserId) => Number = number;

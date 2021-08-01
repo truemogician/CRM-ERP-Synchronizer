@@ -3,7 +3,7 @@ using KCustomer = TheFirstFarm.Models.Kingdee.Customer;
 
 namespace TheFirstFarm.Transform.Entities {
 	[Map(typeof(FCustomer), typeof(KCustomer), FExtKeyName = nameof(FCustomer.KingdeeId))]
-	public class CustomerMap : IdMap {
+	public class CustomerMap : FIdMap {
 		public CustomerMap() { }
 
 		public CustomerMap(string fId, string number = null, int? kId = null) : base(fId, kId) => Number = number;
