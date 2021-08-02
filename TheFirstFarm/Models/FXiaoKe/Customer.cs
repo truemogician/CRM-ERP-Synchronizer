@@ -79,6 +79,42 @@ namespace TheFirstFarm.Models.FXiaoKe {
 		public Organization UserOrgName { get; set; } = Organization.TheFirstFarm;
 
 		/// <summary>
+		///     开票抬头
+		/// </summary>
+		[JsonProperty("field_1B7uB__c")]
+		public string InvoiceTitle { get; set; }
+
+		/// <summary>
+		///     纳税识别号
+		/// </summary>
+		[JsonProperty("field_lW3AG__c")]
+		public string TaxpayerId { get; set; }
+
+		/// <summary>
+		///     开户银行
+		/// </summary>
+		[JsonProperty("field_B5sv6__c")]
+		public string OpeningBank { get; set; }
+
+		/// <summary>
+		///     开户账户
+		/// </summary>
+		[JsonProperty("field_2e11k__c")]
+		public string BankAccount { get; set; }
+
+		/// <summary>
+		///     开票通讯地址
+		/// </summary>
+		[JsonProperty("field_ymSQx__c")]
+		public string BillingAddress { get; set; }
+
+		/// <summary>
+		///     开票联系电话
+		/// </summary>
+		[JsonProperty("field_zdg6p__c")]
+		public string InvoicePhoneNumber { get; set; }
+
+		/// <summary>
 		///     客户类型
 		/// </summary>
 		[JsonProperty("account_type")]
@@ -103,7 +139,8 @@ namespace TheFirstFarm.Models.FXiaoKe {
 		/// </summary>
 
 		[JsonProperty("is_sync__c")]
-		public string NeedSync { get; set; }
+		[JsonConverter(typeof(NullableConverter<BoolConverter, bool>), "是", "否")]
+		public bool? NeedSync { get; set; }
 
 		/// <summary>
 		///     同步结果
@@ -119,16 +156,14 @@ namespace TheFirstFarm.Models.FXiaoKe {
 		[JsonProperty("sync_TorF__c")]
 		public bool SyncSuccess { get; set; }
 
-		[JsonIgnore]
 		[SubModel(ReverseKeyName = nameof(FXiaoKe.Contact.CustomerId))]
 		public Contact Contact { get; set; }
 
-		[JsonIgnore]
-		[SubModel(Eager = true, Cascade = true)]
+		[SubModel]
 		public List<CustomerAddress> Addresses { get; set; }
 
 		[JsonIgnore]
-		[SubModel(Eager = true, Cascade = true)]
+		[SubModel(Eager = false, Cascade = false)]
 		public List<CustomerFinancialInfo> FinancialInfos { get; set; }
 	}
 
