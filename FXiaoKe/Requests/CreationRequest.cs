@@ -8,6 +8,7 @@ using FXiaoKe.Utilities;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Shared.Exceptions;
+using Shared.Serialization;
 
 namespace FXiaoKe.Requests {
 	[Request("/cgi/crm/custom/v2/data/create")]
@@ -75,30 +76,7 @@ namespace FXiaoKe.Requests {
 		public TDetail Detail { get; set; }
 	}
 
-	public class CreationDataModelConverter : JsonConverter<CrmModelBase> {
-		public override void WriteJson(JsonWriter writer, CrmModelBase value, JsonSerializer serializer) {
-			var builder = new StringBuilder();
-			using var stringWriter = new StringWriter(builder);
-			serializer.Serialize(stringWriter, value, value.GetType());
-			var json = builder.ToString();
-			int index = json.LastIndexOf('}');
-			json = $"{json[..index]},\"dataObjectApiName\":\"{value.GetType().GetModelName()}\"}}";
-			writer.WriteRawValue(json);
-		}
-
-		public override CrmModelBase ReadJson(JsonReader reader, Type objectType, CrmModelBase existingValue, bool hasExistingValue, JsonSerializer serializer) {
-			var token = JToken.Load(reader);
-			if (token.Type is JTokenType.Null or JTokenType.Undefined)
-				return default;
-			if (token.Type != JTokenType.Object)
-				throw new JTokenTypeException(token, JTokenType.Object);
-			if ((token as JObject)!.Property("dataObjectApiName") is { } prop) {
-				if (prop.Value.Value<string>() != objectType.GetModelName())
-					throw new JTokenException(prop, $"Model name mismatched: {objectType.GetModelName()} expected");
-				prop.Remove();
-			}
-			var stringReader = new StringReader(token.ToString());
-			return (dynamic)serializer.Deserialize(stringReader, objectType);
-		}
+	public class CreationDataModelConverter : AdditionalPropertyConverter<CrmModelBase> {
+		public CreationDataModelConverter() => AdditionalProperties.Add("dataObjectApiName", value => value.GetType().GetModelName());
 	}
 }
