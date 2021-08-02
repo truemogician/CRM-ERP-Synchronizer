@@ -11,7 +11,6 @@ namespace Kingdee.Forms {
 
 		protected override string ValueName => nameof(Number);
 
-		//public static implicit operator T(NumberWrapper<T> self) => self.Number;
 		public static implicit operator NumberWrapper<T>(T number) => new() {Number = number};
 	}
 
@@ -23,13 +22,18 @@ namespace Kingdee.Forms {
 
 		protected override string ValueName => nameof(Name);
 
-		//public static implicit operator T(NameWrapper<T> self) => self.Name;
 		public static implicit operator NameWrapper<T>(T number) => new() {Name = number};
 	}
 
 	public abstract class WrapperBase<T> {
+		private readonly MemberInfo _member;
+
+		protected WrapperBase() => _member = GetType().GetMostDerivedMember(ValueName);
+
 		protected abstract string ValueName { get; }
 
-		public static implicit operator T(WrapperBase<T> self) => (T)self.GetType().GetMember(self.ValueName).Single().GetValue(self);
+		public override string ToString() => ((T)_member.GetValue(this)).ToString();
+
+		public static implicit operator T(WrapperBase<T> self) => (T)self._member.GetValue(self);
 	}
 }

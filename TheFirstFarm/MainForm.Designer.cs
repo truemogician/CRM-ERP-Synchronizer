@@ -36,7 +36,7 @@ namespace TheFirstFarm {
 			};
 			Controls.Add(TabControl);
 			foreach (var model in Enum.GetValues<SyncModel>()) {
-				var synchronizer = new Synchronizer(model);
+				var synchronizer = new Synchronizer(model, this);
 				Synchronizers.Add(synchronizer);
 				TabControl.TabPages.Add(synchronizer.Page);
 			}
@@ -95,18 +95,10 @@ namespace TheFirstFarm {
 
 			internal TextBox TimeLeftBox = new();
 
-			internal Timer SyncTimer = new();
-
 			#endregion
-
-			private bool _synchronizing = false;
-
-			internal Queue<Task> Tasks = new();
-
 			internal SyncModel Model;
 
-			internal Synchronizer(SyncModel model) {
-				Model = model;
+			internal void InitializeComponent() {
 				// 
 				// Page
 				// 
@@ -126,11 +118,11 @@ namespace TheFirstFarm {
 				Page.Controls.Add(LogTextBox);
 				Page.Location = new Point(4, 34);
 				Page.Margin = new Padding(0);
-				Page.Name = $"{model}Page";
+				Page.Name = $"{Model}Page";
 				Page.Padding = new Padding(20);
 				Page.Size = new Size(574, 515);
 				Page.TabIndex = 0;
-				Page.Text = model.GetValue();
+				Page.Text = Model.GetValue();
 				Page.UseVisualStyleBackColor = true;
 				// 
 				// Label3
@@ -273,30 +265,7 @@ namespace TheFirstFarm {
 				LogTextBox.Text = "";
 				LogTextBox.ReadOnly = true;
 				LogTextBox.Font = new Font("微软雅黑", 9);
-				// 
-				// SyncTimer
-				// 
-				SyncTimer = new() {Enabled = false};
-				SyncTimer.Tick += (_, _) => AutoSync();
 			}
-
-			internal bool Synchronizing {
-				get => _synchronizing;
-				set {
-					if (value == _synchronizing)
-						return;
-					if (!value && Tasks.Count > 0) {
-						var task = Tasks.Dequeue();
-						task.ContinueWith(_ => Synchronizing = false).Start();
-					}
-					else {
-						_synchronizing = value;
-						ManualSyncButton.SafeInvoke(btn => btn.Enabled = !value);
-					}
-				}
-			}
-
-			internal DateTime? LastSyncTime { get; set; } = null;
 		}
 	}
 
