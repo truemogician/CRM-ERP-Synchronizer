@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Runtime.Serialization;
 using FXiaoKe.Models;
@@ -230,14 +231,39 @@ namespace FXiaoKe.Requests {
 			if (source.Type != typeof(T))
 				throw new TypeNotMatchException(typeof(T), source.Type);
 		}
+		#nullable enable
+		public static ModelFilter<T> Equal(string propertyName, [NotNull] object value) => new(propertyName, QueryOperator.Equal, value);
 
-		public static ModelFilter<T> Equal(string propertyName, object value) => new(propertyName, QueryOperator.Equal, value);
+		public static ModelFilter<T> NotEqual(string propertyName, [NotNull] object value) => new(propertyName, QueryOperator.NotEqual, value);
 
-		public static ModelFilter<T> NotEqual(string propertyName, object value) => new(propertyName, QueryOperator.NotEqual, value);
+		public static ModelFilter<T> Is(string propertyName, object? value) => new(propertyName, QueryOperator.Is, new object?[] {value});
 
-		public static ModelFilter<T> In(string propertyName, params object[] values) => new(propertyName, QueryOperator.In, values);
+		public static ModelFilter<T> IsNot(string propertyName, object? value) => new(propertyName, QueryOperator.IsNot, new object?[] {value});
 
-		public static ModelFilter<T> NotIn(string propertyName, params object[] values) => new(propertyName, QueryOperator.NotIn, values);
+		public static ModelFilter<T> In(string propertyName, params object?[] values) => new(propertyName, QueryOperator.In, values);
+
+		public static ModelFilter<T> NotIn(string propertyName, params object?[] values) => new(propertyName, QueryOperator.NotIn, values);
+
+		public static ModelFilter<T> Greater(string propertyName, [NotNull] object value) => new(propertyName, QueryOperator.Greater, value);
+
+		public static ModelFilter<T> Less(string propertyName, [NotNull] object value) => new(propertyName, QueryOperator.Less, value);
+
+		public static ModelFilter<T> GreaterEqual(string propertyName, [NotNull] object value) => new(propertyName, QueryOperator.GreaterEqual, value);
+
+		public static ModelFilter<T> LessEqual(string propertyName, [NotNull] object value) => new(propertyName, QueryOperator.LessEqual, value);
+
+		public static ModelFilter<T> Like(string propertyName, [NotNull] string value) => new(propertyName, QueryOperator.Like, value);
+
+		public static ModelFilter<T> NotLike(string propertyName, [NotNull] string value) => new(propertyName, QueryOperator.NotLike, value);
+
+		public static ModelFilter<T> StartWith(string propertyName, [NotNull] string value) => new(propertyName, QueryOperator.StartWith, value);
+
+		public static ModelFilter<T> EndWith(string propertyName, [NotNull] string value) => new(propertyName, QueryOperator.EndWith, value);
+
+		public static ModelFilter<T> Between(string propertyName, [NotNull] object from, [NotNull] object to) => new(propertyName, QueryOperator.Between, from, to);
+
+		public static ModelFilter<T> NotBetween(string propertyName, [NotNull] object from, [NotNull] object to) => new(propertyName, QueryOperator.NotBetween, from, to);
+		#nullable disable
 	}
 
 	public class ModelFilter : IType {
