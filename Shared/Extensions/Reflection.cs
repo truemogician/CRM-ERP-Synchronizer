@@ -117,13 +117,18 @@ namespace System.Reflection {
 						parameterTypes.Select((t, index) => t == args[index].ParameterType).All(x => x)
 				);
 
-		public static MemberInfo[] GetMembersWithAttributes(this Type type, params Type[] attributeTypes) => type.GetMembers().Where(member => attributeTypes.All(member.IsDefined)).ToArray();
+		public static MemberInfo[] GetMembersWithAllAttributes(this Type type, params Type[] attributeTypes) => type.GetMembers().Where(member => attributeTypes.All(member.IsDefined)).ToArray();
+
+		public static MemberInfo[] GetMembersWithAnyAttributes(this Type type, params Type[] attributeTypes) => type.GetMembers().Where(member => attributeTypes.Any(member.IsDefined)).ToArray();
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static MemberInfo[] GetMembersWithAttribute<T>(this Type type) where T : Attribute => type.GetMembersWithAttributes(typeof(T));
+		public static MemberInfo[] GetMembersWithAttribute<T>(this Type type) where T : Attribute => type.GetMembersWithAllAttributes(typeof(T));
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static MemberInfo GetMemberWithAttributes(this Type type, params Type[] attributeTypes) => type.GetMembersWithAttributes(attributeTypes).SingleOrDefault();
+		public static MemberInfo GetMemberWithAllAttributes(this Type type, params Type[] attributeTypes) => type.GetMembersWithAllAttributes(attributeTypes).SingleOrDefault();
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static MemberInfo GetMemberWithAnyAttributes(this Type type, params Type[] attributeTypes) => type.GetMembersWithAnyAttributes(attributeTypes).SingleOrDefault();
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static MemberInfo GetMemberWithAttribute<T>(this Type type) where T : Attribute => type.GetMembersWithAttribute<T>().SingleOrDefault();
