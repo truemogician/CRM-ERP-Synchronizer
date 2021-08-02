@@ -2,6 +2,7 @@
 using System.IO;
 using System.Net;
 using System.Text;
+using Kingdee.Utilities;
 
 namespace Kingdee {
 	public class ApiRequest : JsonObject {

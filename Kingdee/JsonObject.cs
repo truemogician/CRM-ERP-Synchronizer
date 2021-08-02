@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using Kingdee.Exceptions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
@@ -22,7 +23,7 @@ namespace Kingdee {
 		public static JsonObject Parse(string json) => new(json);
 
 		public void SetValue(string prop, object v) {
-			if (v != null && v.GetType().IsSimpleType())
+			if (v != null && v.GetType() is var type && (type.IsValueType || type == typeof(string)))
 				AddOrUpdate(prop, new JValue(v));
 			else
 				AddOrUpdate(prop, JObject.FromObject(v!));

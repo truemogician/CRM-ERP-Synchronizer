@@ -2,7 +2,7 @@
 using System.Collections;
 using System.Runtime.Serialization;
 
-namespace Kingdee {
+namespace Kingdee.Exceptions {
 	public class ServiceException : Exception {
 		private const int ApiClientErrorCode = -1;
 

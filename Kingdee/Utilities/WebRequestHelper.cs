@@ -5,7 +5,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Security.Cryptography.X509Certificates;
 
-namespace Kingdee {
+namespace Kingdee.Utilities {
 	public class WebRequestHelper {
 		[Flags]
 		public enum SecurityProtocolTypeEnum {

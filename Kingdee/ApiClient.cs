@@ -25,11 +25,13 @@ namespace Kingdee {
 		public Language Language { get; set; } = Language.ChineseChina;
 	}
 
-	public enum Language {
-		ChineseChina = 2052
-	}
-
 	public class ApiClient {
+		public static readonly TimeSpan LoginInterval = TimeSpan.FromHours(1);
+
+		protected ConnectionConfig ConnectionConfig;
+
+		protected DateTime? LastLoginTime;
+
 		private readonly CookieContainer _cookiesContainer;
 
 		private readonly FailCallbackHandler _defaultFailCallback;
@@ -41,8 +43,6 @@ namespace Kingdee {
 		private readonly HttpClient _httpClient;
 
 		private readonly string _serverUrl;
-
-		protected ConnectionConfig ConnectionConfig;
 
 		#region Constructors
 		public ApiClient(string serverUrl) {
@@ -66,8 +66,6 @@ namespace Kingdee {
 			=> _defaultTimeout = timeout;
 
 		public ApiClient(string serverUrl, FailCallbackHandler onFail) : this(serverUrl) => _defaultFailCallback = onFail;
-
-		public ApiClient(string serverUrl, FailCallbackHandler onFail, int timeout) : this(serverUrl, onFail) => _defaultTimeout = timeout;
 		#endregion
 
 		#region Methods
@@ -188,9 +186,13 @@ namespace Kingdee {
 			FailCallbackHandler onFail = null,
 			int timeout = 1000000
 		) {
-			var loginResp = ValidateLogin();
-			if (!loginResp)
-				throw new LoginFailedException(loginResp);
+			var now = DateTime.Now;
+			if (!LastLoginTime.HasValue || now - LastLoginTime.Value >= LoginInterval) {
+				var loginResp = ValidateLogin();
+				if (!loginResp)
+					throw new LoginFailedException(loginResp);
+				LastLoginTime = now;
+			}
 			return Execute<T>(serviceName, parameters, onFail, timeout);
 		}
 
@@ -355,19 +357,20 @@ namespace Kingdee {
 			var reporter = ProgressReporter.Create(this, request, onProgressChange, reportInterval);
 			if (reportInterval <= 0)
 				return;
-			new DelayInvoker<ApiRequest>(
-				_ => {
-					try {
-						reporter.TimerCallback(null);
-					}
-					catch (WebException ex) {
-						if (ex.Status == WebExceptionStatus.RequestCanceled)
-							throw new TimeoutException($"请求超时{timeout}毫秒，请求被终止");
-					}
-				},
-				request,
-				timeout
-			).Invoke();
+			if (timeout != Timeout.Infinite) {
+				var _ = Task.Delay(timeout)
+					.ContinueWith(
+						_ => {
+							try {
+								reporter.TimerCallback(null);
+							}
+							catch (WebException ex) {
+								if (ex.Status == WebExceptionStatus.RequestCanceled)
+									throw new TimeoutException($"请求超时{timeout}毫秒，请求被终止");
+							}
+						}
+					);
+			}
 		}
 		#endregion
 

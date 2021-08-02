@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Net;
+using Kingdee.Exceptions;
 
 namespace Kingdee {
 	internal class HttpClient {

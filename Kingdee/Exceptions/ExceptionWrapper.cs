@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections;
 
-namespace Kingdee {
+namespace Kingdee.Exceptions {
 	public class ExceptionWrapper {
 		public bool IsEmpty {
 			get {
