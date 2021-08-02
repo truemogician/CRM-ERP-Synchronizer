@@ -2,6 +2,7 @@
 using System.Linq;
 using Kingdee.Exceptions;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace Kingdee {
 	public class AsyncResult<T> {
@@ -13,7 +14,7 @@ namespace Kingdee {
 
 		public ServiceException Exception { get; internal set; }
 
-		internal static AsyncResult<T> CreateUnsuccess(ServiceException ex)
+		internal static AsyncResult<T> CreateFailure(ServiceException ex)
 			=> new() {
 				Successful = false,
 				ReturnValue = default,
@@ -28,16 +29,20 @@ namespace Kingdee {
 			};
 
 		internal void ThrowEx() {
-			if (Exception != null && !Exception.Handled)
+			if (Exception is {Handled: false})
 				throw Exception;
 		}
 
-		internal AsyncResult<List<To>> ToList<To>() {
-			var asyncResult = new AsyncResult<List<To>> {
+		internal AsyncResult<List<TResult>> ToList<TResult>() {
+			var asyncResult = new AsyncResult<List<TResult>> {
 				Successful = Successful,
-				Exception = Exception
+				Exception = Exception,
+				ReturnValue = typeof(T) != typeof(string)
+					? (List<TResult>)(object)ReturnValue
+					: JArray.Parse(ReturnValue.ToString()!)
+						.Select(token => token is JObject jObj ? jObj.ToObject<TResult>() : token.Value<TResult>())
+						.ToList()
 			};
-			asyncResult.ReturnValue = !(typeof(T) == typeof(string)) ? (List<To>)(object)ReturnValue : JsonArray.Parse(ReturnValue.ToString()).ConvertTo<To>().ToList();
 			return asyncResult;
 		}
 

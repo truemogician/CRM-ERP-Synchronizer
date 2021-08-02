@@ -7,7 +7,7 @@ namespace Kingdee {
 	internal class HttpClient {
 		public static string Send(ApiRequest request) {
 			using (var requestStream = request.HttpRequest.GetRequestStream()) {
-				byte[] bytes = request.Encoder.GetBytes(request.ToJsonString());
+				byte[] bytes = request.Encoder.GetBytes(request.SerializeBody());
 				requestStream.Write(bytes, 0, bytes.Length);
 				requestStream.Flush();
 			}
@@ -54,7 +54,7 @@ namespace Kingdee {
 					}
 					else {
 						var ex = new ServiceException((int)response.StatusCode, response.StatusDescription);
-						callback(AsyncResult<string>.CreateUnsuccess(ex));
+						callback(AsyncResult<string>.CreateFailure(ex));
 					}
 				}
 			);
@@ -74,10 +74,10 @@ namespace Kingdee {
 				action();
 			}
 			catch (ServiceException ex) {
-				reqs.Callback(AsyncResult<string>.CreateUnsuccess(ex));
+				reqs.Callback(AsyncResult<string>.CreateFailure(ex));
 			}
 			catch (Exception ex) {
-				reqs.Callback(AsyncResult<string>.CreateUnsuccess(new ServiceException(ex)));
+				reqs.Callback(AsyncResult<string>.CreateFailure(new ServiceException(ex)));
 			}
 		}
 
@@ -100,7 +100,7 @@ namespace Kingdee {
 
 			internal void EndSendRequest(IAsyncResult ar) {
 				using var requestStream = Request.HttpRequest.EndGetRequestStream(ar);
-				byte[] bytes = Request.Encoder.GetBytes(Request.ToJsonString());
+				byte[] bytes = Request.Encoder.GetBytes(Request.SerializeBody());
 				requestStream.Write(bytes, 0, bytes.Length);
 				requestStream.Flush();
 			}

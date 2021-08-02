@@ -3,20 +3,15 @@ using System.IO;
 using System.Net;
 using System.Text;
 using Kingdee.Utilities;
+using Newtonsoft.Json.Linq;
 
 namespace Kingdee {
-	public class ApiRequest : JsonObject {
-		private const string FmtProp = "format";
-
-		private const string UaProp = "useragent";
-
+	public class ApiRequest {
 		private static bool HasSetSecurityProtocol;
 
 		private HttpWebRequest _httpRequest;
 
 		public ApiRequest(string serverUrl, bool async, Encoding encoder, CookieContainer cookies) {
-			SetFormat(1);
-			SetValue(UaProp, "ApiClient");
 			ServerUrl = serverUrl;
 			Encoder = encoder;
 			CookiesContainer = cookies;
@@ -24,6 +19,8 @@ namespace Kingdee {
 			AutoGetLastProgress = true;
 			IsAsync = async;
 			Version = "1.0";
+			Body["format"] = 1;
+			Body["useragent"] = "ApiClient";
 		}
 
 		public bool IsAsync { get; }
@@ -42,14 +39,14 @@ namespace Kingdee {
 
 		public string Version { get; set; }
 
+		public JObject Body { get; } = new();
+
 		internal HttpWebRequest HttpRequest {
 			get {
 				lock (this)
 					return _httpRequest ??= CreateRequest();
 			}
 		}
-
-		private void SetFormat(int value) => SetValue(FmtProp, value);
 
 		public static void SetSecurityProtocol(Uri uri) {
 			if (!HasSetSecurityProtocol)
@@ -66,10 +63,10 @@ namespace Kingdee {
 			ServicePointManager.ServerCertificateValidationCallback = ServicePointManager.ServerCertificateValidationCallback = (_, _, _, _) => true;
 		}
 
-		public virtual string ToJsonString() {
-			SetValue("timestamp", DateTime.Now);
-			SetValue("v", Version);
-			return ToString();
+		public virtual string SerializeBody() {
+			Body["v"] = Version;
+			Body["timestamp"] = DateTime.Now;
+			return Body.ToString();
 		}
 
 		private HttpWebRequest CreateRequest() {

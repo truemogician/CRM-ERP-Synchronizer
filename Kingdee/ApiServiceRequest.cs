@@ -25,10 +25,10 @@ namespace Kingdee {
 
 		public override Uri ServiceUri => IsAsync ? new Uri(new Uri(ServerUrl), "a\\" + ServiceName + ".common.kdsvc") : new Uri(new Uri(ServerUrl), ServiceName + ".common.kdsvc");
 
-		public override string ToJsonString() {
-			SetValue("rid", RequestId);
-			SetValue("parameters", JsonConvert.SerializeObject(Parameters));
-			return base.ToJsonString();
+		public override string SerializeBody() {
+			Body["rid"] = RequestId;
+			Body["parameters"] = JsonConvert.SerializeObject(Parameters);
+			return base.SerializeBody();
 		}
 	}
 }

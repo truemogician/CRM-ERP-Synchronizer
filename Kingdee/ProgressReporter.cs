@@ -2,6 +2,7 @@
 using System.Collections.Concurrent;
 using System.Linq;
 using System.Threading;
+using Newtonsoft.Json.Linq;
 
 namespace Kingdee {
 	internal class ProgressReporter {
@@ -74,7 +75,7 @@ namespace Kingdee {
 			try {
 				string json = _client.Call(_client.CreateProgressQuery(_requestId));
 				if (!string.IsNullOrEmpty(json))
-					return JsonArray.Parse(json).ConvertTo<ProgressInfo>().ToArray();
+					return JArray.Parse(json).Select(token => (token as JObject)!.ToObject<ProgressInfo>()).ToArray();
 			}
 			catch (Exception ex) {
 				Console.Write(ex.Message);
