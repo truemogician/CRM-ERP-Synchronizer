@@ -1,8 +1,8 @@
 ﻿namespace Kingdee.Requests.Query {
 	public class Sentence : ExpressionBase<Clause, Sentence, LogicalOperator> {
-		protected Sentence(Clause body) : base(body) { }
+		internal Sentence(Clause body) : base(body) { }
 
-		protected Sentence(Sentence left, LogicalOperator @operator, Sentence right) : base(left, @operator, right) { }
+		internal Sentence(Sentence left, LogicalOperator @operator, Sentence right) : base(left, @operator, right) { }
 
 		public static implicit operator Sentence(Clause value) => new(value);
 

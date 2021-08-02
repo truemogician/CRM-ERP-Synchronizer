@@ -4,12 +4,11 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using Kingdee.Forms;
-using Kingdee.Requests.Query;
 using Newtonsoft.Json;
 using Shared;
 using Shared.Exceptions;
 
-namespace Kingdee.Requests {
+namespace Kingdee.Requests.Query {
 	public class Field : PropertyChain, IFormType {
 		public Field(string propertyName) : base(propertyName) { }
 
@@ -52,8 +51,6 @@ namespace Kingdee.Requests {
 				},
 				builder => builder.ToString(0, builder.Length - 1)
 			);
-
-		public new static Field FromString(Type type, string chain, string format = null) => throw new NotImplementedException();
 
 		public override Field Concat(PropertyChain field) => new(base.Concat(field));
 

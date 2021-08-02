@@ -26,5 +26,9 @@ namespace Kingdee.Requests.Query {
 		}
 
 		public override string ToString() => $"({Left} {Operator} {Right})";
+
+		public static Sentence operator &(Clause left, Sentence right) => new(left, LogicalOperator.And, right);
+
+		public static Sentence operator |(Clause left, Sentence right) => new(left, LogicalOperator.Or, right);
 	}
 }

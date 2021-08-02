@@ -1,7 +1,10 @@
 ﻿using System;
 using System.Globalization;
+using System.Reflection;
+using System.Runtime.Serialization;
 using System.Text.RegularExpressions;
 using Shared.Exceptions;
+using Shared.Serialization;
 
 namespace Kingdee.Requests.Query {
 	public class Literal {
@@ -50,6 +53,14 @@ namespace Kingdee.Requests.Query {
 		public static implicit operator Literal(double value) => Float(value);
 
 		public static implicit operator Literal(float value) => Float(value);
+
+		public static implicit operator Literal(Enum value) {
+			if (value.GetType().GetMembersWithAnyAttributes(typeof(EnumValueAttribute), typeof(EnumMemberAttribute)).Length > 0)
+				return String(value.GetValue());
+			return Integer(Convert.ToInt64(value));
+		}
+
+		public static implicit operator Literal(DateTime value) => String(value.ToString("s"));
 
 		public override string ToString()
 			=> Type switch {
