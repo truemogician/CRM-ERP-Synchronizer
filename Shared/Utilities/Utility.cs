@@ -10,20 +10,5 @@ namespace Shared.Utilities {
 			if (!derived.IsAssignableTo(@base))
 				throw new InvariantTypeException(@base, derived);
 		}
-
-		public static List<ValidationResult> Validate<T>(T obj, bool recursive = false) {
-			var results = new List<ValidationResult>();
-			if (recursive)
-				RecursiveValidator.TryValidateObjectRecursive(obj, results);
-			else
-				RecursiveValidator.TryValidateObject(obj, results);
-			return results;
-		}
-
-		public static void ValidatedOrThrow<T>(T obj, bool recursive = false) {
-			var results = Validate(obj, recursive);
-			if (results.Count > 0)
-				throw new ValidationFailedException(obj, results);
-		}
 	}
 }

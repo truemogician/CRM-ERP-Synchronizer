@@ -8,6 +8,7 @@ using System.Reflection;
 using System.Text;
 using Newtonsoft.Json;
 using Shared.Exceptions;
+using Shared.Extensions;
 using Shared.Utilities;
 using Shared.Validation;
 
@@ -42,7 +43,7 @@ namespace Shared {
 
 		protected IEnumerable<EnumerablePropertyInfo> InfoChain {
 			get {
-				Utility.ValidatedOrThrow(this);
+				this.ValidatedOrThrow();
 				var type = StartingType;
 				foreach (string propName in NameChain) {
 					var prop = new EnumerablePropertyInfo(type.GetProperty(propName));
@@ -156,7 +157,7 @@ namespace Shared {
 		}
 
 		public object GetValue(object obj, params int[][] indices) {
-			Utility.ValidatedOrThrow(this);
+			this.ValidatedOrThrow();
 			(var chain, object cur) = (this, obj);
 			var i = 0;
 			while (chain.Length > 1 && chain.StartingType.IsInstanceOfType(cur)) {
@@ -174,7 +175,7 @@ namespace Shared {
 		}
 
 		public void SetValue(object obj, object value, params int[][] indices) {
-			Utility.ValidatedOrThrow(this);
+			this.ValidatedOrThrow();
 			(var chain, object cur) = (this, obj);
 			var i = 0;
 			while (chain.Length > 1 && chain.StartingType.IsInstanceOfType(cur)) {

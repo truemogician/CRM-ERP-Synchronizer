@@ -34,7 +34,5 @@ namespace FXiaoKe.Requests {
 			request.Content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
 			return request;
 		}
-
-		public virtual List<ValidationResult> Validate(bool recursive = true) => Utility.Validate(this, recursive);
 	}
 }

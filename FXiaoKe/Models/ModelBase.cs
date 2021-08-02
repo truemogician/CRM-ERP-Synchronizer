@@ -10,7 +10,5 @@ namespace FXiaoKe.Models {
 	public abstract class ModelBase {
 		[JsonIgnore]
 		public MemberInfo Key => GetType().GetKey();
-
-		public virtual List<ValidationResult> Validate(bool recursive = true) => Utility.Validate(this, recursive);
 	}
 }
