@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 
@@ -12,14 +13,11 @@ namespace Shared.Serialization {
 
 		public HashSet<Type> IgnoreAttributes { get; }
 
-		protected override IList<JsonProperty> CreateProperties(Type type, MemberSerialization memberSerialization) {
-			var properties = base.CreateProperties(type, memberSerialization);
-			foreach (var prop in properties) {
-				var attrs = prop.AttributeProvider!.GetAttributes(true);
-				if (!prop.Ignored && attrs.Any(attr => IgnoreAttributes.Contains(attr.GetType())))
-					prop.Ignored = true;
-			}
-			return properties;
+		protected override JsonProperty CreateProperty(MemberInfo member, MemberSerialization memberSerialization) {
+			var result = base.CreateProperty(member, memberSerialization);
+			if (!result.Ignored && IgnoreAttributes.Any(member.IsDefined))
+				result.Ignored = true;
+			return result;
 		}
 	}
 }

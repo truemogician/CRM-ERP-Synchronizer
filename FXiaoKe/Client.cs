@@ -16,6 +16,7 @@ using FXiaoKe.Utilities;
 using Newtonsoft.Json;
 using Shared;
 using Shared.Exceptions;
+using Shared.Extensions;
 
 namespace FXiaoKe {
 	public class Client {
@@ -229,6 +230,16 @@ namespace FXiaoKe {
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public Task<CreationResponse> Create<T>(T model, bool? cascade = null) where T : CrmModelBase => Create((CrmModelBase)model, cascade);
 
+		private async Task<BasicResponse> Update(IUpdater<CrmModelBase> updater) {
+			var response = await (updater.Model.GetType().IsCustomModel()
+				? ReceiveResponse<BasicResponse, CustomUpdationRequest<CrmModelBase>>(new CustomUpdationRequest<CrmModelBase> {Data = new UpdationData<CrmModelBase>(updater)})
+				: ReceiveResponse<BasicResponse, UpdationRequest<CrmModelBase>>(new UpdationRequest<CrmModelBase> {Data = new UpdationData<CrmModelBase>(updater)}));
+			return response;
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public Task<BasicResponse> Update<T>(Updater<T> updater) where T : CrmModelBase => Update((IUpdater<CrmModelBase>)updater);
+
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public Task<BasicResponse> SendMessage<T>(T request) where T : MessageRequest => ReceiveResponse<BasicResponse, T>(request);
 
@@ -299,7 +310,7 @@ namespace FXiaoKe {
 
 		private async Task<HttpResponseMessage> ValidateAndSend<T>(T request) where T : RequestBase {
 			await AuthenticateRequest(request);
-			var results = request.Validate();
+			var results = request.Validate(true);
 			if (results?.Count > 0) {
 				var args = new ValidationFailedEventArgs(request, results);
 				ValidationFailed(this, args);
@@ -310,7 +321,7 @@ namespace FXiaoKe {
 		}
 
 		private bool ValidateResponse(ResponseBase response) {
-			var results = response.Validate();
+			var results = response.Validate(true);
 			if (results?.Count > 0) {
 				var args = new ValidationFailedEventArgs(response, results);
 				ValidationFailed(this, args);
