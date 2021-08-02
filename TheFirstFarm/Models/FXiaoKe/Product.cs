@@ -62,19 +62,19 @@ namespace TheFirstFarm.Models.FXiaoKe {
 		///     长
 		/// </summary>
 		[JsonProperty("field_9M1ng__c")]
-		public string Length { get; set; }
+		public decimal? Length { get; set; }
 
 		/// <summary>
 		///     宽
 		/// </summary>
 		[JsonProperty("field_kKc10__c")]
-		public string Width { get; set; }
+		public decimal? Width { get; set; }
 
 		/// <summary>
 		///     高
 		/// </summary>
 		[JsonProperty("field_G2e0j__c")]
-		public string Height { get; set; }
+		public decimal? Height { get; set; }
 
 		/// <summary>
 		///     保质期单位
@@ -87,13 +87,13 @@ namespace TheFirstFarm.Models.FXiaoKe {
 		///     保质期
 		/// </summary>
 		[JsonProperty("field_rwK57__c")]
-		public string ShelfLife { get; set; }
+		public decimal? ShelfLife { get; set; }
 
 		/// <summary>
 		///     起订量
 		/// </summary>
 		[JsonProperty("field_BN728__c")]
-		public string MinOrderQuantity { get; set; }
+		public decimal? MinOrderQuantity { get; set; }
 
 		/// <summary>
 		///     允许退货

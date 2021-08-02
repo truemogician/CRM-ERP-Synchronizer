@@ -3,7 +3,7 @@
 namespace Kingdee.Responses {
 	public class SaveResponse : BatchSaveResponse {
 		[JsonProperty("Id")]
-		public string Id { get; set; }
+		public int Id { get; set; }
 
 		[JsonProperty("Number")]
 		public string Number { get; set; }

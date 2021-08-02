@@ -20,7 +20,7 @@ namespace FXiaoKe.Models {
 		[JsonProperty("last_modified_time")]
 		[JsonConverter(typeof(NullableConverter<TimestampConverter, DateTime>))]
 		[Generated]
-		public DateTime? LastModifiedTime { get; set; }
+		public DateTime LastModifiedTime { get; set; }
 
 		/// <summary>
 		///     创建时间
@@ -28,7 +28,7 @@ namespace FXiaoKe.Models {
 		[JsonProperty("create_time")]
 		[JsonConverter(typeof(NullableConverter<TimestampConverter, DateTime>))]
 		[Generated]
-		public DateTime? CreationTime { get; set; }
+		public DateTime CreationTime { get; set; }
 
 		/// <summary>
 		///     生命状态
@@ -111,12 +111,6 @@ namespace FXiaoKe.Models {
 		///     作废
 		/// </summary>
 		[EnumValue("invalid")]
-		Invalid,
-
-		/// <summary>
-		///     非法值
-		/// </summary>
-		[EnumDefault]
-		Illegal
+		Invalid
 	}
 }

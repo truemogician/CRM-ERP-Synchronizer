@@ -25,7 +25,7 @@ namespace TheFirstFarm.Models.FXiaoKe {
 		/// </summary>
 		[JsonProperty("field_6V5Ls__c")]
 		[JsonConverter(typeof(TimestampConverter))]
-		public DateTime Date { get; set; }
+		public DateTime? Date { get; set; }
 
 		/// <summary>
 		///     退货客户
