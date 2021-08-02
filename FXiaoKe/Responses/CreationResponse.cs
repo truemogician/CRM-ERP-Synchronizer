@@ -2,7 +2,7 @@
 using Newtonsoft.Json;
 
 namespace FXiaoKe.Responses {
-	public class CreationResponse : BasicResponseWithDescription {
+	public class CreationResponse : BasicResponse {
 		/// <summary>
 		///     添加成功的数据Id
 		/// </summary>

@@ -33,6 +33,9 @@ namespace FXiaoKe.Responses {
 		[Required]
 		public string ErrorMessage { get; set; }
 
+		[JsonProperty("errorDescription")]
+		public string ErrorDescription { get; set; }
+
 		public static bool operator true(BasicResponse resp) => resp;
 
 		public static bool operator false(BasicResponse resp) => !(bool)resp;

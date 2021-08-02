@@ -2,7 +2,7 @@
 using Newtonsoft.Json;
 
 namespace FXiaoKe.Responses {
-	public class DepartmentDetailResponse : BasicResponseWithDescription {
+	public class DepartmentDetailResponse : BasicResponse {
 		[JsonProperty("department")]
 		public Department Department { get; set; }
 	}

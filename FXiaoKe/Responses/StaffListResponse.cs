@@ -4,7 +4,7 @@ using FXiaoKe.Models;
 using Newtonsoft.Json;
 
 namespace FXiaoKe.Responses {
-	public class StaffListResponse : BasicResponseWithDescription {
+	public class StaffListResponse : BasicResponse {
 		[JsonProperty("userlist")]
 		public List<Staff> Staffs { get; set; }
 	}

@@ -4,7 +4,7 @@ using FXiaoKe.Models;
 using Newtonsoft.Json;
 
 namespace FXiaoKe.Responses {
-	public class StaffQueryResponse : BasicResponseWithDescription {
+	public class StaffQueryResponse : BasicResponse {
 		/// <summary>
 		///     员工信息列表
 		/// </summary>
