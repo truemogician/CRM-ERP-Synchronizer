@@ -8,11 +8,13 @@ namespace FXiaoKe.Requests {
 		protected T Content;
 
 		protected CrmRequestBase() { }
+
 		protected CrmRequestBase(T data) => Content = data;
 	}
 
 	public class CrmRequest<T> : CrmRequestBase<T> {
 		public CrmRequest() { }
+
 		public CrmRequest(T data) : base(data) { }
 
 		/// <summary>
@@ -27,6 +29,7 @@ namespace FXiaoKe.Requests {
 
 	public class CovariantCrmRequest<T> : CrmRequestBase<T> {
 		public CovariantCrmRequest() { }
+
 		public CovariantCrmRequest(T data) : base(data) { }
 
 		/// <summary>

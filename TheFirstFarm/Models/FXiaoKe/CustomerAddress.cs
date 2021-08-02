@@ -55,7 +55,7 @@ namespace TheFirstFarm.Models.FXiaoKe {
 		public string Address { get; set; }
 
 		/// <summary>
-		///		定位
+		///     定位
 		/// </summary>
 		[JsonProperty("location")]
 		public Location Location { get; set; }

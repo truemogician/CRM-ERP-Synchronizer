@@ -6,6 +6,7 @@ using Shared.Exceptions;
 namespace Shared.Serialization {
 	public class TimeSpanUnitConverter<T> : TimeSpanConverter<T> where T : IConvertible {
 		public TimeSpanUnitConverter(TimeSpanUnit unit) => Unit = unit;
+
 		public TimeSpanUnit Unit { get; }
 
 		protected override Func<TimeSpan, T> ToNumber
@@ -73,10 +74,15 @@ namespace Shared.Serialization {
 
 	public enum TimeSpanUnit {
 		Tick,
+
 		Millisecond,
+
 		Second,
+
 		Minute,
+
 		Hour,
+
 		Day
 	}
 }

@@ -5,7 +5,6 @@ using FXiaoKe.Models;
 using Newtonsoft.Json;
 using Shared.Serialization;
 using TheFirstFarm.Models.Common;
-using TheFirstFarm.Models.Kingdee;
 
 namespace TheFirstFarm.Models.FXiaoKe {
 	/// <summary>

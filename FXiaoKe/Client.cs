@@ -333,8 +333,8 @@ namespace FXiaoKe {
 		}
 
 		public class RequestFailedEventArgs : RequestSucceededEventArgs {
-			public RequestFailedEventArgs(RequestBase request = null, ResponseBase response = null) : base(request, response)
- { }
+			public RequestFailedEventArgs(RequestBase request = null, ResponseBase response = null) : base(request, response) { }
+
 			public bool Continue { get; set; } = false;
 		}
 

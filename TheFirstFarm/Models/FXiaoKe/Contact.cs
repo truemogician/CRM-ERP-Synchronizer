@@ -17,7 +17,7 @@ namespace TheFirstFarm.Models.FXiaoKe {
 		public string Number { get; set; } = "CONT000001";
 
 		/// <summary>
-		/// 	客户名称
+		///     客户名称
 		/// </summary>
 		[JsonProperty("account_id")]
 		[ForeignKey(typeof(Customer))]

@@ -103,7 +103,9 @@ namespace Shared {
 		public bool Remove(EnumerablePropertyInfo item) => NameChain.Remove(item?.Name);
 
 		public int Count => NameChain.Count;
+
 		public bool IsReadOnly => false;
+
 		public int IndexOf(EnumerablePropertyInfo item) => NameChain.IndexOf(item?.Name);
 
 		public void Insert(int index, EnumerablePropertyInfo item) => NameChain.Insert(index, item?.Name);
@@ -224,16 +226,23 @@ namespace Shared {
 		}
 
 		public PropertyInfo Info { get; }
+
 		public int Rank { get; }
+
 		public Type ElementType { get; }
 
 		public override Type DeclaringType => Info.DeclaringType;
+
 		public override string Name => Info.Name;
+
 		public override Type ReflectedType => Info.ReflectedType;
 
 		public override PropertyAttributes Attributes => Info.Attributes;
+
 		public override bool CanRead => Info.CanRead;
+
 		public override bool CanWrite => Info.CanWrite;
+
 		public override Type PropertyType => Info.PropertyType;
 
 		public object GetIndexedValue(object obj, params int[] indices) {//ToDo: int[] -> Index[]
@@ -270,6 +279,7 @@ namespace Shared {
 		public override object[] GetCustomAttributes(Type attributeType, bool inherit) => Info.GetCustomAttributes(attributeType, inherit);
 
 		public override bool IsDefined(Type attributeType, bool inherit) => Info.IsDefined(attributeType, inherit);
+
 		public override MethodInfo[] GetAccessors(bool nonPublic) => Info.GetAccessors(nonPublic);
 
 		public override MethodInfo GetGetMethod(bool nonPublic) => Info.GetGetMethod(nonPublic);

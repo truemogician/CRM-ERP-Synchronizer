@@ -9,9 +9,12 @@ namespace Kingdee {
 	public class WebRequestHelper {
 		[Flags]
 		public enum SecurityProtocolTypeEnum {
-			Ssl3 = 48,  // 0x00000030
-			Tls = 192,  // 0x000000C0
+			Ssl3 = 48,// 0x00000030
+
+			Tls = 192,// 0x000000C0
+
 			Tls11 = 768,// 0x00000300
+
 			Tls12 = 3072// 0x00000C00
 		}
 

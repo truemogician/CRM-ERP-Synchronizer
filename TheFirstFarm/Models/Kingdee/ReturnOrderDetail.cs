@@ -8,7 +8,7 @@ using Shared.Serialization;
 using TheFirstFarm.Models.Common;
 
 namespace TheFirstFarm.Models.Kingdee {
-	[Form()]//TODO
+	[Form]//TODO
 	public class ReturnOrderDetail : FormBase {
 		/// <summary>
 		///     物料编码

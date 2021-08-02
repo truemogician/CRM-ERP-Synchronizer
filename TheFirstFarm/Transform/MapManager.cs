@@ -3,14 +3,12 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reflection;
-using System.Threading;
 using System.Threading.Tasks;
 using FXiaoKe.Models;
 using FXiaoKe.Requests;
 using Kingdee.Forms;
 using Kingdee.Requests;
 using Kingdee.Requests.Query;
-using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Shared.Exceptions;
@@ -151,7 +149,6 @@ namespace TheFirstFarm.Transform {
 				}
 			return map;
 		}
-
 		#nullable enable
 		public TMap? GetByFXiaoKeId<TMap>(string? id) where TMap : class, IIdMap => GetByFXiaoKeId(Context.GetDbSet<TMap>(), id);
 
@@ -270,11 +267,11 @@ namespace TheFirstFarm.Transform {
 	}
 
 	internal class MapInfo {
-		internal Type MapType;
-
 		internal MapAttribute MapAttribute;
 
 		internal Dictionary<PropertyInfo, MapReferenceAttribute?> MapReferenceAttributes = new();
+
+		internal Type MapType;
 
 		internal MapInfo(Type mapType) {
 			MapType = mapType;

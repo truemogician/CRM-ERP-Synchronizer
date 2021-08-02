@@ -68,12 +68,19 @@ namespace FXiaoKe.Requests {
 
 	public enum HttpMethod {
 		Get,
+
 		Post,
+
 		Put,
+
 		Patch,
+
 		Delete,
+
 		Head,
+
 		Trace,
+
 		Options
 	}
 }

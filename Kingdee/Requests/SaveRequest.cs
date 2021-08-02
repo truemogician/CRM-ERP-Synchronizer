@@ -5,6 +5,7 @@ using Shared.Serialization;
 namespace Kingdee.Requests {
 	public class SaveRequest<T> : CreationRequest<T> where T : FormBase {
 		public SaveRequest() { }
+
 		public SaveRequest(T data) : base(data) { }
 
 		/// <summary>
@@ -12,6 +13,6 @@ namespace Kingdee.Requests {
 		/// </summary>
 		[JsonProperty("IsVerifyBaseDataField")]
 		[JsonConverter(typeof(BoolConverter))]
-		public bool ValidateEffectiveness { get; set; } = false;
+		public bool ValidateEffectiveness { get; set; }
 	}
 }

@@ -6,6 +6,7 @@ namespace FXiaoKe.Requests {
 	[Request("/cgi/user/getByMobile", typeof(StaffQueryResponse))]
 	public class StaffQueryRequest : RequestWithBasicAuth {
 		public StaffQueryRequest() { }
+
 		public StaffQueryRequest(string number) => PhoneNumber = number;
 
 		/// <summary>

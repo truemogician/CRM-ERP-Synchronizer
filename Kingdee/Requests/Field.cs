@@ -59,27 +59,39 @@ namespace Kingdee.Requests {
 
 		public override Field Concat(string propertyName) => new(base.Concat(propertyName));
 
+		public static implicit operator Field(PropertyInfo prop) => new(prop);
+
 		#region Arithmetic Operators
 		public static Expression operator +(Field left, Expression right) => (Expression)left + right;
+
 		public static Expression operator -(Field left, Expression right) => (Expression)left - right;
+
 		public static Expression operator *(Field left, Expression right) => (Expression)left * right;
+
 		public static Expression operator /(Field left, Expression right) => (Expression)left / right;
+
 		public static Expression operator %(Field left, Expression right) => (Expression)left % right;
+
 		public static Expression operator &(Field left, Expression right) => (Expression)left & right;
+
 		public static Expression operator |(Field left, Expression right) => (Expression)left | right;
+
 		public static Expression operator ^(Field left, Expression right) => (Expression)left ^ right;
 		#endregion
 
 		#region Comparison Operators
 		public static Clause operator ==(Field left, Expression right) => (Expression)left == right;
+
 		public static Clause operator !=(Field left, Expression right) => (Expression)left != right;
+
 		public static Clause operator >(Field left, Expression right) => (Expression)left > right;
+
 		public static Clause operator <=(Field left, Expression right) => (Expression)left <= right;
+
 		public static Clause operator <(Field left, Expression right) => (Expression)left < right;
+
 		public static Clause operator >=(Field left, Expression right) => (Expression)left >= right;
 		#endregion
-
-		public static implicit operator Field(PropertyInfo prop) => new(prop);
 	}
 
 	public class Field<T> : Field {

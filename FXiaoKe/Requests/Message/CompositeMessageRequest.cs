@@ -9,7 +9,9 @@ using Shared.Validation;
 namespace FXiaoKe.Requests.Message {
 	public class CompositeMessageRequest : MessageRequest {
 		public CompositeMessageRequest() { }
+
 		public CompositeMessageRequest(CompositeMessage message) => Composite = message;
+
 		public override MessageType Type => MessageType.Composite;
 
 		[JsonProperty("composite")]
@@ -77,6 +79,7 @@ namespace FXiaoKe.Requests.Message {
 		public string Value { get; set; }
 
 		public static implicit operator LabelAndValue((string, string) tuple) => new(tuple.Item1, tuple.Item2);
+
 		public static implicit operator (string, string)(LabelAndValue self) => (self.Label, self.Value);
 
 		public override string ToString() => ToString(0);

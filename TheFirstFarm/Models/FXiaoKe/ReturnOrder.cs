@@ -8,7 +8,7 @@ using TheFirstFarm.Models.Common;
 
 namespace TheFirstFarm.Models.FXiaoKe {
 	/// <summary>
-	///		退换货单
+	///     退换货单
 	/// </summary>
 	[Model("object_4qZkc__c", Custom = true)]
 	public class ReturnOrder : CrmModelBase {

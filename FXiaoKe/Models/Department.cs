@@ -76,7 +76,9 @@ namespace FXiaoKe.Models {
 
 	public enum DepartmentStatus : byte {
 		Normal = 1,
+
 		Suspended = 2,
+
 		Deleted = 3
 	}
 }

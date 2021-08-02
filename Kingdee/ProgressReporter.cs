@@ -6,11 +6,17 @@ using System.Threading;
 namespace Kingdee {
 	internal class ProgressReporter {
 		private static readonly ConcurrentDictionary<string, ProgressReporter> Reporters = new();
+
 		private readonly ApiClient _client;
+
 		private readonly bool _getLastAuto;
+
 		private readonly LockOneTime _locker = new();
+
 		private readonly ProgressChangedHandler _progressCallback;
+
 		private readonly string _requestId;
+
 		private readonly Timer _timer;
 
 		private ProgressReporter(

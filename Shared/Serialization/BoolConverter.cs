@@ -24,7 +24,9 @@ namespace Shared.Serialization {
 
 	public abstract class BoolConverterBase : JsonConverter<bool> {
 		protected abstract string TrueString { get; }
+
 		protected abstract string FalseString { get; }
+
 		protected virtual StringComparison ComparisonOption => StringComparison.OrdinalIgnoreCase;
 
 		public sealed override void WriteJson(JsonWriter writer, bool value, JsonSerializer serializer) => writer.WriteValue(value ? TrueString : FalseString);

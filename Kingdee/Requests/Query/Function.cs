@@ -12,8 +12,11 @@ namespace Kingdee.Requests.Query {
 		}
 
 		public IList<Expression> Parameters => Arguments;
+
 		public DataType Type { get; }
+
 		public string FuncName { get; }
+
 		public override string ToString() => $"{FuncName}({string.Join(", ", Arguments.Select(arg => arg.ToString()))})";
 	}
 
@@ -39,7 +42,9 @@ namespace Kingdee.Requests.Query {
 
 	public sealed class InList : ArgumentCollection, IList<Expression> {
 		public InList(params Expression[] expressions) => Arguments = expressions.ToList();
+
 		public IEnumerator<Expression> GetEnumerator() => Arguments.GetEnumerator();
+
 		IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
 		public void Add(Expression item) => Arguments.Add(item);
@@ -53,7 +58,9 @@ namespace Kingdee.Requests.Query {
 		public bool Remove(Expression item) => Arguments.Remove(item);
 
 		public int Count => Arguments.Count;
+
 		public bool IsReadOnly => Arguments.IsReadOnly;
+
 		public int IndexOf(Expression item) => Arguments.IndexOf(item);
 
 		public void Insert(int index, Expression item) => Arguments.Insert(index, item);

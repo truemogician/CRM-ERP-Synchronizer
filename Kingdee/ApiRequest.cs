@@ -1,14 +1,16 @@
 ﻿using System;
 using System.IO;
 using System.Net;
-using System.Net.Http;
 using System.Text;
 
 namespace Kingdee {
 	public class ApiRequest : JsonObject {
 		private const string FmtProp = "format";
+
 		private const string UaProp = "useragent";
+
 		private static bool HasSetSecurityProtocol;
+
 		private HttpWebRequest _httpRequest;
 
 		public ApiRequest(string serverUrl, bool async, Encoding encoder, CookieContainer cookies) {
@@ -104,9 +106,12 @@ namespace Kingdee {
 
 		[Flags]
 		internal enum SecurityProtocolTypeEnum {
-			Ssl3 = 48,  // 0x00000030
-			Tls = 192,  // 0x000000C0
+			Ssl3 = 48,// 0x00000030
+
+			Tls = 192,// 0x000000C0
+
 			Tls11 = 768,// 0x00000300
+
 			Tls12 = 3072// 0x00000C00
 		}
 	}

@@ -13,10 +13,6 @@ using KClient = Kingdee.Client;
 
 namespace TheFirstFarm {
 	public partial class MainForm : Form {
-		public FClient FClient { get; }
-
-		public KClient KClient { get; }
-
 		public MainForm() {
 			var fSection = (NameValueCollection)ConfigurationManager.GetSection("fXiaoKe");
 			var kSection = (NameValueCollection)ConfigurationManager.GetSection("kingdee");
@@ -24,6 +20,10 @@ namespace TheFirstFarm {
 			KClient = new KClient(kSection["url"], kSection["databaseId"], kSection["username"], kSection["password"], (Language)Convert.ToInt32(kSection["languageId"]));
 			InitializeComponent();
 		}
+
+		public FClient FClient { get; }
+
+		public KClient KClient { get; }
 
 		internal void UpdateTimeLeft() {
 			var activeSync = Synchronizers.FirstOrDefault(sync => sync.Page.TabIndex == TabControl.SelectedIndex);

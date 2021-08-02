@@ -33,12 +33,19 @@ namespace Kingdee.Requests.Query {
 
 		#region Conversion Operators
 		public static implicit operator Expression(ArgumentCollection value) => new(value);
+
 		public static implicit operator Expression(Field value) => new(value);
+
 		public static implicit operator Expression(Literal value) => new(value);
+
 		public static implicit operator Expression(string value) => (Literal)value;
+
 		public static implicit operator Expression(long value) => (Literal)value;
+
 		public static implicit operator Expression(int value) => (Literal)value;
+
 		public static implicit operator Expression(double value) => (Literal)value;
+
 		public static implicit operator Expression(float value) => (Literal)value;
 		#endregion
 
@@ -46,27 +53,40 @@ namespace Kingdee.Requests.Query {
 
 		#region Arithmetic Operators
 		public static Expression operator +(Expression left, Expression right) => new(left, ArithmeticOperator.Add, right);
+
 		public static Expression operator -(Expression left, Expression right) => new(left, ArithmeticOperator.Subtract, right);
+
 		public static Expression operator *(Expression left, Expression right) => new(left, ArithmeticOperator.Multiply, right);
+
 		public static Expression operator /(Expression left, Expression right) => new(left, ArithmeticOperator.Divide, right);
+
 		public static Expression operator %(Expression left, Expression right) => new(left, ArithmeticOperator.Modulo, right);
+
 		public static Expression operator &(Expression left, Expression right) => new(left, ArithmeticOperator.And, right);
+
 		public static Expression operator |(Expression left, Expression right) => new(left, ArithmeticOperator.Or, right);
+
 		public static Expression operator ^(Expression left, Expression right) => new(left, ArithmeticOperator.ExclusiveOr, right);
 		#endregion
 
 		#region Comparison Operators
 		public static Clause operator ==(Expression left, Expression right) => new(left, ComparisonOperator.Equal, right);
+
 		public static Clause operator !=(Expression left, Expression right) => new(left, ComparisonOperator.NotEqual, right);
+
 		public static Clause operator >(Expression left, Expression right) => new(left, ComparisonOperator.Greater, right);
+
 		public static Clause operator <=(Expression left, Expression right) => new(left, ComparisonOperator.LessEqual, right);
+
 		public static Clause operator <(Expression left, Expression right) => new(left, ComparisonOperator.Less, right);
+
 		public static Clause operator >=(Expression left, Expression right) => new(left, ComparisonOperator.GreaterEqual, right);
 		#endregion
 	}
 
 	public class ExpressionBody : IFormType {
 		private readonly OneOf<ArgumentCollection, Field, Literal> _content;
+
 		public ExpressionBody(OneOf<ArgumentCollection, Field, Literal> content) => _content = content;
 
 		public Type FormType {
@@ -84,9 +104,13 @@ namespace Kingdee.Requests.Query {
 		}
 
 		public static implicit operator ExpressionBody(OneOf<ArgumentCollection, Field, Literal> oneOf) => new(oneOf);
+
 		public static implicit operator ExpressionBody(Function function) => new(function);
+
 		public static implicit operator ExpressionBody(Field column) => new(column);
+
 		public static implicit operator ExpressionBody(Literal literal) => new(literal);
+
 		public static implicit operator OneOf<ArgumentCollection, Field, Literal>(ExpressionBody exp) => exp._content;
 
 		public override string ToString()
@@ -110,7 +134,9 @@ namespace Kingdee.Requests.Query {
 		public TBody Body { get; init; }
 
 		public TOperator Operator { get; init; }
+
 		public TOperand Left { get; init; }
+
 		public TOperand Right { get; init; }
 
 		public bool IsLeaf => Body is not null;

@@ -5,6 +5,7 @@ using Newtonsoft.Json.Linq;
 namespace Shared.Serialization {
 	public class TimestampConverter : JsonConverter<DateTime> {
 		public TimestampConverter() : this(TimestampPrecision.Millisecond) { }
+
 		public TimestampConverter(TimestampPrecision precision) => Precision = precision;
 
 		public TimestampPrecision Precision { get; }
@@ -24,6 +25,7 @@ namespace Shared.Serialization {
 
 	public enum TimestampPrecision : byte {
 		Second,
+
 		Millisecond
 	}
 }

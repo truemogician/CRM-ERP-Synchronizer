@@ -79,20 +79,20 @@ namespace TheFirstFarm.Models.FXiaoKe {
 		public Organization UserOrgName { get; set; } = Organization.TheFirstFarm;
 
 		/// <summary>
-		/// 	客户类型
+		///     客户类型
 		/// </summary>
 		[JsonProperty("account_type")]
 		public CustomerType CustomerType { get; set; }
 
 		/// <summary>
-		/// 	重要程度
+		///     重要程度
 		/// </summary>
 		[JsonProperty("field_Wyk2a__c")]
 		[JsonConverter(typeof(EnumValueConverter), "Significance")]
 		public Level Significance { get; set; }
 
 		/// <summary>
-		/// 	客户意向
+		///     客户意向
 		/// </summary>
 		[JsonProperty("field_4j3bg__c")]
 		[JsonConverter(typeof(EnumValueConverter), "Intention")]
@@ -223,141 +223,144 @@ namespace TheFirstFarm.Models.FXiaoKe {
 
 	internal enum OrgSet : byte {
 		CreatorOrgId,
+
 		CreatorOrgName,
+
 		UserOrgId,
+
 		UserOrgName
 	}
 
 	[JsonConverter(typeof(EnumValueConverter))]
 	public enum CustomerType {
 		/// <summary>
-		/// 	客户
+		///     客户
 		/// </summary>
 		[EnumValue("1")]
 		Customer,
 
 		/// <summary>
-		/// 	工厂
+		///     工厂
 		/// </summary>
 		[EnumValue("TJ0kf42xv")]
 		Factory,
 
 		/// <summary>
-		/// 	商超
+		///     商超
 		/// </summary>
 		[EnumValue("FKV3UdBg4")]
 		Supermarket,
 
 		/// <summary>
-		/// 	平台
+		///     平台
 		/// </summary>
 		[EnumValue("h71as17P7")]
 		Platform,
 
 		/// <summary>
-		/// 	团膳食堂
+		///     团膳食堂
 		/// </summary>
 		[EnumValue("z36PyrYv9")]
 		Canteen,
 
 		/// <summary>
-		/// 	商超+平台
+		///     商超+平台
 		/// </summary>
 		[EnumValue("2SMDgxe6A")]
 		SupermarketPlatform,
 
 		/// <summary>
-		/// 	休食
+		///     休食
 		/// </summary>
 		[EnumValue("4V0s1Ii9j")]
 		LeisureFood,
 
 		/// <summary>
-		/// 	母婴
+		///     母婴
 		/// </summary>
 		[EnumValue("j3h3znF1T")]
 		Mothering,
 
 		/// <summary>
-		/// 	水果生鲜店
+		///     水果生鲜店
 		/// </summary>
 		[EnumValue("QABzE2ett")]
 		FreshStore,
 
 		/// <summary>
-		/// 	LKA 社区社团
+		///     LKA 社区社团
 		/// </summary>
 		[EnumValue("1x50y7aw4")]
 		Lka,
 
 		/// <summary>
-		/// 	GKA
+		///     GKA
 		/// </summary>
 		[EnumValue("c9Wh26Tvz")]
 		Gka,
 
 		/// <summary>
-		/// 	NKA
+		///     NKA
 		/// </summary>
 		[EnumValue("htacg89sv")]
 		Nka,
 
 		/// <summary>
-		/// 	BC超
+		///     BC超
 		/// </summary>
 		[EnumValue("1mI3c9k7k")]
 		BcSupermarket,
 
 		/// <summary>
-		/// 	校超
+		///     校超
 		/// </summary>
 		[EnumValue("lDUYl4371")]
 		SchoolSupermarket,
 
 		/// <summary>
-		/// 	微商
+		///     微商
 		/// </summary>
 		[EnumValue("is2Jxj7aP")]
 		WeChat,
 
 		/// <summary>
-		/// 	CVS
+		///     CVS
 		/// </summary>
 		[EnumValue("KZD25krTv")]
 		Cvs,
 
 		/// <summary>
-		/// 	特渠
+		///     特渠
 		/// </summary>
 		[EnumValue("q4WGXm339")]
 		Special,
 
 		/// <summary>
-		/// 	学校
+		///     学校
 		/// </summary>
 		[EnumValue("6cxgSXPC1")]
 		School,
 
 		/// <summary>
-		/// 	企业
+		///     企业
 		/// </summary>
 		[EnumValue("vh31Ln19l")]
 		Enterprise,
 
 		/// <summary>
-		/// 	代销
+		///     代销
 		/// </summary>
 		[EnumValue("R1EoD4wmM")]
 		Proxy,
 
 		/// <summary>
-		/// 	餐饮
+		///     餐饮
 		/// </summary>
 		[EnumValue("f02b67vVM")]
 		Catering,
 
 		/// <summary>
-		/// 	其他
+		///     其他
 		/// </summary>
 		[EnumValue("other")]
 		Other
@@ -365,34 +368,34 @@ namespace TheFirstFarm.Models.FXiaoKe {
 
 	public enum Level {
 		/// <summary>
-		/// 	一星
+		///     一星
 		/// </summary>
 		[EnumValue("2cJ4zkgoi", "Significance")]
 		[EnumValue("option1", "Intention")]
 		Low,
 
 		/// <summary>
-		/// 	二星
+		///     二星
 		/// </summary>
 		[EnumValue("ko8Z09Kwb", "Significance")]
 		[EnumValue("C5bKq4b3v", "Intention")]
 		Middle,
 
 		/// <summary>
-		/// 	三星
+		///     三星
 		/// </summary>
 		[EnumValue("option1", "Significance")]
 		[EnumValue("pw4N2ivN3", "Intention")]
 		High,
 
 		/// <summary>
-		/// 	其他
+		///     其他
 		/// </summary>
 		[EnumValue("other")]
 		Other,
 
 		/// <summary>
-		///		非法值
+		///     非法值
 		/// </summary>
 		[EnumDefault]
 		Illegal

@@ -40,6 +40,16 @@ namespace TheFirstFarm.Transform.Entities {
 			_kingdeeId = kingdeeId;
 		}
 
+		public virtual TF FXiaoKeId {
+			get => _fXiaoKeId;
+			set => _fXiaoKeId = value;
+		}
+
+		public virtual TK KingdeeId {
+			get => _kingdeeId;
+			set => _kingdeeId = value;
+		}
+
 		object IIdMap.FXiaoKeId {
 			get => FXiaoKeId;
 			set {
@@ -58,16 +68,6 @@ namespace TheFirstFarm.Transform.Entities {
 				else
 					throw new InvariantTypeException(typeof(TK), value.GetType());
 			}
-		}
-
-		public virtual TF FXiaoKeId {
-			get => _fXiaoKeId;
-			set => _fXiaoKeId = value;
-		}
-
-		public virtual TK KingdeeId {
-			get => _kingdeeId;
-			set => _kingdeeId = value;
 		}
 	}
 

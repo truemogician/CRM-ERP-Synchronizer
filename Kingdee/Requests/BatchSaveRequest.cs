@@ -6,6 +6,7 @@ using Newtonsoft.Json;
 namespace Kingdee.Requests {
 	public class BatchSaveRequest<T> : CreationRequest<List<T>> where T : FormBase {
 		public BatchSaveRequest() { }
+
 		public BatchSaveRequest(IEnumerable<T> data) : base(data.ToList()) { }
 
 		/// <summary>

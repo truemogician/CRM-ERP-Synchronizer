@@ -18,7 +18,7 @@ namespace TheFirstFarm.Models.Common {
 		ReturnAndReplenish,
 
 		/// <summary>
-		///		非法值
+		///     非法值
 		/// </summary>
 		[EnumDefault]
 		Invalid

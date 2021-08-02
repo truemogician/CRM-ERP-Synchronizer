@@ -3,7 +3,6 @@ using System;
 using System.ComponentModel.DataAnnotations;
 using FXiaoKe.Models;
 using Newtonsoft.Json;
-using Shared.Serialization;
 
 namespace TheFirstFarm.Models.FXiaoKe {
 	/// <summary>

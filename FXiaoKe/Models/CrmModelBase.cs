@@ -15,7 +15,7 @@ namespace FXiaoKe.Models {
 		public virtual string DataId { get; set; }
 
 		/// <summary>
-		/// 	最后修改时间
+		///     最后修改时间
 		/// </summary>
 		[JsonProperty("last_modified_time")]
 		[JsonConverter(typeof(NullableConverter<TimestampConverter, DateTime>))]
@@ -23,7 +23,7 @@ namespace FXiaoKe.Models {
 		public DateTime? LastModifiedTime { get; set; }
 
 		/// <summary>
-		/// 	创建时间
+		///     创建时间
 		/// </summary>
 		[JsonProperty("create_time")]
 		[JsonConverter(typeof(NullableConverter<TimestampConverter, DateTime>))]
@@ -31,20 +31,20 @@ namespace FXiaoKe.Models {
 		public DateTime? CreationTime { get; set; }
 
 		/// <summary>
-		/// 	生命状态
+		///     生命状态
 		/// </summary>
 		[JsonProperty("life_status")]
 		public LifeStatus LifeStatus { get; set; } = LifeStatus.Normal;
 
 		/// <summary>
-		/// 	锁定状态
+		///     锁定状态
 		/// </summary>
 		[JsonProperty("lock_status")]
 		[JsonConverter(typeof(BoolConverter), "1", "0")]
-		public bool Locked { get; set; } = false;
+		public bool Locked { get; set; }
 
 		/// <summary>
-		/// 	最后修改人
+		///     最后修改人
 		/// </summary>
 		[JsonProperty("last_modified_by")]
 		[JsonConverter(typeof(ArrayWrapperConverter))]
@@ -53,7 +53,7 @@ namespace FXiaoKe.Models {
 		public string LastModifierId { get; set; }
 
 		/// <summary>
-		/// 	创建人
+		///     创建人
 		/// </summary>
 		[JsonProperty("created_by")]
 		[JsonConverter(typeof(ArrayWrapperConverter))]
@@ -62,7 +62,7 @@ namespace FXiaoKe.Models {
 		public string CreatorId { get; set; }
 
 		/// <summary>
-		/// 	负责人
+		///     负责人
 		/// </summary>
 		[JsonProperty("owner")]
 		[JsonConverter(typeof(ArrayWrapperConverter))]
@@ -84,37 +84,37 @@ namespace FXiaoKe.Models {
 	[JsonConverter(typeof(EnumValueConverter))]
 	public enum LifeStatus {
 		/// <summary>
-		/// 	未生效
+		///     未生效
 		/// </summary>
 		[EnumValue("ineffective")]
 		Ineffective,
 
 		/// <summary>
-		/// 	审核中
+		///     审核中
 		/// </summary>
 		[EnumValue("under_review")]
 		Reviewing,
 
 		/// <summary>
-		/// 	正常
+		///     正常
 		/// </summary>
 		[EnumValue("normal")]
 		Normal,
 
 		/// <summary>
-		/// 	变更中
+		///     变更中
 		/// </summary>
 		[EnumValue("in_change")]
 		Changing,
 
 		/// <summary>
-		/// 	作废
+		///     作废
 		/// </summary>
 		[EnumValue("invalid")]
 		Invalid,
 
 		/// <summary>
-		///		非法值
+		///     非法值
 		/// </summary>
 		[EnumDefault]
 		Illegal

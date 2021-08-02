@@ -10,9 +10,9 @@ using Shared.Exceptions;
 
 namespace Shared.Serialization {
 	public class EnumValueConverter : JsonConverter<Enum> {
-		private readonly Dictionary<Enum, string> _stringValue = new();
-
 		private readonly Dictionary<FieldInfo, List<EnumValueAttribute>> _attributes = new();
+
+		private readonly Dictionary<Enum, string> _stringValue = new();
 
 		private Enum _defaultEnum;
 
@@ -84,7 +84,7 @@ namespace Shared.Serialization {
 				var attr = attrs.Count == 1 ? attrs[0] : attrs.FirstOrDefault(a => a.Index.Equals(Index));
 				if (attr is null || !attr.Regex.IsMatch(stringValue!))
 					continue;
-				result = result is null ? field : throw new DuplicateException(stringValue, $"Multiple patterns matched");
+				result = result is null ? field : throw new DuplicateException(stringValue, "Multiple patterns matched");
 			}
 			return result?.GetValue(null) as Enum ?? _defaultEnum ?? throw new NotFoundException(stringValue, $"No enum member matches {stringValue}");
 		}

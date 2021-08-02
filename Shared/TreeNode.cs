@@ -9,6 +9,7 @@ using Shared.Exceptions;
 namespace Shared {
 	public class TreeNode : TreeNodeBase<TreeNode> {
 		public TreeNode() { }
+
 		public TreeNode(TreeNode parent) : base(parent) { }
 	}
 
@@ -30,15 +31,21 @@ namespace Shared {
 
 		#region Fields
 		private TNode _parent;
+
 		private int _height;
+
 		private int _size = 1;
+
 		private int _depth;
+
 		private bool _heightUpToDate = true;
+
 		private bool _depthUpToDate = true;
 		#endregion
 
 		#region Constructors
 		public TreeNodeBase() => Children = new List<TNode>();
+
 		public TreeNodeBase(TNode parent) : this() => Parent = parent;
 		#endregion
 
@@ -369,6 +376,7 @@ namespace Shared {
 		/// <typeparam name="TValue">Type of the changing value</typeparam>
 		public class ValueChangingEventArg<TValue> : EventArgs {
 			public TValue NewValue;
+
 			public TValue OldValue;
 
 			public ValueChangingEventArg(TValue old, TValue @new) {
@@ -383,6 +391,7 @@ namespace Shared {
 		/// <typeparam name="TValue"></typeparam>
 		public class ValueChangedEventArg<TValue> : EventArgs {
 			public TValue NewValue;
+
 			public ValueChangedEventArg(TValue @new) => NewValue = @new;
 		}
 		#endregion

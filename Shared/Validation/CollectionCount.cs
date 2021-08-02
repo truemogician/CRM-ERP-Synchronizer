@@ -29,6 +29,7 @@ namespace Shared.Validation {
 
 	public class CollectionMinCountAttribute : CollectionCountAttribute {
 		public CollectionMinCountAttribute(int minCount) : base(minCount, int.MaxValue) { }
+
 		public override string FormatErrorMessage(string name) => $"The length of {name} must be larger than {MinCount}.";
 	}
 

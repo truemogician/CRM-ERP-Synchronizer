@@ -8,7 +8,9 @@ using Newtonsoft.Json.Converters;
 namespace FXiaoKe.Requests.Message {
 	public class ArticlesMessageRequest : MessageRequest {
 		public ArticlesMessageRequest() { }
+
 		public ArticlesMessageRequest(params Article[] articles) => Articles = articles.AsList();
+
 		public override MessageType Type => MessageType.Articles;
 
 		[JsonProperty("articles")]

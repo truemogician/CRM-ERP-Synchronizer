@@ -63,6 +63,7 @@ namespace FXiaoKe.Requests {
 		public T Model { get; set; }
 
 		public static implicit operator CreationData<T>(T model) => new(model);
+
 		public static implicit operator T(CreationData<T> data) => data.Model;
 	}
 

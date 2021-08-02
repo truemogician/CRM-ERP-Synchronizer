@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Reflection;
-using FXiaoKe.Utilities;
-using Newtonsoft.Json;
 using Shared.Exceptions;
 
 namespace FXiaoKe.Models {
@@ -18,8 +15,6 @@ namespace FXiaoKe.Models {
 
 	[AttributeUsage(AttributeTargets.Property | AttributeTargets.Field)]
 	public class MainFieldAttribute : FXiaoKeAttribute {
-		public MainFieldAttribute() { }
-
 		public bool Unique { get; init; } = true;
 	}
 

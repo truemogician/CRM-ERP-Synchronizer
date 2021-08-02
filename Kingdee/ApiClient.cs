@@ -30,8 +30,6 @@ namespace Kingdee {
 	}
 
 	public class ApiClient {
-		protected ConnectionConfig ConnectionConfig;
-
 		private readonly CookieContainer _cookiesContainer;
 
 		private readonly FailCallbackHandler _defaultFailCallback;
@@ -43,6 +41,8 @@ namespace Kingdee {
 		private readonly HttpClient _httpClient;
 
 		private readonly string _serverUrl;
+
+		protected ConnectionConfig ConnectionConfig;
 
 		#region Constructors
 		public ApiClient(string serverUrl) {

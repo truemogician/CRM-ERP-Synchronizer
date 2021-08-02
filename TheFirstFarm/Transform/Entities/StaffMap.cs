@@ -1,5 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-using FXiaoKe.Models;
+﻿using FXiaoKe.Models;
 
 namespace TheFirstFarm.Transform.Entities {
 	[Map(typeof(Staff))]

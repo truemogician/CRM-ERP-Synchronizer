@@ -26,6 +26,7 @@ namespace Kingdee {
 		public string ExceptionType { get; set; }
 
 		public ExceptionWrapper InnerException { get; set; }
+
 		public static ExceptionWrapper WrapEx(Exception ex) => Wrap(ex);
 
 		private static ExceptionWrapper Wrap(Exception ex) {

@@ -5,7 +5,9 @@ using Newtonsoft.Json.Linq;
 namespace Shared.Exceptions {
 	public class JTokenException : Exception {
 		public JTokenException(string message = null, Exception innerException = null) : base(message, innerException) { }
+
 		public JTokenException(JToken token, string message = null, Exception innerException = null) : this(message, innerException) => Token = token;
+
 		public JToken Token { get; set; }
 	}
 

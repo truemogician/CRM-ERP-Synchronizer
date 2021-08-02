@@ -10,6 +10,7 @@ namespace Shared.Exceptions {
 
 	public class EnumValueOutOfRangeException : EnumException {
 		public EnumValueOutOfRangeException(string message = null, Exception innerException = null) : base(message, innerException) { }
+
 		public EnumValueOutOfRangeException(Type enumType, object enumValue = null, string message = null, Exception innerException = null) : base(enumType, message, innerException) => this[nameof(EnumValue)] = enumValue;
 
 		public object EnumValue => Get<object>(nameof(EnumValue));

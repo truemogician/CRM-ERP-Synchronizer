@@ -4,7 +4,9 @@ using System.Threading;
 namespace Kingdee {
 	internal class DelayInvoker<T> {
 		private readonly Action<T> _action;
+
 		private readonly T _state;
+
 		private readonly int _timeout;
 
 		public DelayInvoker(Action<T> action, T state, int timeout) {
