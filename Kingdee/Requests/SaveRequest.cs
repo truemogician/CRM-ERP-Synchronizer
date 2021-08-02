@@ -3,7 +3,7 @@ using Newtonsoft.Json;
 using Shared.Serialization;
 
 namespace Kingdee.Requests {
-	public class SaveRequest<T> : CreationRequest<T> where T : FormBase {
+	public class SaveRequest<T> : CreationRequest<T> where T : ErpModelBase {
 		public SaveRequest() { }
 
 		public SaveRequest(T data) : base(data) { }

@@ -5,7 +5,7 @@ using Newtonsoft.Json;
 
 namespace TheFirstFarm.Models.Kingdee {
 	[Form("BD_CUSTCONTACT")]
-	public class CustomerAddress : FormBase {
+	public class CustomerAddress : ErpModelBase {
 		/// <summary>
 		///     地点编码
 		/// </summary>

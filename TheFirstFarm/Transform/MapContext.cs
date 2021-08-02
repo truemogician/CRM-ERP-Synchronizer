@@ -9,6 +9,8 @@ using Kingdee.Forms;
 using Microsoft.EntityFrameworkCore;
 using Shared.Exceptions;
 using TheFirstFarm.Transform.Entities;
+using FModelBase = FXiaoKe.Models.ModelBase;
+using KModelBase = Kingdee.Forms.ModelBase;
 
 namespace TheFirstFarm.Transform {
 	public class MapContext : DbContext {
@@ -40,9 +42,9 @@ namespace TheFirstFarm.Transform {
 
 		#nullable enable
 		public static Type? GetMapType(Type modelType) {
-			bool isFModel = modelType.IsAssignableTo(typeof(ModelBase));
-			if (!modelType.IsAssignableTo(typeof(FormBase)))
-				throw new TypeException(modelType, $"{modelType.Name} neither derives from {nameof(ModelBase)} nor {nameof(FormBase)}");
+			bool isFModel = modelType.IsAssignableTo(typeof(FModelBase));
+			if (!modelType.IsAssignableTo(typeof(ErpModelBase)))
+				throw new TypeException(modelType, $"{modelType.Name} neither derives from {nameof(FModelBase)} nor {nameof(ErpModelBase)}");
 			return MapTypes.SingleOrDefault(type => type.GetCustomAttribute<MapAttribute>() is { } attr && (isFModel ? attr.FModel == modelType : attr.KModel == modelType));
 		}
 		#nullable disable

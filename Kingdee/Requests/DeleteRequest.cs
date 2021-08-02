@@ -7,7 +7,7 @@ using Shared.Exceptions;
 using Shared.Serialization;
 
 namespace Kingdee.Requests {
-	public class DeleteRequest<T> : RequestBase where T : FormBase {
+	public class DeleteRequest<T> : RequestBase where T : ErpModelBase {
 		public DeleteRequest(string idName, params T[] entities) {
 			IdProperty = typeof(T).GetProperty(idName, typeof(string));
 			if (IdProperty is null)

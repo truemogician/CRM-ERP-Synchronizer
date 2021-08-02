@@ -9,36 +9,13 @@ using TheFirstFarm.Models.Common;
 
 namespace TheFirstFarm.Models.Kingdee {
 	[Form]//TODO
-	public class ReturnOrderDetail : FormBase {
+	public class ReturnOrderDetail : ErpModelBase {
 		/// <summary>
 		///     物料编码
 		/// </summary>
 		[JsonProperty("FMaterialId")]
 		[Required]
 		public NumberWrapper MaterialNumber { get; set; }
-
-		/// <summary>
-		///     物料名称
-		/// </summary>
-		//[JsonProperty("FMaterialName")]
-		//[JsonInclude]
-		//[Required]
-		//public string MaterialName { get; set; }
-
-		/// <summary>
-		///     规格型号
-		/// </summary>
-		//[JsonProperty("FMaterialModel")]
-		//[JsonInclude]
-		//public string MaterialModel { get; set; }
-
-		/// <summary>
-		///     销售单位
-		/// </summary>
-		//[JsonProperty("FUnitID")]
-		//[JsonInclude]
-		//[Required]
-		//public NumberWrapper SaleUnit { get; set; }
 
 		/// <summary>
 		///     实退数量

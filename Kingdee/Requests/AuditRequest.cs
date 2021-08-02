@@ -5,7 +5,7 @@ using Newtonsoft.Json;
 using Shared.Serialization;
 
 namespace Kingdee.Requests {
-	public class AuditRequest<T> : DeleteRequest<T> where T : FormBase {
+	public class AuditRequest<T> : DeleteRequest<T> where T : ErpModelBase {
 		public AuditRequest(string idName, params T[] entities) : base(idName, entities) { }
 
 		/// <summary>

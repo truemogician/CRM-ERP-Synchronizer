@@ -11,7 +11,7 @@ using TheFirstFarm.Models.Common;
 
 namespace TheFirstFarm.Models.Kingdee {
 	[Form("SAL_RETURNSTOCK")]
-	public class ReturnOrder : FormBase {
+	public class ReturnOrder : ErpModelBase {
 		[JsonProperty("FID")]
 		[Key]
 		public int Id { get; set; }
@@ -26,9 +26,11 @@ namespace TheFirstFarm.Models.Kingdee {
 		public DateTime? Date { get; set; }
 
 		[JsonProperty("FRetcustId")]
+		[Required]
 		public NumberWrapper CustomerNumber { get; set; }
 
 		[JsonProperty("FSalesManId")]
+		[Required]
 		public NumberWrapper SalesmanNumber { get; set; }
 
 		[JsonProperty("FReturnReason")]

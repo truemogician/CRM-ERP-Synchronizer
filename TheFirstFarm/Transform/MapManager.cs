@@ -69,7 +69,7 @@ namespace TheFirstFarm.Transform {
 			return map;
 		}
 
-		private async Task<TMap> QueryByKingdeeId<TMap, TForm>(int id, bool save = true) where TMap : class, IIdMap, new() where TForm : FormBase {
+		private async Task<TMap> QueryByKingdeeId<TMap, TForm>(int id, bool save = true) where TMap : class, IIdMap, new() where TForm : ErpModelBase {
 			var keyInfo = FormMeta<TForm>.Key;
 			var resp = await KClient.QueryAsync(new QueryRequest<TForm>((Field)keyInfo == id));
 			if (resp.IsT0)
@@ -122,7 +122,7 @@ namespace TheFirstFarm.Transform {
 			return map;
 		}
 
-		private async Task<TMap> QueryKingdeeByMapProperty<TMap, TForm>(string propName, object value, bool save = true) where TMap : class, IIdMap, new() where TForm : FormBase {
+		private async Task<TMap> QueryKingdeeByMapProperty<TMap, TForm>(string propName, object value, bool save = true) where TMap : class, IIdMap, new() where TForm : ErpModelBase {
 			var mapInfo = GetMapInfo(typeof(TMap));
 			var property = mapInfo.GetProperty(propName);
 			if (property is null)

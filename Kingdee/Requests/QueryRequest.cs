@@ -7,7 +7,7 @@ using Newtonsoft.Json;
 using Shared.Serialization;
 
 namespace Kingdee.Requests {
-	public class QueryRequest<T> : RequestBase where T : FormBase {
+	public class QueryRequest<T> : RequestBase where T : ErpModelBase {
 		public QueryRequest(int limit = 0, int offset = 0) : this(FormMeta<T>.QueryFields) {
 			Limit = limit;
 			Offset = offset;

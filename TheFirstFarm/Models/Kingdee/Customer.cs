@@ -6,7 +6,7 @@ using Newtonsoft.Json;
 
 namespace TheFirstFarm.Models.Kingdee {
 	[Form("BD_Customer")]
-	public class Customer : FormBase {
+	public class Customer : ErpModelBase {
 		/// <summary>
 		///     客户Id
 		/// </summary>

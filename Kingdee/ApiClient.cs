@@ -175,7 +175,7 @@ namespace Kingdee {
 
 		#region Execute
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public TResponse ValidateAndExecute<TResponse, TForm>(string serviceName, RequestBase request) where TForm : FormBase => ValidateAndExecute<TResponse>(serviceName, FormMeta<TForm>.Name, JsonConvert.SerializeObject(request));
+		public TResponse ValidateAndExecute<TResponse, TForm>(string serviceName, RequestBase request) where TForm : ErpModelBase => ValidateAndExecute<TResponse>(serviceName, FormMeta<TForm>.Name, JsonConvert.SerializeObject(request));
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public T ValidateAndExecute<T>(string serviceName, params object[] parameters) => ValidateAndExecute<T>(serviceName, parameters, timeout: _defaultTimeout);
@@ -197,7 +197,7 @@ namespace Kingdee {
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public TResponse Execute<TResponse, TForm>(string serviceName, RequestBase request) where TForm : FormBase => Execute<TResponse>(serviceName, FormMeta<TForm>.Name, JsonConvert.SerializeObject(request));
+		public TResponse Execute<TResponse, TForm>(string serviceName, RequestBase request) where TForm : ErpModelBase => Execute<TResponse>(serviceName, FormMeta<TForm>.Name, JsonConvert.SerializeObject(request));
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public T Execute<T>(string serviceName, params object[] parameters) => Execute<T>(serviceName, parameters, timeout: _defaultTimeout);
@@ -217,7 +217,7 @@ namespace Kingdee {
 		public Task<TResponse> ValidateAndExecuteAsync<TResponse, TForm>(
 			string serviceName,
 			RequestBase request
-		) where TForm : FormBase
+		) where TForm : ErpModelBase
 			=> ValidateAndExecuteAsync<TResponse>(
 				serviceName,
 				FormMeta<TForm>.Name,
@@ -238,7 +238,7 @@ namespace Kingdee {
 		public Task<TResponse> ExecuteAsync<TResponse, TForm>(
 			string serviceName,
 			RequestBase request
-		) where TForm : FormBase
+		) where TForm : ErpModelBase
 			=> ExecuteAsync<TResponse>(
 				serviceName,
 				FormMeta<TForm>.Name,
@@ -263,7 +263,7 @@ namespace Kingdee {
 			FailCallbackHandler onFail = null,
 			int timeout = Timeout.Infinite,
 			int reportInterval = 5
-		) where TForm : FormBase
+		) where TForm : ErpModelBase
 			=> ExecuteAsync(
 				serviceName,
 				onSucceed,

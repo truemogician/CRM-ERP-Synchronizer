@@ -5,6 +5,7 @@ using System.Reflection;
 using System.Text.Json.Serialization;
 using Kingdee.Forms;
 using Kingdee.Requests;
+using Kingdee.Requests.Query;
 using Shared;
 using Shared.Exceptions;
 using Shared.Utilities;
@@ -14,7 +15,7 @@ namespace Kingdee.Utilities {
 	public static class Extension {
 		public static FormAttribute GetFormAttribute(this Type type, bool verify = true) {
 			if (verify)
-				Utility.VerifyInheritance(type, typeof(FormBase));
+				Utility.VerifyInheritance(type, typeof(ErpModelBase));
 			return type.GetCustomAttribute<FormAttribute>();
 		}
 
@@ -98,7 +99,7 @@ namespace Kingdee.Utilities {
 
 		public static List<Field> GetQueryFields(this Type type, bool verify = true) {
 			if (verify)
-				Utility.VerifyInheritance(type, typeof(FormBase));
+				Utility.VerifyInheritance(type, typeof(ErpModelBase));
 			return GetQueryFields(type, null);
 		}
 	}

@@ -24,14 +24,14 @@ using KResponses = Kingdee.Responses;
 namespace TheFirstFarm.Test {
 	public class ReturnOrderTests : TestBase {
 		[TestCaseGeneric(GenericArgument = typeof(KModels.ReturnOrder), ExpectedResult = 15)]
-		public int KingdeeFieldsTest<T>() where T : FormBase {
+		public int KingdeeFieldsTest<T>() where T : ErpModelBase {
 			var fields = FormMeta<T>.QueryFields;
 			Console.WriteLine(string.Join(", ", fields.Select(field => field.ToString("json"))));
 			return fields.Count;
 		}
 
 		[TestCaseGeneric(GenericArgument = typeof(KModels.ReturnOrder))]
-		public void KingdeeQueryTest<T>() where T : FormBase {
+		public void KingdeeQueryTest<T>() where T : ErpModelBase {
 			var response = KClient.Query(new KRequests.QueryRequest<T>());
 			Assert.IsTrue(response.IsT1);
 			foreach (var resp in response.AsT1)
@@ -106,7 +106,7 @@ namespace TheFirstFarm.Test {
 						string ownerId = transformer.GetByMapProperty<StaffMap, string>(nameof(StaffMap.Number), model.SalesmanNumber)?.FXiaoKeId;
 						return new FModels.ReturnOrder {
 							CustomerId = (await transformer.FromMapProperty<CustomerMap>(nameof(CustomerMap.Number), (string)model.CustomerNumber))?.FXiaoKeId,
-							Date = model.Date!.Value,
+							Date = model.Date,
 							OwnerId = ownerId,
 							Reason = model.ReturnReason,
 							Number = model.Number,

@@ -9,6 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Kingdee.Forms;
 using Kingdee.Requests;
+using Kingdee.Requests.Query;
 using Kingdee.Responses;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -77,7 +78,7 @@ namespace Kingdee {
 			);
 		}
 
-		private OneOf<BasicResponse, List<T>> DeserializeQueryResponse<T>(IEnumerable<Field> fields, string json) where T : FormBase {
+		private OneOf<BasicResponse, List<T>> DeserializeQueryResponse<T>(IEnumerable<Field> fields, string json) where T : ErpModelBase {
 			var token = JToken.Parse(json);
 			if (token.Type == JTokenType.Object)
 				return token.Value<BasicResponse>();
@@ -105,7 +106,7 @@ namespace Kingdee {
 		/// </summary>
 		/// <param name="request"></param>
 		/// <returns></returns>
-		public OneOf<BasicResponse, List<T>> Query<T>(QueryRequest<T> request) where T : FormBase {
+		public OneOf<BasicResponse, List<T>> Query<T>(QueryRequest<T> request) where T : ErpModelBase {
 			var json = ValidateAndExecute<string>(
 				"Kingdee.BOS.WebApi.ServicesStub.DynamicFormService.ExecuteBillQuery",
 				JsonConvert.SerializeObject(request)
@@ -117,37 +118,37 @@ namespace Kingdee {
 		///     保存
 		/// </summary>
 		/// <returns></returns>
-		public SaveResponse Save<T>(SaveRequest<T> request) where T : FormBase => ValidateAndExecute<SaveResponse, T>("Kingdee.BOS.WebApi.ServicesStub.DynamicFormService.Save", request);
+		public SaveResponse Save<T>(SaveRequest<T> request) where T : ErpModelBase => ValidateAndExecute<SaveResponse, T>("Kingdee.BOS.WebApi.ServicesStub.DynamicFormService.Save", request);
 
 		/// <summary>
 		///     批量保存
 		/// </summary>
 		/// <returns></returns>
-		public BatchSaveResponse BatchSave<T>(BatchSaveRequest<T> request) where T : FormBase => ValidateAndExecute<BatchSaveResponse, T>("Kingdee.BOS.WebApi.ServicesStub.DynamicFormService.BatchSave", request);
+		public BatchSaveResponse BatchSave<T>(BatchSaveRequest<T> request) where T : ErpModelBase => ValidateAndExecute<BatchSaveResponse, T>("Kingdee.BOS.WebApi.ServicesStub.DynamicFormService.BatchSave", request);
 
 		/// <summary>
 		///     暂存
 		/// </summary>
 		/// <returns></returns>
-		public SaveResponse Draft<T>(SaveRequest<T> request) where T : FormBase => ValidateAndExecute<SaveResponse, T>("Kingdee.BOS.WebApi.ServicesStub.DynamicFormService.Draft", request);
+		public SaveResponse Draft<T>(SaveRequest<T> request) where T : ErpModelBase => ValidateAndExecute<SaveResponse, T>("Kingdee.BOS.WebApi.ServicesStub.DynamicFormService.Draft", request);
 
 		/// <summary>
 		///     审核
 		/// </summary>
 		/// <returns></returns>
-		public BasicResponse Audit<T>(AuditRequest<T> request) where T : FormBase => ValidateAndExecute<BasicResponse, T>("Kingdee.BOS.WebApi.ServicesStub.DynamicFormService.Audit", request);
+		public BasicResponse Audit<T>(AuditRequest<T> request) where T : ErpModelBase => ValidateAndExecute<BasicResponse, T>("Kingdee.BOS.WebApi.ServicesStub.DynamicFormService.Audit", request);
 
 		/// <summary>
 		///     反审核
 		/// </summary>
 		/// <returns></returns>
-		public BasicResponse Unaudit<T>(AuditRequest<T> request) where T : FormBase => Execute<BasicResponse, T>("Kingdee.BOS.WebApi.ServicesStub.DynamicFormService.UnAudit", request);
+		public BasicResponse Unaudit<T>(AuditRequest<T> request) where T : ErpModelBase => Execute<BasicResponse, T>("Kingdee.BOS.WebApi.ServicesStub.DynamicFormService.UnAudit", request);
 
 		/// <summary>
 		///     删除
 		/// </summary>
 		/// <returns></returns>
-		public BasicResponse Delete<T>(DeleteRequest<T> request) where T : FormBase => ValidateAndExecute<BasicResponse, T>("Kingdee.BOS.WebApi.ServicesStub.DynamicFormService.Delete", request);
+		public BasicResponse Delete<T>(DeleteRequest<T> request) where T : ErpModelBase => ValidateAndExecute<BasicResponse, T>("Kingdee.BOS.WebApi.ServicesStub.DynamicFormService.Delete", request);
 
 		/// <summary>
 		///     提交
@@ -183,7 +184,7 @@ namespace Kingdee {
 		#endregion
 
 		#region Async(Task) Requests
-		public async Task<OneOf<BasicResponse, List<T>>> QueryAsync<T>(QueryRequest<T> request) where T : FormBase {
+		public async Task<OneOf<BasicResponse, List<T>>> QueryAsync<T>(QueryRequest<T> request) where T : ErpModelBase {
 			var json = await ValidateAndExecuteAsync<string>(
 				"Kingdee.BOS.WebApi.ServicesStub.DynamicFormService.ExecuteBillQuery",
 				JsonConvert.SerializeObject(request)
@@ -191,19 +192,19 @@ namespace Kingdee {
 			return DeserializeQueryResponse<T>(request.Fields, json);
 		}
 
-		public Task<SaveResponse> SaveAsync<T>(SaveRequest<T> request) where T : FormBase
+		public Task<SaveResponse> SaveAsync<T>(SaveRequest<T> request) where T : ErpModelBase
 			=> ValidateAndExecuteAsync<SaveResponse, T>(
 				"Kingdee.BOS.WebApi.ServicesStub.DynamicFormService.Save",
 				request
 			);
 
-		public Task<BasicResponse> AuditAsync<T>(AuditRequest<T> request) where T : FormBase
+		public Task<BasicResponse> AuditAsync<T>(AuditRequest<T> request) where T : ErpModelBase
 			=> ValidateAndExecuteAsync<BasicResponse, T>(
 				"Kingdee.BOS.WebApi.ServicesStub.DynamicFormService.Audit",
 				request
 			);
 
-		public Task<BasicResponse> UnauditAsync<T>(AuditRequest<T> request) where T : FormBase
+		public Task<BasicResponse> UnauditAsync<T>(AuditRequest<T> request) where T : ErpModelBase
 			=> ValidateAndExecuteAsync<BasicResponse, T>(
 				"Kingdee.BOS.WebApi.ServicesStub.DynamicFormService.UnAudit",
 				request
@@ -238,7 +239,7 @@ namespace Kingdee {
 			FailCallbackHandler onFail = null,
 			ProgressChangedHandler onProgressChange = null,
 			int reportInterval = 5
-		) where T : FormBase {
+		) where T : ErpModelBase {
 			ExecuteAsync<string>(
 				"Kingdee.BOS.WebApi.ServicesStub.DynamicFormService.ExecuteBillQuery",
 				json => onSucceed(DeserializeQueryResponse<T>(request.Fields, json)),
@@ -256,7 +257,7 @@ namespace Kingdee {
 			FailCallbackHandler onFail = null,
 			ProgressChangedHandler onProgressChange = null,
 			int reportInterval = 5
-		) where T : FormBase {
+		) where T : ErpModelBase {
 			ExecuteAsync<SaveResponse, T>(
 				"Kingdee.BOS.WebApi.ServicesStub.DynamicFormService.Save",
 				request,
@@ -274,7 +275,7 @@ namespace Kingdee {
 			FailCallbackHandler onFail = null,
 			ProgressChangedHandler onProgressChange = null,
 			int reportInterval = 5
-		) where T : FormBase {
+		) where T : ErpModelBase {
 			ExecuteAsync<BatchSaveResponse, T>(
 				"Kingdee.BOS.WebApi.ServicesStub.DynamicFormService.BatchSave",
 				request,
@@ -292,7 +293,7 @@ namespace Kingdee {
 			FailCallbackHandler onFail = null,
 			ProgressChangedHandler onProgressChange = null,
 			int reportInterval = 5
-		) where T : FormBase {
+		) where T : ErpModelBase {
 			ExecuteAsync<SaveResponse, T>(
 				"Kingdee.BOS.WebApi.ServicesStub.DynamicFormService.Draft",
 				request,
@@ -310,7 +311,7 @@ namespace Kingdee {
 			FailCallbackHandler onFail = null,
 			ProgressChangedHandler onProgressChange = null,
 			int reportInterval = 5
-		) where T : FormBase {
+		) where T : ErpModelBase {
 			ExecuteAsync<BasicResponse, T>(
 				"Kingdee.BOS.WebApi.ServicesStub.DynamicFormService.Audit",
 				request,
@@ -328,7 +329,7 @@ namespace Kingdee {
 			FailCallbackHandler onFail = null,
 			ProgressChangedHandler onProgressChange = null,
 			int reportInterval = 5
-		) where T : FormBase {
+		) where T : ErpModelBase {
 			ExecuteAsync<BasicResponse, T>(
 				"Kingdee.BOS.WebApi.ServicesStub.DynamicFormService.UnAudit",
 				request,
@@ -346,7 +347,7 @@ namespace Kingdee {
 			FailCallbackHandler onFail = null,
 			ProgressChangedHandler onProgressChange = null,
 			int reportInterval = 5
-		) where T : FormBase {
+		) where T : ErpModelBase {
 			ExecuteAsync<BasicResponse, T>(
 				"Kingdee.BOS.WebApi.ServicesStub.DynamicFormService.Delete",
 				request,

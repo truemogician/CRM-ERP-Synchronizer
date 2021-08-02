@@ -6,7 +6,7 @@ using TheFirstFarm.Models.Common;
 
 namespace TheFirstFarm.Models.Kingdee {
 	[Form("BD_MATERIAL")]
-	public class Material : FormBase {
+	public class Material : ErpModelBase {
 		[JsonProperty("FMaterialId")]
 		[Key]
 		[Required]
@@ -97,6 +97,6 @@ namespace TheFirstFarm.Models.Kingdee {
 		///     允许退货
 		/// </summary>
 		[JsonProperty("FIsReturn")]
-		public bool? AllowReturn { get; set; }
+		public bool AllowReturn { get; set; }
 	}
 }
