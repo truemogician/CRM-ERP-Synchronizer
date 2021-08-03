@@ -3,23 +3,17 @@ using System.Linq;
 using System.Reflection;
 using Kingdee.Forms;
 using Newtonsoft.Json;
-using Shared.Exceptions;
 using Shared.Serialization;
 
 namespace Kingdee.Requests {
 	public class DeleteRequest<T> : RequestBase where T : ErpModelBase {
-		public DeleteRequest(string idName, params T[] entities) {
-			IdProperty = typeof(T).GetProperty(idName, typeof(string));
-			if (IdProperty is null)
-				throw new TypeException(typeof(T), $"Property \"{idName}\" with string type not found");
-			Entities = entities.ToList();
-		}
+		private static readonly MemberInfo Key = FormMeta<T>.Key;
 
-		[JsonIgnore]
-		public PropertyInfo IdProperty { get; }
+		public DeleteRequest(params int[] ids) => Ids = ids.ToList();
 
-		[JsonIgnore]
-		public List<T> Entities { get; }
+		public DeleteRequest(params string[] numbers) => Numbers = numbers.ToList();
+
+		public DeleteRequest(params T[] entities) => AddEntities(entities);
 
 		/// <summary>
 		///     创建者组织内码
@@ -31,14 +25,14 @@ namespace Kingdee.Requests {
 		///     单据编码集合
 		/// </summary>
 		[JsonProperty("Numbers")]
-		public List<object> Numbers { get; set; } = new();
+		public List<string> Numbers { get; set; } = new();
 
 		/// <summary>
 		///     单据内码集合
 		/// </summary>
 		[JsonProperty("Ids")]
 		[JsonConverter(typeof(StringCollectionConverter), ',')]
-		public IEnumerable<string> Ids => Entities.Select(entity => IdProperty.GetValue(entity) as string);
+		public List<int> Ids { get; set; } = new();
 
 		/// <summary>
 		///     是否启用网控
@@ -46,5 +40,9 @@ namespace Kingdee.Requests {
 		[JsonProperty("NetworkCtrl")]
 		[JsonConverter(typeof(BoolConverter))]
 		public bool NetworkControl { get; set; }
+
+		public void AddEntity(T entity) => Ids.Add((int)Key.GetValue(entity));
+
+		public void AddEntities(IEnumerable<T> entities) => Ids.AddRange(entities.Select(entity => (int)Key.GetValue(entity)));
 	}
 }

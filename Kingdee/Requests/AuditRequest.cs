@@ -6,7 +6,11 @@ using Shared.Serialization;
 
 namespace Kingdee.Requests {
 	public class AuditRequest<T> : DeleteRequest<T> where T : ErpModelBase {
-		public AuditRequest(string idName, params T[] entities) : base(idName, entities) { }
+		public AuditRequest(params int[] ids) : base(ids) { }
+
+		public AuditRequest(params string[] numbers) : base(numbers) { }
+
+		public AuditRequest(params T[] entities) : base(entities) { }
 
 		/// <summary>
 		///     交互标志集合
