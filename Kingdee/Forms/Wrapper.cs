@@ -1,24 +1,27 @@
-﻿using System.Linq;
-using System.Reflection;
+﻿using System.Reflection;
 using Newtonsoft.Json;
 
 namespace Kingdee.Forms {
-	public class NumberWrapper : NumberWrapper<string> { }
+	public class NumberWrapper : NumberWrapper<string> {
+		public static implicit operator NumberWrapper(string number) => new() {Number = number};
+	}
 
 	public class NumberWrapper<T> : WrapperBase<T> {
 		[JsonProperty("FNumber")]
-		public T Number { get; set; }
+		public virtual T Number { get; set; }
 
 		protected override string ValueName => nameof(Number);
 
 		public static implicit operator NumberWrapper<T>(T number) => new() {Number = number};
 	}
 
-	public class NameWrapper : NameWrapper<string> { }
+	public class NameWrapper : NameWrapper<string> {
+		public static implicit operator NameWrapper(string number) => new() {Name = number};
+	}
 
 	public class NameWrapper<T> : WrapperBase<T> {
 		[JsonProperty("FName")]
-		public T Name { get; set; }
+		public virtual T Name { get; set; }
 
 		protected override string ValueName => nameof(Name);
 

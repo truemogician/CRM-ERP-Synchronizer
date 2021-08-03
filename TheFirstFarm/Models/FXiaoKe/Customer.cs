@@ -5,6 +5,7 @@ using System.ComponentModel.DataAnnotations;
 using FXiaoKe.Models;
 using Newtonsoft.Json;
 using Shared.Serialization;
+using TheFirstFarm.Models.Common;
 
 namespace TheFirstFarm.Models.FXiaoKe {
 	/// <summary>
@@ -39,6 +40,7 @@ namespace TheFirstFarm.Models.FXiaoKe {
 		/// </summary>
 
 		[JsonProperty("field_Nx4Oo__c")]
+		[JsonConverter(typeof(EnumValueConverter), Platform.FXiaoKe)]
 		[Required]
 		public Currency SettlementCurrency { get; set; } = Currency.CNY;
 
@@ -47,7 +49,7 @@ namespace TheFirstFarm.Models.FXiaoKe {
 		/// </summary>
 
 		[JsonProperty("field_U8k97__c")]
-		[JsonConverter(typeof(EnumValueConverter), OrgSet.CreatorOrgId)]
+		[JsonConverter(typeof(EnumValueConverter), OrgSet.FCreatorOrgId)]
 		[Required]
 		public Organization CreatorOrgId { get; set; } = Organization.TheFirstFarm;
 
@@ -56,7 +58,7 @@ namespace TheFirstFarm.Models.FXiaoKe {
 		/// </summary>
 
 		[JsonProperty("field_Qbln5__c")]
-		[JsonConverter(typeof(EnumValueConverter), OrgSet.CreatorOrgName)]
+		[JsonConverter(typeof(EnumValueConverter), OrgSet.FCreatorOrgName)]
 		[Required]
 		public Organization CreatorOrgName { get; set; } = Organization.TheFirstFarm;
 
@@ -65,7 +67,7 @@ namespace TheFirstFarm.Models.FXiaoKe {
 		/// </summary>
 
 		[JsonProperty("field_f267J__c")]
-		[JsonConverter(typeof(EnumValueConverter), OrgSet.UserOrgId)]
+		[JsonConverter(typeof(EnumValueConverter), OrgSet.FUserOrgId)]
 		[Required]
 		public Organization UserOrgId { get; set; } = Organization.TheFirstFarm;
 
@@ -74,7 +76,7 @@ namespace TheFirstFarm.Models.FXiaoKe {
 		/// </summary>
 
 		[JsonProperty("field_7v1a2__c")]
-		[JsonConverter(typeof(EnumValueConverter), OrgSet.UserOrgName)]
+		[JsonConverter(typeof(EnumValueConverter), OrgSet.FUserOrgName)]
 		[Required]
 		public Organization UserOrgName { get; set; } = Organization.TheFirstFarm;
 
@@ -157,6 +159,7 @@ namespace TheFirstFarm.Models.FXiaoKe {
 		public bool SyncSuccess { get; set; }
 
 		[SubModel(ReverseKeyName = nameof(FXiaoKe.Contact.CustomerId))]
+		[Required]
 		public Contact Contact { get; set; }
 
 		[SubModel]
@@ -165,105 +168,6 @@ namespace TheFirstFarm.Models.FXiaoKe {
 		[JsonIgnore]
 		[SubModel(Eager = false, Cascade = false)]
 		public List<CustomerFinancialInfo> FinancialInfos { get; set; }
-	}
-
-	[JsonConverter(typeof(EnumValueConverter))]
-	public enum Currency {
-		/// <summary>
-		///     PRE001
-		/// </summary>
-		[EnumValue("cJoS42Bvj")]
-		CNY,
-
-		/// <summary>
-		///     PRE002
-		/// </summary>
-		[EnumValue("9budk8Qg6")]
-		HKD,
-
-		/// <summary>
-		///     PRE003
-		/// </summary>
-		[EnumValue("0bg2lP3iC")]
-		EUR,
-
-		/// <summary>
-		///     PRE004
-		/// </summary>
-		[EnumValue("oxfswvKPO")]
-		JPY,
-
-		/// <summary>
-		///     PRE005
-		/// </summary>
-		[EnumValue("PWs5iRCd6")]
-		TWD,
-
-		/// <summary>
-		///     PRE006
-		/// </summary>
-		[EnumValue("63b132wdN")]
-		GBP,
-
-		/// <summary>
-		///     PRE007
-		/// </summary>
-		[EnumValue("0cg1IM59y")]
-		USD,
-
-		/// <summary>
-		///     其他
-		/// </summary>
-		[EnumValue("other")]
-		Other
-	}
-
-	public enum Organization : byte {
-		/// <summary>
-		///     江苏一号农场科技股份有限公司
-		/// </summary>
-		[EnumValue("823li72l1", OrgSet.CreatorOrgId)]
-		[EnumValue("jO1vcYL3g", OrgSet.CreatorOrgName)]
-		[EnumValue("al70nWs58", OrgSet.UserOrgId)]
-		[EnumValue("PsdFo1W03", OrgSet.UserOrgName)]
-		TheFirstFarm,
-
-		/// <summary>
-		///     江苏海威科网络科技有限公司
-		/// </summary>
-		[EnumValue("0461V10u4", OrgSet.CreatorOrgId)]
-		[EnumValue("g5ySNf9e5", OrgSet.CreatorOrgName)]
-		[EnumValue("x52p2dk70", OrgSet.UserOrgId)]
-		[EnumValue("c52sR5sy9", OrgSet.UserOrgName)]
-		Hiwico,
-
-		/// <summary>
-		///     旅游酒店BD
-		/// </summary>
-		[EnumValue("option1", OrgSet.CreatorOrgId)]
-		[EnumValue("option1", OrgSet.CreatorOrgName)]
-		[EnumValue("option1", OrgSet.UserOrgId)]
-		[EnumValue("option1", OrgSet.UserOrgName)]
-		TourHotelBD,
-
-		/// <summary>
-		///     其他
-		/// </summary>
-		[EnumValue("other", OrgSet.CreatorOrgId)]
-		[EnumValue("other", OrgSet.CreatorOrgName)]
-		[EnumValue("other", OrgSet.UserOrgId)]
-		[EnumValue("other", OrgSet.UserOrgName)]
-		Other
-	}
-
-	internal enum OrgSet : byte {
-		CreatorOrgId,
-
-		CreatorOrgName,
-
-		UserOrgId,
-
-		UserOrgName
 	}
 
 	[JsonConverter(typeof(EnumValueConverter))]

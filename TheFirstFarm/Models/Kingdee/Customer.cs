@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using Kingdee.Forms;
 using Newtonsoft.Json;
+using Shared.Serialization;
+using TheFirstFarm.Models.Common;
 
 namespace TheFirstFarm.Models.Kingdee {
 	[Form("BD_Customer")]
@@ -33,28 +35,28 @@ namespace TheFirstFarm.Models.Kingdee {
 		///     销售员#名称
 		/// </summary>
 		[JsonProperty("FSeller")]
-		public NumberWrapper SalesmanId { get; set; }
+		public NumberWrapper SalesmanNumber { get; set; }
 
 		/// <summary>
 		///     结算币别#编码
 		/// </summary>
 		[JsonProperty("FReceiveCurrId")]
 		[Required]
-		public NumberWrapper CurrencyId { get; set; }
+		public CurrencyWrapper CurrencyNumber { get; set; }
 
 		/// <summary>
 		///     创建组织#编码
 		/// </summary>
 		[JsonProperty("FCreateOrgId")]
 		[Required]
-		public NumberWrapper CreatorOrgId { get; set; }
+		public OrganizationWrapper CreatorOrgNumber { get; set; }
 
 		/// <summary>
 		///     使用组织#编码
 		/// </summary>
 		[JsonProperty("FUseOrgId")]
 		[Required]
-		public NumberWrapper UserOrgId { get; set; }
+		public OrganizationWrapper UserOrgNumber { get; set; }
 
 		/// <summary>
 		///     发票抬头
@@ -92,8 +94,36 @@ namespace TheFirstFarm.Models.Kingdee {
 		[JsonProperty("FINVOICETEL")]
 		public string PhoneNumber { get; set; }
 
+		[JsonProperty("FT_BD_CUSTLOCATION")]
+		public List<ContactRef> Contacts { get; set; }
+
 		[JsonProperty("FT_BD_CUSTCONTACT")]
 		[SubForm]
 		public List<CustomerAddress> Addresses { get; set; }
+
+		public class CurrencyWrapper : NumberWrapper<Currency> {
+			[JsonConverter(typeof(EnumValueConverter), Platform.Kingdee)]
+			public override Currency Number {
+				get => base.Number;
+				set => base.Number = value;
+			}
+
+			public static implicit operator CurrencyWrapper(Currency value) => new() {Number = value};
+		}
+
+		public class OrganizationWrapper : NumberWrapper<Organization> {
+			[JsonConverter(typeof(EnumValueConverter), OrgSet.KOrg)]
+			public override Organization Number {
+				get => base.Number;
+				set => base.Number = value;
+			}
+
+			public static implicit operator OrganizationWrapper(Organization value) => new() {Number = value};
+		}
+
+		public class ContactRef {
+			[JsonProperty("FContactId")]
+			public NumberWrapper Number { get; set; }
+		}
 	}
 }

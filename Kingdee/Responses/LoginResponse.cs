@@ -34,7 +34,7 @@ namespace Kingdee.Responses {
 		public object ErrorStackTrace { get; set; }
 
 		[JsonProperty("Lcid")]
-		public int Lcid { get; set; }
+		public Language Lcid { get; set; }
 
 		[JsonProperty("AccessToken")]
 		public object AccessToken { get; set; }
