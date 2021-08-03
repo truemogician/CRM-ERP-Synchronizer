@@ -1,5 +1,6 @@
 ﻿// ReSharper disable StringLiteralTypo
 using System.Collections.Generic;
+using Kingdee.Requests.Query;
 using Newtonsoft.Json;
 using Shared.Serialization;
 
@@ -8,6 +9,8 @@ namespace Kingdee.Responses {
 	public class BasicResponse : ResponseBase {
 		[JsonProperty("ResponseStatus")]
 		public ResponseStatus ResponseStatus { get; set; }
+
+		public static implicit operator bool(BasicResponse resp) => resp.ResponseStatus;
 	}
 
 	public class ResponseStatus {
@@ -28,6 +31,8 @@ namespace Kingdee.Responses {
 
 		[JsonProperty("MsgCode")]
 		public int MessageCode { get; set; }
+
+		public static implicit operator bool(ResponseStatus status) => status.Success;
 	}
 
 	public class Error {

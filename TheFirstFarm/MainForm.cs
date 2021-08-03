@@ -28,6 +28,8 @@ namespace TheFirstFarm {
 	using KClient = Kingdee.Client;
 	using FCustomer = FModels.Customer;
 	using KCustomer = KModels.Customer;
+	using FContact = FModels.Contact;
+	using KContact = KModels.Contact;
 	using FReturnOrder = FModels.ReturnOrder;
 	using KReturnOrder = KModels.ReturnOrder;
 
@@ -197,9 +199,9 @@ namespace TheFirstFarm {
 					var result = new KCustomer {
 						Name = c.Name,
 						Number = c.Number,
-						CurrencyId = c.SettlementCurrency,
-						CreatorOrgId = c.CreatorOrgId,
-						UserOrgId = c.UserOrgId,
+						CurrencyNumber = c.SettlementCurrency,
+						CreatorOrgNumber = c.CreatorOrgId,
+						UserOrgNumber = c.UserOrgId,
 						InvoiceTitle = c.InvoiceTitle,
 						TaxpayerId = c.TaxpayerId,
 						OpeningBank = c.OpeningBank,
@@ -208,7 +210,18 @@ namespace TheFirstFarm {
 						PhoneNumber = c.InvoicePhoneNumber,
 						Addresses = new List<KModels.CustomerAddress>()
 					};
-					//ToDo: 联系人
+					var contact = new KContact {
+						Name = c.Contact.Name,
+						Number = c.Contact.Number,
+						PhoneNumber = c.Contact.PhoneNumber,
+						Address = c.Contact.Address
+					};
+					var contactSaveResp = await KClient.SaveAsync(new SaveRequest<KContact>(contact));
+					if (!contactSaveResp) {
+						Error($"保存联系人{contact.Name}时发生错误：{string.Join(", ", contactSaveResp.ResponseStatus.Errors.Select(e => $"{e.FieldName}: {e.Message}"))}");
+						continue;
+					}
+					result.Contacts = new List<KCustomer.ContactRef> {new() {Number = contactSaveResp.Number}};
 					foreach (var addr in c.Addresses)
 						result.Addresses.Add(
 							new KModels.CustomerAddress {
