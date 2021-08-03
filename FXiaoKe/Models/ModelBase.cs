@@ -1,9 +1,6 @@
-﻿using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Reflection;
+﻿using System.Reflection;
 using FXiaoKe.Utilities;
 using Newtonsoft.Json;
-using Shared.Utilities;
 
 namespace FXiaoKe.Models {
 	[Model]

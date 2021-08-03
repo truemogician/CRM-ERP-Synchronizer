@@ -28,10 +28,6 @@ namespace Kingdee {
 	public class ApiClient {
 		public static readonly TimeSpan LoginInterval = TimeSpan.FromHours(1);
 
-		protected ConnectionConfig ConnectionConfig;
-
-		protected DateTime? LastLoginTime;
-
 		private readonly CookieContainer _cookiesContainer;
 
 		private readonly FailCallbackHandler _defaultFailCallback;
@@ -43,6 +39,10 @@ namespace Kingdee {
 		private readonly HttpClient _httpClient;
 
 		private readonly string _serverUrl;
+
+		protected ConnectionConfig ConnectionConfig;
+
+		protected DateTime? LastLoginTime;
 
 		#region Constructors
 		public ApiClient(string serverUrl) {

@@ -1,5 +1,4 @@
 ﻿using System;
-using Kingdee.Requests;
 using Kingdee.Requests.Query;
 using Newtonsoft.Json;
 

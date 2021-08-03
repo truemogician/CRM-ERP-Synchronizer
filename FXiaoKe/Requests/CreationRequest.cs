@@ -1,13 +1,8 @@
-﻿using System;
-using System.ComponentModel.DataAnnotations;
-using System.IO;
-using System.Text;
+﻿using System.ComponentModel.DataAnnotations;
 using FXiaoKe.Models;
 using FXiaoKe.Responses;
 using FXiaoKe.Utilities;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using Shared.Exceptions;
 using Shared.Serialization;
 
 namespace FXiaoKe.Requests {

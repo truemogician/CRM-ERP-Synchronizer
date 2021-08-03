@@ -4,7 +4,6 @@ using System.Linq;
 using System.Reflection;
 using System.Text.Json.Serialization;
 using Kingdee.Forms;
-using Kingdee.Requests;
 using Kingdee.Requests.Query;
 using Shared;
 using Shared.Exceptions;
@@ -92,8 +91,6 @@ namespace Kingdee.Utilities {
 			}
 			return obj;
 		}
-
-		public static object SetQueryFields(this object obj, IEnumerable<Field> fields, IEnumerable<object> data) => SetQueryFields(obj, obj.GetType(), fields.AsList(), data.AsArray());
 
 		public static object CreateFromQueryFields(this Type type, IEnumerable<Field> fields, IEnumerable<object> data) => SetQueryFields(null, type, fields.AsList(), data.AsArray());
 

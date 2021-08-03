@@ -2,7 +2,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Reflection;
-using Kingdee.Requests;
 using Kingdee.Requests.Query;
 using Kingdee.Utilities;
 

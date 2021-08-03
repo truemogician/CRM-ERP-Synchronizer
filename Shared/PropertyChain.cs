@@ -9,7 +9,6 @@ using System.Text;
 using Newtonsoft.Json;
 using Shared.Exceptions;
 using Shared.Extensions;
-using Shared.Utilities;
 using Shared.Validation;
 
 namespace Shared {

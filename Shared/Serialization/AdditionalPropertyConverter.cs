@@ -5,9 +5,9 @@ using Newtonsoft.Json.Linq;
 
 namespace Shared.Serialization {
 	public class AdditionalPropertyConverter<T> : JsonConverter<T> {
-		public Dictionary<string, Func<T, object>> AdditionalProperties { get; } = new();
-
 		public List<JsonConverter> Converters = new();
+
+		public Dictionary<string, Func<T, object>> AdditionalProperties { get; } = new();
 
 		public sealed override void WriteJson(JsonWriter writer, T value, JsonSerializer serializer) {
 			serializer.Converters.AddRange(Converters);

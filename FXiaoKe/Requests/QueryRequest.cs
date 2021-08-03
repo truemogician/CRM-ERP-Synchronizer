@@ -236,9 +236,9 @@ namespace FXiaoKe.Requests {
 
 		public static ModelFilter<T> NotEqual(string propertyName, [NotNull] object value) => new(propertyName, QueryOperator.NotEqual, value);
 
-		public static ModelFilter<T> Is(string propertyName, object? value) => new(propertyName, QueryOperator.Is, new object?[] {value});
+		public static ModelFilter<T> Is(string propertyName, object? value) => new(propertyName, QueryOperator.Is, value);
 
-		public static ModelFilter<T> IsNot(string propertyName, object? value) => new(propertyName, QueryOperator.IsNot, new object?[] {value});
+		public static ModelFilter<T> IsNot(string propertyName, object? value) => new(propertyName, QueryOperator.IsNot, value);
 
 		public static ModelFilter<T> In(string propertyName, params object?[] values) => new(propertyName, QueryOperator.In, values);
 

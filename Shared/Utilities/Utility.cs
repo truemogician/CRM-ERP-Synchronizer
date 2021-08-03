@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
 using Shared.Exceptions;
-using Shared.Validation;
 
 namespace Shared.Utilities {
 	public static class Utility {
