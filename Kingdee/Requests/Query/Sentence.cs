@@ -18,7 +18,7 @@
 
 		public Sentence(Sentence sentence) : base(sentence.Body) {
 			Left = sentence.Left;
-			Right = sentence.Left;
+			Right = sentence.Right;
 			Operator = sentence.Operator;
 			FormType = typeof(T);
 		}
