@@ -4,6 +4,8 @@ using Newtonsoft.Json.Linq;
 
 namespace Shared.Serialization {
 	public class TimestampConverter : JsonConverter<DateTime> {
+		public static readonly DateTime UnixTimeBeginning = new(1970, 1, 1);
+
 		public TimestampConverter() : this(TimestampPrecision.Millisecond) { }
 
 		public TimestampConverter(TimestampPrecision precision) => Precision = precision;
@@ -11,15 +13,16 @@ namespace Shared.Serialization {
 		public TimestampPrecision Precision { get; }
 
 		public override void WriteJson(JsonWriter writer, DateTime value, JsonSerializer serializer) {
-			var offset = new DateTimeOffset(value);
-			writer.WriteValue(Precision == TimestampPrecision.Second ? offset.ToUnixTimeSeconds() : offset.ToUnixTimeMilliseconds());
+			var duration = value - UnixTimeBeginning;
+			writer.WriteValue(Convert.ToInt64(Math.Max(0, Precision == TimestampPrecision.Second ? duration.TotalSeconds : duration.TotalMilliseconds)));
 		}
 
 		public override DateTime ReadJson(JsonReader reader, Type objectType, DateTime existingValue, bool hasExistingValue, JsonSerializer serializer) {
 			var token = JToken.Load(reader);
-			return Precision == TimestampPrecision.Second
-				? DateTimeOffset.FromUnixTimeSeconds(token.Value<long>()).DateTime
-				: DateTimeOffset.FromUnixTimeMilliseconds(token.Value<long>()).DateTime;
+			return UnixTimeBeginning +
+				(Precision == TimestampPrecision.Second
+					? TimeSpan.FromSeconds(token.Value<long>())
+					: TimeSpan.FromMilliseconds(token.Value<long>()));
 		}
 	}
 
