@@ -36,7 +36,7 @@ namespace TheFirstFarm.Models.FXiaoKe {
 		///     发货时间1
 		/// </summary>
 		[JsonProperty("field_602Xn__c")]
-		[JsonConverter(typeof(NullableConverter<TimestampConverter, DateTime>))]
+		[JsonConverter(typeof(NullableConverter<TimestampConverter>))]
 		public DateTime? DeliveryTime { get; set; }
 
 		/// <summary>
@@ -56,7 +56,7 @@ namespace TheFirstFarm.Models.FXiaoKe {
 		///     日期
 		/// </summary>
 		[JsonProperty("field_q5ye0__c")]
-		[JsonConverter(typeof(NullableConverter<TimestampConverter, DateTime>))]
+		[JsonConverter(typeof(NullableConverter<TimestampConverter>))]
 		public DateTime? Date { get; set; }
 
 		/// <summary>

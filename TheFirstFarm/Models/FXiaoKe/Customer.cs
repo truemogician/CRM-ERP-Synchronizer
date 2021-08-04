@@ -141,7 +141,7 @@ namespace TheFirstFarm.Models.FXiaoKe {
 		/// </summary>
 
 		[JsonProperty("is_sync__c")]
-		[JsonConverter(typeof(NullableConverter<BoolConverter, bool>), "是", "否")]
+		[JsonConverter(typeof(NullableConverter<BoolConverter>), new object[] {new[] {"是", "否"}})]
 		public bool? NeedSync { get; set; }
 
 		/// <summary>

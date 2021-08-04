@@ -18,17 +18,17 @@ namespace FXiaoKe.Models {
 		///     最后修改时间
 		/// </summary>
 		[JsonProperty("last_modified_time")]
-		[JsonConverter(typeof(NullableConverter<TimestampConverter, DateTime>))]
+		[JsonConverter(typeof(NullableConverter<TimestampConverter>))]
 		[Generated]
-		public DateTime LastModifiedTime { get; set; }
+		public DateTime? LastModifiedTime { get; set; }
 
 		/// <summary>
 		///     创建时间
 		/// </summary>
 		[JsonProperty("create_time")]
-		[JsonConverter(typeof(NullableConverter<TimestampConverter, DateTime>))]
+		[JsonConverter(typeof(NullableConverter<TimestampConverter>))]
 		[Generated]
-		public DateTime CreationTime { get; set; }
+		public DateTime? CreationTime { get; set; }
 
 		/// <summary>
 		///     生命状态

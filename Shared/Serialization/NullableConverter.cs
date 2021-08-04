@@ -3,34 +3,41 @@ using System.Reflection;
 using Newtonsoft.Json;
 
 namespace Shared.Serialization {
-	public class NullableConverter<TConverter, TValue> : JsonConverter<TValue?> where TConverter : JsonConverter<TValue> where TValue : struct {
+	public class NullableConverter<TConverter> : JsonConverter where TConverter : JsonConverter {
+		private static Type _nullableValueType;
+
+		private static PropertyInfo _nullableValueProperty;
+
 		public NullableConverter() => Converter = typeof(TConverter).Construct() as TConverter;
 
 		public NullableConverter(params object[] parameters) => Converter = typeof(TConverter).Construct(parameters) as TConverter;
 
+		public static Type ValueType { get; } = typeof(TConverter).GetGenericType(typeof(JsonConverter<>)) is { } converterType ? converterType.GetGenericArguments()[0] : typeof(object);
+
+		public static Type NullableValueType => _nullableValueType ??= typeof(Nullable<>).MakeGenericType(ValueType);
+
+		private static PropertyInfo NullableValueProperty => _nullableValueProperty ??= NullableValueType.GetProperty(nameof(Nullable<int>.Value));
+
 		public TConverter Converter { get; }
 
-		public override void WriteJson(JsonWriter writer, TValue? value, JsonSerializer serializer) {
-			if (!value.HasValue)
+		#nullable enable
+		public override void WriteJson(JsonWriter writer, object? value, JsonSerializer serializer) {
+			if (value is null)
 				writer.WriteNull();
 			else
-				Converter.WriteJson(writer, value.Value, serializer);
+				Converter.WriteJson(writer, NullableValueProperty.GetValue(value!), serializer);
 		}
 
-		public override TValue? ReadJson(JsonReader reader, Type objectType, TValue? existingValue, bool hasExistingValue, JsonSerializer serializer) {
-			if (reader.TokenType is JsonToken.Null or JsonToken.Undefined)
-				return null;
-			return Converter.ReadJson(reader, objectType, existingValue ?? default, hasExistingValue, serializer);
-		}
+		public override object? ReadJson(
+			JsonReader reader,
+			Type objectType,
+			object? existingValue,
+			JsonSerializer serializer
+		)
+			=> reader.TokenType is JsonToken.Null or JsonToken.Undefined
+				? null
+				: Converter.ReadJson(reader, objectType.GetGenericArguments()[0], existingValue ?? default, serializer);
 
-		#region Reflection Constructors
-		public NullableConverter(object param) : this(new[] {param}) { }
-
-		public NullableConverter(object param1, object param2) : this(new[] {param1, param2}) { }
-
-		public NullableConverter(object param1, object param2, object param3) : this(new[] {param1, param2, param3}) { }
-
-		public NullableConverter(object param1, object param2, object param3, object param4) : this(new[] {param1, param2, param3, param4}) { }
-		#endregion
+		public override bool CanConvert(Type objectType) => objectType == NullableValueType;
 	}
 }
