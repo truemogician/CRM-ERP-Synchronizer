@@ -15,7 +15,7 @@ namespace Shared.Serialization {
 			foreach ((string name, var func) in AdditionalProperties)
 				obj.Add(name, JToken.FromObject(func(value), serializer));
 			serializer.Converters.RemoveRange(Converters);
-			writer.WriteValue(obj);
+			writer.WriteValue(obj, serializer);
 		}
 
 		public sealed override T ReadJson(JsonReader reader, Type objectType, T existingValue, bool hasExistingValue, JsonSerializer serializer) {
