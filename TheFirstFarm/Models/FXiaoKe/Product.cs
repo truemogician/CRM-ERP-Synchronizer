@@ -42,8 +42,9 @@ namespace TheFirstFarm.Models.FXiaoKe {
 		///     分类
 		/// </summary>
 		[JsonProperty("category")]
+		[JsonConverter(typeof(NullableEnumValueConverter), Platform.FXiaoKe)]
 		[Required]
-		public string Category { get; set; }//Enum too large
+		public ProductCategory? Category { get; set; }
 
 		/// <summary>
 		///     物料属性

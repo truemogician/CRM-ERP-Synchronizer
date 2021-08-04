@@ -41,7 +41,7 @@ namespace TheFirstFarm.Models.Kingdee {
 		///     物料分组
 		/// </summary>
 		[JsonProperty("FMaterialGroup")]
-		public NumberWrapper Group { get; set; }
+		public GroupWrapper Group { get; set; }
 
 		/// <summary>
 		///     物料属性
@@ -98,5 +98,15 @@ namespace TheFirstFarm.Models.Kingdee {
 		/// </summary>
 		[JsonProperty("FIsReturn")]
 		public bool AllowReturn { get; set; }
+
+		public class GroupWrapper : NumberWrapper<ProductCategory?> {
+			[JsonConverter(typeof(NullableEnumValueConverter), Platform.Kingdee)]
+			public override ProductCategory? Number {
+				get => base.Number;
+				set => base.Number = value;
+			}
+
+			public static implicit operator GroupWrapper(ProductCategory? value) => new() {Number = value};
+		}
 	}
 }
