@@ -127,7 +127,7 @@ namespace Shared.Serialization {
 			if (prop is null)
 				throw new JTokenException(token, $"Property \"{PropertyName}\" not found");
 			serializer.Converters.AddRange(Converters);
-			var result = prop.Value.ToObject<T>(serializer);
+			var result = prop.Value.ToObject<T>(serializer);//BUG: self recurse when applying JsonConverterAttribute to a class
 			serializer.Converters.RemoveRange(Converters);
 			return result;
 		}
