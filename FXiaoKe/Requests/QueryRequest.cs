@@ -12,6 +12,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Shared;
 using Shared.Exceptions;
+using Shared.Serialization;
 
 namespace FXiaoKe.Requests {
 	[Request("/cgi/crm/custom/v2/data/get", typeof(QueryByConditionResponse))]
@@ -181,7 +182,7 @@ namespace FXiaoKe.Requests {
 		/// </summary>
 		[JsonProperty("limit")]
 		[Required]
-		public int Limit { get; set; } = 100;
+		public int Limit { get; set; }
 
 		/// <summary>
 		///     偏移量，从0开始、数值必须为limit的整数倍
@@ -293,7 +294,7 @@ namespace FXiaoKe.Requests {
 		/// <summary>
 		///     取值范围
 		/// </summary>
-		[JsonProperty("field_values")]
+		[JsonProperty("field_values", ItemConverterType = typeof(FilterValueConverter))]
 		[Required]
 		public List<object> Values { get; set; }
 
@@ -386,6 +387,31 @@ namespace FXiaoKe.Requests {
 		[JsonIgnore]
 		public Type Type { get; }
 	}
+
+	#nullable enable
+	internal class FilterValueConverter : JsonConverter {
+		public static readonly TimestampConverter TimestampConverter = new(TimestampPrecision.Millisecond);
+
+		public override void WriteJson(JsonWriter writer, object? value, JsonSerializer serializer) {
+			if (value is null)
+				writer.WriteNull();
+			else {
+				serializer.Converters.Add(TimestampConverter);
+				writer.WriteValue(value);
+				serializer.Converters.Remove(TimestampConverter);
+			}
+		}
+
+		public override object? ReadJson(JsonReader reader, Type objectType, object? existingValue, JsonSerializer serializer) {
+			serializer.Converters.Add(TimestampConverter);
+			object? result = serializer.Deserialize(reader);
+			serializer.Converters.Remove(TimestampConverter);
+			return result;
+		}
+
+		public override bool CanConvert(Type objectType) => Type.GetTypeCode(objectType) is not TypeCode.Object or TypeCode.DBNull;
+	}
+	#nullable disable
 
 	[JsonConverter(typeof(StringEnumConverter))]
 	public enum QueryOperator {
