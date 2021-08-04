@@ -10,17 +10,11 @@ namespace Kingdee.Forms {
 		[JsonProperty("FDocumentStatus")]
 		public Status Status { get; set; }
 
-		[JsonProperty("FModifierId")]
+		[JsonProperty("FApproverId")]
 		public int? AuditorId { get; set; }
 
-		[JsonProperty("FModifyDate")]
+		[JsonProperty("FApproveDate")]
 		public DateTime? AuditionTime { get; set; }
-
-		[JsonProperty("FForbidderId")]
-		public int? InvalidatorId { get; set; }
-
-		[JsonProperty("FForbidDate")]
-		public DateTime? InvalidatedTime { get; set; }
 	}
 
 	[JsonConverter(typeof(EnumValueConverter))]
