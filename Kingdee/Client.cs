@@ -80,11 +80,12 @@ namespace Kingdee {
 
 		private OneOf<BasicResponse, List<T>> DeserializeQueryResponse<T>(IEnumerable<Field> fields, string json) where T : ErpModelBase {
 			var token = JToken.Parse(json);
-			if (token.Type == JTokenType.Object)
-				return token.Value<BasicResponse>();
-			var contents = token is JArray array
-				? array.Values<JArray>().Select(arr => arr.Values<JValue>().Select(v => v.Value))
-				: throw new JTokenTypeException(token, JTokenType.Array);
+			if (token.Type != JTokenType.Array)
+				throw new JTokenTypeException(token, JTokenType.Array);
+			var tuples = (token as JArray)!.Values<JArray>().ToArray();
+			if (tuples.Length == 1 && tuples[0]!.Count == 1 && tuples[0][0].Type == JTokenType.Object)
+				return tuples[0][0].ToObject<BasicResponse>();
+			object[][] contents = tuples.Select(arr => arr.Values<JValue>().Select(v => v.Value).ToArray()).ToArray();
 			var builder = new StringBuilder();
 			var forms = contents.Select(
 				data => {
@@ -198,6 +199,12 @@ namespace Kingdee {
 				request
 			);
 
+		public Task<BatchSaveResponse> BatchSaveAsync<T>(BatchSaveRequest<T> request) where T : ErpModelBase
+			=> ValidateAndExecuteAsync<BatchSaveResponse, T>(
+				"Kingdee.BOS.WebApi.ServicesStub.DynamicFormService.BatchSave",
+				request
+			);
+
 		public Task<BasicResponse> AuditAsync<T>(AuditRequest<T> request) where T : ErpModelBase
 			=> ValidateAndExecuteAsync<BasicResponse, T>(
 				"Kingdee.BOS.WebApi.ServicesStub.DynamicFormService.Audit",
@@ -209,6 +216,17 @@ namespace Kingdee {
 				"Kingdee.BOS.WebApi.ServicesStub.DynamicFormService.UnAudit",
 				request
 			);
+
+		public Task<BasicResponse> DeleteAsync<T>(DeleteRequest<T> request) where T : ErpModelBase
+			=> ValidateAndExecuteAsync<BasicResponse, T>(
+				"Kingdee.BOS.WebApi.ServicesStub.DynamicFormService.Delete",
+				request
+			);
+
+		public async Task<BasicResponse> UnauditAndDeleteAsync<T>(DeleteRequest<T> request) where T : ErpModelBase {
+			await UnauditAsync<T>(new AuditRequest<T>(request));
+			return await DeleteAsync(request);
+		}
 		#endregion
 
 		#region Asnyc(Callback) Requests
