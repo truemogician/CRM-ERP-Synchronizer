@@ -21,6 +21,6 @@ namespace FXiaoKe.Exceptions {
 
 		public ResponseBase Response => Data[nameof(Response)] as ResponseBase;
 
-		protected override string DefaultMessage => $"{base.DefaultMessage} Failed";
+		protected override string DefaultMessage => Response is BasicResponse resp ? $"{resp.ErrorMessage}" : $"{base.DefaultMessage} Failed";
 	}
 }
