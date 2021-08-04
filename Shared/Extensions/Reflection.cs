@@ -7,12 +7,14 @@ using Shared.Serialization;
 // ReSharper disable once CheckNamespace
 namespace System.Reflection {
 	public static class ReflectionExtensions {
-		public static object GetValue(this MemberInfo info, object obj)
+		#nullable enable
+		public static object? GetValue(this MemberInfo info, object obj)
 			=> info switch {
 				FieldInfo field       => field.GetValue(obj),
 				PropertyInfo property => property.GetValue(obj),
 				_                     => throw new MemberTypeException(info, MemberTypes.Property | MemberTypes.Field)
 			};
+		#nullable disable
 
 		public static void SetValue(this MemberInfo info, object obj, object value) {
 			switch (info) {
@@ -97,8 +99,10 @@ namespace System.Reflection {
 			return Array.Empty<Type>();
 		}
 
+		#nullable enable
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static Type GetGenericType(this Type type, Type genericTypeDefinition) => type.GetGenericTypes(genericTypeDefinition).SingleOrDefault();
+		public static Type? GetGenericType(this Type type, Type genericTypeDefinition) => type.GetGenericTypes(genericTypeDefinition).SingleOrDefault();
+		#nullable disable
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static bool IsAssignableToGeneric(this Type type, Type genericType) => type.GetGenericTypes(genericType).Length > 0;
