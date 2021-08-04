@@ -9,7 +9,23 @@ using Newtonsoft.Json.Linq;
 using Shared.Exceptions;
 
 namespace Shared.Serialization {
-	public class EnumValueConverter : JsonConverter<Enum> {
+	public class EnumValueConverter : EnumValueConverterBase {
+		public EnumValueConverter() { }
+
+		public EnumValueConverter(object index) : base(index) { }
+
+		protected override bool Nullable => false;
+	}
+
+	public class NullableEnumValueConverter : EnumValueConverterBase {
+		public NullableEnumValueConverter() { }
+
+		public NullableEnumValueConverter(object index) : base(index) { }
+
+		protected override bool Nullable => true;
+	}
+
+	public abstract class EnumValueConverterBase : JsonConverter<Enum> {
 		private readonly Dictionary<FieldInfo, List<EnumValueAttribute>> _attributes = new();
 
 		private readonly Dictionary<Enum, string> _stringValue = new();
@@ -18,17 +34,21 @@ namespace Shared.Serialization {
 
 		private Type _enumType;
 
-		public EnumValueConverter() { }
+		protected EnumValueConverterBase() { }
 
-		public EnumValueConverter(object index) => Index = index;
+		protected EnumValueConverterBase(object index) => Index = index;
 
 		public object Index { get; }
+
+		protected abstract bool Nullable { get; }
 
 		protected Type EnumType {
 			get => _enumType;
 			set {
 				if (value is null)
 					throw new ArgumentNullException(nameof(value));
+				if (value.IsGenericType && value.GetGenericTypeDefinition() == typeof(Nullable<>))
+					value = value.GetGenericArguments()[0];
 				if (!value.IsAssignableTo(typeof(Enum)))
 					throw new InvariantTypeException(typeof(Enum), value);
 				if (_enumType != value) {
@@ -59,7 +79,14 @@ namespace Shared.Serialization {
 		}
 
 		public override void WriteJson(JsonWriter writer, Enum value, JsonSerializer serializer) {
-			if (value == null || value.GetEnumMember().IsDefined(typeof(EnumDefaultAttribute))) {
+			if (value is null) {
+				if (Nullable) {
+					writer.WriteNull();
+					return;
+				}
+				throw new ArgumentNullException(nameof(value));
+			}
+			if (value.GetEnumMember().IsDefined(typeof(EnumDefaultAttribute))) {
 				writer.WriteNull();
 				return;
 			}
@@ -73,6 +100,8 @@ namespace Shared.Serialization {
 		public override Enum ReadJson(JsonReader reader, Type objectType, Enum existingValue, bool hasExistingValue, JsonSerializer serializer) {
 			EnumType = objectType;
 			var token = JToken.Load(reader);
+			if (Nullable && token.Type is JTokenType.Null or JTokenType.Undefined)
+				return null;
 			if (token.Type != JTokenType.String)
 				throw new JTokenTypeException(token, JTokenType.String);
 			var stringValue = token.Value<string>();
