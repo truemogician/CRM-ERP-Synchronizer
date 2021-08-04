@@ -94,9 +94,6 @@ namespace TheFirstFarm.Models.Kingdee {
 		[JsonProperty("FINVOICETEL")]
 		public string PhoneNumber { get; set; }
 
-		[JsonProperty("FT_BD_CUSTLOCATION")]
-		public List<ContactRef> Contacts { get; set; }
-
 		[JsonProperty("FT_BD_CUSTCONTACT")]
 		[SubForm]
 		public List<CustomerAddress> Addresses { get; set; }

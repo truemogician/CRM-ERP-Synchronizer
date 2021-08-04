@@ -31,5 +31,11 @@ namespace TheFirstFarm.Models.Kingdee {
 		/// </summary>
 		[JsonProperty("FMobile")]
 		public string ContactWay { get; set; }
+
+		/// <summary>
+		///		联系人Id
+		/// </summary>
+		[JsonProperty("FTContact")]
+		public int ContactId { get; set; }
 	}
 }

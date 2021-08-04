@@ -18,6 +18,12 @@ namespace TheFirstFarm.Models.Kingdee {
 		public string Number { get; set; }
 
 		/// <summary>
+		///		客户Id
+		/// </summary>
+		[JsonProperty("FCustId")]
+		public int CustomerId { get; set; }
+
+		/// <summary>
 		///     姓名
 		/// </summary>
 		[JsonProperty("FName")]
