@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using Kingdee.Forms;
@@ -8,6 +9,8 @@ using Shared.Serialization;
 namespace Kingdee.Requests {
 	public class DeleteRequest<T> : RequestBase where T : ErpModelBase {
 		private static readonly MemberInfo Key = FormMeta<T>.Key;
+
+		protected DeleteRequest() { }
 
 		public DeleteRequest(params int[] ids) => Ids = ids.ToList();
 
@@ -27,18 +30,23 @@ namespace Kingdee.Requests {
 		[JsonProperty("Numbers")]
 		public List<string> Numbers { get; set; } = new();
 
+		[JsonProperty("Ids")]
+		[JsonConverter(typeof(StringCollectionConverter), ',')]
+		private IEnumerable<string> IdStrings {
+			get => Ids.Select(id => id.ToString());
+			set => Ids = value.Select(idString => Convert.ToInt32(idString)).ToList();
+		}
+
 		/// <summary>
 		///     单据内码集合
 		/// </summary>
-		[JsonProperty("Ids")]
-		[JsonConverter(typeof(StringCollectionConverter), ',')]
+		[JsonIgnore]
 		public List<int> Ids { get; set; } = new();
 
 		/// <summary>
 		///     是否启用网控
 		/// </summary>
 		[JsonProperty("NetworkCtrl")]
-		[JsonConverter(typeof(BoolConverter))]
 		public bool NetworkControl { get; set; }
 
 		public void AddEntity(T entity) => Ids.Add((int)Key.GetValue(entity));
