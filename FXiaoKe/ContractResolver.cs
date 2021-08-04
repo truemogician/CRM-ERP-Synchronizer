@@ -22,7 +22,7 @@ namespace FXiaoKe {
 			foreach (var prop in props.Where(prop => !prop.Ignored))
 				if (prop.IsDefined<GeneratedAttribute>())
 					prop.Ignored = true;
-				else if (!UpdationList!.Contains(prop.UnderlyingName!))
+				else if (UpdationList?.Contains(prop.UnderlyingName!) == false)
 					prop.Ignored = true;
 			return props;
 		}

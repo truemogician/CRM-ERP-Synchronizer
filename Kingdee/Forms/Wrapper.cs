@@ -35,7 +35,7 @@ namespace Kingdee.Forms {
 
 		protected abstract string ValueName { get; }
 
-		public override string ToString() => ((T)_member.GetValue(this)).ToString();
+		public override string ToString() => ((T)_member.GetValue(this))?.ToString();
 
 		public static implicit operator T(WrapperBase<T> self) => (T)self._member.GetValue(self);
 	}
