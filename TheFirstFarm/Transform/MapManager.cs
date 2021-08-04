@@ -207,6 +207,8 @@ namespace TheFirstFarm.Transform {
 		public async Task<bool> HasFXiaoKeId<TMap>(string? id) where TMap : class, IIdMap, new() => await FromFXiaoKeId<TMap>(id) is not null;
 
 		public async Task<TMap?> FromFXiaoKeId<TMap>(string? id) where TMap : class, IIdMap, new() {
+			if (id is null)
+				return null;
 			if (GetByFXiaoKeId<TMap>(id) is { } map)
 				return map;
 			var mapInfo = GetMapInfo(typeof(TMap));
@@ -227,6 +229,8 @@ namespace TheFirstFarm.Transform {
 		public async Task<bool> HasMapProperty<TMap>(string propName, object? value) where TMap : class, IIdMap, new() => await FromMapProperty<TMap>(propName, value) is not null;
 
 		public async Task<TMap?> FromMapProperty<TMap>(string propName, object? value) where TMap : class, IIdMap, new() {
+			if (value is null)
+				return null;
 			var map = GetByMapProperty<TMap>(propName, value);
 			if (!(map?.FXiaoKeId is null || map.KingdeeId is null))
 				return map;
