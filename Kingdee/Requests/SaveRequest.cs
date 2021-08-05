@@ -3,6 +3,7 @@ using Newtonsoft.Json;
 using Shared.Serialization;
 
 namespace Kingdee.Requests {
+	[Request("Kingdee.BOS.WebApi.ServicesStub.DynamicFormService.Save")]
 	public class SaveRequest<T> : CreationRequest<T> where T : ErpModelBase {
 		public SaveRequest() { }
 

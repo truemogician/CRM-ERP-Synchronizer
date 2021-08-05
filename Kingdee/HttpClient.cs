@@ -29,35 +29,25 @@ namespace Kingdee {
 
 		private void BeginGetRequestCallback(IAsyncResult ar) {
 			var request = (RequestState)ar.AsyncState;
-			SafeDo(
-				request,
-				() => {
-					request!.EndSendRequest(ar);
-					request.SentCallback?.Invoke();
-					request.Request.HttpRequest.BeginGetResponse(GetResponseCallback, ar.AsyncState);
-				}
-			);
+			request!.EndSendRequest(ar);
+			request.SentCallback?.Invoke();
+			request.Request.HttpRequest.BeginGetResponse(GetResponseCallback, ar.AsyncState);
 		}
 
 		private void GetResponseCallback(IAsyncResult ar) {
 			var request = (RequestState)ar.AsyncState;
-			SafeDo(
-				request,
-				() => {
-					var callback = request!.Callback;
-					using var response = (HttpWebResponse)((RequestState)ar.AsyncState)!.Request.HttpRequest.EndGetResponse(ar);
-					if (response.StatusCode == HttpStatusCode.OK) {
-						using var responseStream = response.GetResponseStream();
-						using var streamReader = new StreamReader(responseStream!, request.Request.Encoder);
-						string result = ValidateResult(streamReader.ReadToEnd());
-						callback(AsyncResult<string>.CreateSuccess(result));
-					}
-					else {
-						var ex = new ServiceException((int)response.StatusCode, response.StatusDescription);
-						callback(AsyncResult<string>.CreateFailure(ex));
-					}
-				}
-			);
+			var callback = request!.Callback;
+			using var response = (HttpWebResponse)((RequestState)ar.AsyncState)!.Request.HttpRequest.EndGetResponse(ar);
+			if (response.StatusCode == HttpStatusCode.OK) {
+				using var responseStream = response.GetResponseStream();
+				using var streamReader = new StreamReader(responseStream!, request.Request.Encoder);
+				string result = ValidateResult(streamReader.ReadToEnd());
+				callback(AsyncResult<string>.CreateSuccess(result));
+			}
+			else {
+				var ex = new ServiceException((int)response.StatusCode, response.StatusDescription);
+				callback(AsyncResult<string>.CreateFailure(ex));
+			}
 		}
 
 		private static string ValidateResult(string responseText) {
@@ -67,18 +57,6 @@ namespace Kingdee {
 			if (string.IsNullOrEmpty(str))
 				throw new ServiceException("返回的异常信息为空");
 			throw new ServiceException(str.Replace("\"", ""));
-		}
-
-		private static void SafeDo(RequestState reqs, Action action) {
-			try {
-				action();
-			}
-			catch (ServiceException ex) {
-				reqs.Callback(AsyncResult<string>.CreateFailure(ex));
-			}
-			catch (Exception ex) {
-				reqs.Callback(AsyncResult<string>.CreateFailure(new ServiceException(ex)));
-			}
 		}
 
 		private class RequestState {

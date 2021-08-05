@@ -98,9 +98,9 @@ namespace Kingdee {
 		}
 
 		#region Sync Requests
-		public List<DataCenter> GetDataCenters() => Execute<List<DataCenter>>("Kingdee.BOS.ServiceFacade.ServicesStub.Account.AccountService.GetDataCenterList", Array.Empty<object>());
+		public List<DataCenter> GetDataCenters() => Execute<List<DataCenter>>("Kingdee.BOS.ServiceFacade.ServicesStub.Account.AccountService.GetDataCenterList");
 
-		public string ExecuteOperation(string formId, string opNumber, string data) => Execute<string>("Kingdee.BOS.WebApi.ServicesStub.DynamicFormService.ExecuteOperation", formId, opNumber, data);
+		public string ExecuteOperation(string formId, string opNumber, string data) => Execute<string>("Kingdee.BOS.WebApi.ServicesStub.DynamicFormService.ExecuteOperation", new object[] {formId, opNumber, data});
 
 		/// <summary>
 		///     单据查询
@@ -108,10 +108,7 @@ namespace Kingdee {
 		/// <param name="request"></param>
 		/// <returns></returns>
 		public OneOf<BasicResponse, List<T>> Query<T>(QueryRequest<T> request) where T : ErpModelBase {
-			var json = ValidateAndExecute<string>(
-				"Kingdee.BOS.WebApi.ServicesStub.DynamicFormService.ExecuteBillQuery",
-				JsonConvert.SerializeObject(request)
-			);
+			string json = ValidateAndExecute<QueryRequest<T>, string>(JsonConvert.SerializeObject(request));
 			return DeserializeQueryResponse<T>(request.Fields, json);
 		}
 
@@ -119,112 +116,83 @@ namespace Kingdee {
 		///     保存
 		/// </summary>
 		/// <returns></returns>
-		public SaveResponse Save<T>(SaveRequest<T> request) where T : ErpModelBase => ValidateAndExecute<SaveResponse, T>("Kingdee.BOS.WebApi.ServicesStub.DynamicFormService.Save", request);
+		public SaveResponse Save<T>(SaveRequest<T> request) where T : ErpModelBase => ValidateAndExecute<SaveRequest<T>, SaveResponse, T>(request);
 
 		/// <summary>
 		///     批量保存
 		/// </summary>
 		/// <returns></returns>
-		public BatchSaveResponse BatchSave<T>(BatchSaveRequest<T> request) where T : ErpModelBase => ValidateAndExecute<BatchSaveResponse, T>("Kingdee.BOS.WebApi.ServicesStub.DynamicFormService.BatchSave", request);
+		public BatchSaveResponse BatchSave<T>(BatchSaveRequest<T> request) where T : ErpModelBase => ValidateAndExecute<BatchSaveRequest<T>, BatchSaveResponse, T>(request);
 
 		/// <summary>
 		///     暂存
 		/// </summary>
 		/// <returns></returns>
-		public SaveResponse Draft<T>(SaveRequest<T> request) where T : ErpModelBase => ValidateAndExecute<SaveResponse, T>("Kingdee.BOS.WebApi.ServicesStub.DynamicFormService.Draft", request);
+		public SaveResponse Draft<T>(DraftRequest<T> request) where T : ErpModelBase => ValidateAndExecute<DraftRequest<T>, SaveResponse, T>(request);
 
 		/// <summary>
 		///     审核
 		/// </summary>
 		/// <returns></returns>
-		public BasicResponse Audit<T>(AuditRequest<T> request) where T : ErpModelBase => ValidateAndExecute<BasicResponse, T>("Kingdee.BOS.WebApi.ServicesStub.DynamicFormService.Audit", request);
+		public BasicResponse Audit<T>(AuditRequest<T> request) where T : ErpModelBase => ValidateAndExecute<AuditRequest<T>, BasicResponse, T>(request);
 
 		/// <summary>
 		///     反审核
 		/// </summary>
 		/// <returns></returns>
-		public BasicResponse Unaudit<T>(AuditRequest<T> request) where T : ErpModelBase => Execute<BasicResponse, T>("Kingdee.BOS.WebApi.ServicesStub.DynamicFormService.UnAudit", request);
+		public BasicResponse Unaudit<T>(UnauditRequest<T> request) where T : ErpModelBase => ValidateAndExecute<UnauditRequest<T>, BasicResponse, T>(request);
 
 		/// <summary>
 		///     删除
 		/// </summary>
 		/// <returns></returns>
-		public BasicResponse Delete<T>(DeleteRequest<T> request) where T : ErpModelBase => ValidateAndExecute<BasicResponse, T>("Kingdee.BOS.WebApi.ServicesStub.DynamicFormService.Delete", request);
+		public BasicResponse Delete<T>(DeleteRequest<T> request) where T : ErpModelBase => ValidateAndExecute<DeleteRequest<T>, BasicResponse, T>(request);
 
 		/// <summary>
-		///     提交
+		///     提交审核
 		/// </summary>
-		/// <param name="formId"></param>
-		/// <param name="data"></param>
 		/// <returns></returns>
-		public string Submit(string formId, string data) => Execute<string>("Kingdee.BOS.WebApi.ServicesStub.DynamicFormService.Submit", formId, data);
+		public BasicResponse Submit<T>(SubmitRequest<T> request) where T : ErpModelBase => ValidateAndExecute<SubmitRequest<T>, BasicResponse, T>(request);
 
 		/// <summary>
 		///     查看
 		/// </summary>
-		/// <param name="formId"></param>
-		/// <param name="data"></param>
 		/// <returns></returns>
-		public string View(string formId, string data) => Execute<string>("Kingdee.BOS.WebApi.ServicesStub.DynamicFormService.View", formId, data);
+		public string View(string formId, string data) => Execute<string>("Kingdee.BOS.WebApi.ServicesStub.DynamicFormService.View", new object[] {formId, data});
 
-		public string Allocate(string formId, string data) => Execute<string>("Kingdee.BOS.WebApi.ServicesStub.DynamicFormService.Allocate", formId, data);
+		public string Allocate(string formId, string data) => Execute<string>("Kingdee.BOS.WebApi.ServicesStub.DynamicFormService.Allocate", new object[] {formId, data});
 
-		public string FlexSave(string formId, string data) => Execute<string>("Kingdee.BOS.WebApi.ServicesStub.DynamicFormService.FlexSave", formId, data);
+		public string FlexSave(string formId, string data) => Execute<string>("Kingdee.BOS.WebApi.ServicesStub.DynamicFormService.FlexSave", new object[] {formId, data});
 
-		public string SendMsg(string data) => Execute<string>("Kingdee.BOS.WebApi.ServicesStub.DynamicFormService.SendMsg", data);
+		public string SendMsg(string data) => Execute<string>("Kingdee.BOS.WebApi.ServicesStub.DynamicFormService.SendMsg", new object[] {data});
 
 		/// <summary>
 		///     下推
 		/// </summary>
-		/// <param name="formId"></param>
-		/// <param name="data"></param>
 		/// <returns></returns>
-		public string Push(string formId, string data) => Execute<string>("Kingdee.BOS.WebApi.ServicesStub.DynamicFormService.Push", formId, data);
+		public string Push(string formId, string data) => Execute<string>("Kingdee.BOS.WebApi.ServicesStub.DynamicFormService.Push", new object[] {formId, data});
 
-		public string GroupSave(string formId, string data) => Execute<string>("Kingdee.BOS.WebApi.ServicesStub.DynamicFormService.GroupSave", formId, data);
+		public string GroupSave(string formId, string data) => Execute<string>("Kingdee.BOS.WebApi.ServicesStub.DynamicFormService.GroupSave", new object[] {formId, data});
 		#endregion
 
 		#region Async(Task) Requests
 		public async Task<OneOf<BasicResponse, List<T>>> QueryAsync<T>(QueryRequest<T> request) where T : ErpModelBase {
-			var json = await ValidateAndExecuteAsync<string>(
-				"Kingdee.BOS.WebApi.ServicesStub.DynamicFormService.ExecuteBillQuery",
-				JsonConvert.SerializeObject(request)
-			);
+			string json = await ValidateAndExecuteAsync<QueryRequest<T>, string>(JsonConvert.SerializeObject(request));
 			return DeserializeQueryResponse<T>(request.Fields, json);
 		}
 
-		public Task<SaveResponse> SaveAsync<T>(SaveRequest<T> request) where T : ErpModelBase
-			=> ValidateAndExecuteAsync<SaveResponse, T>(
-				"Kingdee.BOS.WebApi.ServicesStub.DynamicFormService.Save",
-				request
-			);
+		public Task<SaveResponse> SaveAsync<T>(SaveRequest<T> request) where T : ErpModelBase => ValidateAndExecuteAsync<SaveRequest<T>, SaveResponse, T>(request);
 
-		public Task<BatchSaveResponse> BatchSaveAsync<T>(BatchSaveRequest<T> request) where T : ErpModelBase
-			=> ValidateAndExecuteAsync<BatchSaveResponse, T>(
-				"Kingdee.BOS.WebApi.ServicesStub.DynamicFormService.BatchSave",
-				request
-			);
+		public Task<BatchSaveResponse> BatchSaveAsync<T>(BatchSaveRequest<T> request) where T : ErpModelBase => ValidateAndExecuteAsync<BatchSaveRequest<T>, BatchSaveResponse, T>(request);
 
-		public Task<BasicResponse> AuditAsync<T>(AuditRequest<T> request) where T : ErpModelBase
-			=> ValidateAndExecuteAsync<BasicResponse, T>(
-				"Kingdee.BOS.WebApi.ServicesStub.DynamicFormService.Audit",
-				request
-			);
+		public Task<BasicResponse> AuditAsync<T>(AuditRequest<T> request) where T : ErpModelBase => ValidateAndExecuteAsync<AuditRequest<T>, BasicResponse, T>(request);
 
-		public Task<BasicResponse> UnauditAsync<T>(AuditRequest<T> request) where T : ErpModelBase
-			=> ValidateAndExecuteAsync<BasicResponse, T>(
-				"Kingdee.BOS.WebApi.ServicesStub.DynamicFormService.UnAudit",
-				request
-			);
+		public Task<BasicResponse> UnauditAsync<T>(UnauditRequest<T> request) where T : ErpModelBase => ValidateAndExecuteAsync<UnauditRequest<T>, BasicResponse, T>(request);
 
-		public Task<BasicResponse> DeleteAsync<T>(DeleteRequest<T> request) where T : ErpModelBase
-			=> ValidateAndExecuteAsync<BasicResponse, T>(
-				"Kingdee.BOS.WebApi.ServicesStub.DynamicFormService.Delete",
-				request
-			);
+		public Task<BasicResponse> DeleteAsync<T>(DeleteRequest<T> request) where T : ErpModelBase => ValidateAndExecuteAsync<DeleteRequest<T>, BasicResponse, T>(request);
 
 		public async Task<BasicResponse> UnauditAndDeleteAsync<T>(DeleteRequest<T> request) where T : ErpModelBase {
-			await UnauditAsync<T>(new AuditRequest<T>(request));
+			await UnauditAsync(new UnauditRequest<T>(request));
 			return await DeleteAsync(request);
 		}
 		#endregion

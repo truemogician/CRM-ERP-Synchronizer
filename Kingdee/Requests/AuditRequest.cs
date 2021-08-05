@@ -5,8 +5,9 @@ using Newtonsoft.Json;
 using Shared.Serialization;
 
 namespace Kingdee.Requests {
+	[Request("Kingdee.BOS.WebApi.ServicesStub.DynamicFormService.Audit")]
 	public class AuditRequest<T> : DeleteRequest<T> where T : ErpModelBase {
-		private AuditRequest() { }
+		protected AuditRequest() { }
 
 		public AuditRequest(params int[] ids) : base(ids) { }
 

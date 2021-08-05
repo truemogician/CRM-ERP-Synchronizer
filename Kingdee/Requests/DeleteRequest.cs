@@ -7,6 +7,7 @@ using Newtonsoft.Json;
 using Shared.Serialization;
 
 namespace Kingdee.Requests {
+	[Request("Kingdee.BOS.WebApi.ServicesStub.DynamicFormService.Delete")]
 	public class DeleteRequest<T> : RequestBase where T : ErpModelBase {
 		private static readonly MemberInfo Key = FormMeta<T>.Key;
 
@@ -32,7 +33,7 @@ namespace Kingdee.Requests {
 
 		[JsonProperty("Ids")]
 		[JsonConverter(typeof(StringCollectionConverter), ',')]
-		private IEnumerable<string> IdStrings {
+		protected IEnumerable<string> IdStrings {
 			get => Ids.Select(id => id.ToString());
 			set => Ids = value.Select(idString => Convert.ToInt32(idString)).ToList();
 		}
@@ -49,8 +50,8 @@ namespace Kingdee.Requests {
 		[JsonProperty("NetworkCtrl")]
 		public bool NetworkControl { get; set; }
 
-		public void AddEntity(T entity) => Ids.Add((int)Key.GetValue(entity));
+		public void AddEntity(T entity) => Ids.Add((int)Key.GetValue(entity)!);
 
-		public void AddEntities(IEnumerable<T> entities) => Ids.AddRange(entities.Select(entity => (int)Key.GetValue(entity)));
+		public void AddEntities(IEnumerable<T> entities) => Ids.AddRange(entities.Select(entity => (int)Key.GetValue(entity)!));
 	}
 }

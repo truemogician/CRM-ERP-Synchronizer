@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text.Json.Serialization;
 using Kingdee.Forms;
+using Kingdee.Requests;
 using Kingdee.Requests.Query;
 using Shared;
 using Shared.Exceptions;
@@ -99,5 +100,7 @@ namespace Kingdee.Utilities {
 				Utility.VerifyInheritance(type, typeof(ErpModelBase));
 			return GetQueryFields(type, null);
 		}
+
+		public static string GetServiceName(this Type type) => type.GetCustomAttribute<RequestAttribute>()?.ServiceName;
 	}
 }

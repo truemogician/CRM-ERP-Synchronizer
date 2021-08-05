@@ -38,23 +38,22 @@ namespace Kingdee {
 
 		private readonly HttpClient _httpClient;
 
-		private readonly string _serverUrl;
+		protected string ServerUrl;
 
-		protected ConnectionConfig ConnectionConfig;
+		protected LoginRequest DefaultLoginRequest;
 
 		protected DateTime? LastLoginTime;
 
 		#region Constructors
 		public ApiClient(string serverUrl) {
+			ServerUrl = serverUrl;
 			_encoder = new UTF8Encoding();
-			_serverUrl = serverUrl;
 			_cookiesContainer = new CookieContainer();
 			_httpClient = new HttpClient();
 		}
 
 		public ApiClient(string serverUrl, string dbId, string username, string password, Language lcid = Language.ChineseChina) : this(serverUrl)
-			=> ConnectionConfig = new ConnectionConfig {
-				Url = serverUrl,
+			=> DefaultLoginRequest = new LoginRequest {
 				DatabaseId = dbId,
 				Username = username,
 				Password = password,
@@ -70,42 +69,32 @@ namespace Kingdee {
 
 		#region Methods
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public ApiRequest CreateAsyncRequest(string serviceName, object[] parameters = null) => new ApiServiceRequest(_serverUrl, true, _encoder, _cookiesContainer, serviceName, parameters);
+		protected ApiRequest CreateAsyncRequest(string serviceName, object[] parameters = null) => new ApiServiceRequest(ServerUrl, true, _encoder, _cookiesContainer, serviceName, parameters);
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public ApiRequest CreateRequest(string serviceName, object[] parameters = null) => new ApiServiceRequest(_serverUrl, false, _encoder, _cookiesContainer, serviceName, parameters);
+		protected ApiRequest CreateRequest(string serviceName, object[] parameters = null) => new ApiServiceRequest(ServerUrl, false, _encoder, _cookiesContainer, serviceName, parameters);
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public ApiRequest CreateProgressQuery(string reqId) => new ApiProgressRequest(_serverUrl, false, _encoder, _cookiesContainer, reqId);
+		internal ApiRequest CreateProgressQuery(string reqId) => new ApiProgressRequest(ServerUrl, false, _encoder, _cookiesContainer, reqId);
 
 		#region Login
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public bool Login(string dbId, string userName, string password, int lcid) => JObject.Parse(Execute<string>("Kingdee.BOS.WebApi.ServicesStub.AuthService.ValidateUserEnDeCode", dbId, EnDecode.Encode(userName), EnDecode.Encode(password), lcid))["LoginResultType"]?.Value<int>() == 1;
+		public LoginResponse ValidateLogin() => ValidateLogin(DefaultLoginRequest);
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public LoginResponse ValidateLogin() => ValidateLogin(ConnectionConfig.DatabaseId, ConnectionConfig.Username, ConnectionConfig.Password, ConnectionConfig.Language);
+		public LoginResponse ValidateLogin(LoginRequest request) => Execute<LoginRequest, LoginResponse>(request);
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public LoginResponse ValidateLogin(string dbId, string userName, string password, Language lcid) => Execute<LoginResponse>("Kingdee.BOS.WebApi.ServicesStub.AuthService.ValidateUserEnDeCode", dbId, EnDecode.Encode(userName), EnDecode.Encode(password), (int)lcid);
+		public Task<LoginResponse> ValidateLoginAsync() => ValidateLoginAsync(DefaultLoginRequest);
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public Task<LoginResponse> ValidateLoginAsync() => ValidateLoginAsync(ConnectionConfig.DatabaseId, ConnectionConfig.Username, ConnectionConfig.Password, ConnectionConfig.Language);
+		public Task<LoginResponse> ValidateLoginAsync(LoginRequest request) => ExecuteAsync<LoginRequest, LoginResponse>(request);
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public Task<LoginResponse> ValidateLoginAsync(string dbId, string userName, string password, Language lcid) => ExecuteAsync<LoginResponse>("Kingdee.BOS.WebApi.ServicesStub.AuthService.ValidateUserEnDeCode", dbId, EnDecode.Encode(userName), EnDecode.Encode(password), (int)lcid);
+		public LoginResponse ValidateLogin2(bool kickOff) => ValidateLogin2(DefaultLoginRequest, kickOff);
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public LoginResponse ValidateLogin2(bool kickOff) => ValidateLogin2(ConnectionConfig.DatabaseId, ConnectionConfig.Username, ConnectionConfig.Password, kickOff, ConnectionConfig.Language);
-
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public LoginResponse ValidateLogin2(
-			string dbId,
-			string username,
-			string password,
-			bool isKickOff,
-			Language lcid
-		)
-			=> Execute<LoginResponse>("Kingdee.BOS.WebApi.ServicesStub.AuthService.ValidateUser2", dbId, username, password, isKickOff, (int)lcid);
+		public LoginResponse ValidateLogin2(LoginRequest request, bool isKickOff) => Execute<LoginRequest, LoginResponse>(request.DatabaseId, request.Username, request.Password, isKickOff, (int)request.Language);
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public string LoginByAppSecret(
@@ -113,9 +102,9 @@ namespace Kingdee {
 			string userName,
 			string appId,
 			string appSecret,
-			int lcid
+			Language lcid = Language.ChineseChina
 		)
-			=> Execute<string>("Kingdee.BOS.WebApi.ServicesStub.AuthService.LoginByAppSecret", dbId, userName, appId, appSecret, lcid);
+			=> Execute<string>("Kingdee.BOS.WebApi.ServicesStub.AuthService.LoginByAppSecret", new object[] {dbId, userName, appId, appSecret, (int)lcid});
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public string LoginByAppSecret2(
@@ -124,9 +113,9 @@ namespace Kingdee {
 			string appId,
 			string appSecret,
 			bool isKickOff,
-			int lcid = 2052
+			Language lcid = Language.ChineseChina
 		)
-			=> Execute<string>("Kingdee.BOS.WebApi.ServicesStub.AuthService.LoginByAppSecret2", dbId, userName, appId, appSecret, isKickOff, lcid);
+			=> Execute<string>("Kingdee.BOS.WebApi.ServicesStub.AuthService.LoginByAppSecret2", new object[] {dbId, userName, appId, appSecret, isKickOff, (int)lcid});
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public string LoginBySign(
@@ -135,9 +124,9 @@ namespace Kingdee {
 			string appId,
 			long timestamp,
 			string sign,
-			int lcid
+			Language lcid = Language.ChineseChina
 		)
-			=> Execute<string>("Kingdee.BOS.WebApi.ServicesStub.AuthService.LoginBySign", dbId, userName, appId, timestamp, sign, lcid);
+			=> Execute<string>("Kingdee.BOS.WebApi.ServicesStub.AuthService.LoginBySign", new object[] {dbId, userName, appId, timestamp, sign, (int)lcid});
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public string LoginBySign2(
@@ -147,26 +136,26 @@ namespace Kingdee {
 			long timestamp,
 			string sign,
 			bool isKickOff,
-			int lcid = 2052
+			Language lcid = Language.ChineseChina
 		)
-			=> Execute<string>("Kingdee.BOS.WebApi.ServicesStub.AuthService.LoginBySign2", dbId, userName, appId, timestamp, sign, isKickOff, lcid);
+			=> Execute<string>("Kingdee.BOS.WebApi.ServicesStub.AuthService.LoginBySign2", new object[] {dbId, userName, appId, timestamp, sign, isKickOff, (int)lcid});
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public string LoginBySimplePassport(string passportForBase64, int lcid = 2052) => Execute<string>("Kingdee.BOS.WebApi.ServicesStub.AuthService.LoginBySimplePassport", passportForBase64, lcid);
+		public string LoginBySimplePassport(string passportForBase64, Language lcid = Language.ChineseChina) => Execute<string>("Kingdee.BOS.WebApi.ServicesStub.AuthService.LoginBySimplePassport", new object[] {passportForBase64, (int)lcid});
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public string LoginBySimplePassport2(string passportForBase64, bool isKickOff, int lcid = 2052) => Execute<string>("Kingdee.BOS.WebApi.ServicesStub.AuthService.LoginBySimplePassport2", passportForBase64, isKickOff, lcid);
+		public string LoginBySimplePassport2(string passportForBase64, bool isKickOff, Language lcid = Language.ChineseChina) => Execute<string>("Kingdee.BOS.WebApi.ServicesStub.AuthService.LoginBySimplePassport2", new object[] {passportForBase64, isKickOff, (int)lcid});
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public string LoginByMobileCard(
 			string passportForBase64,
 			string customizationParameter,
-			int lcid = 2052
+			Language lcid = Language.ChineseChina
 		)
-			=> Execute<string>("Kingdee.BOS.WebApi.ServicesStub.AuthService.LoginByMobileCard", passportForBase64, customizationParameter, lcid);
+			=> Execute<string>("Kingdee.BOS.WebApi.ServicesStub.AuthService.LoginByMobileCard", new object[] {passportForBase64, customizationParameter, (int)lcid});
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public string LoginByRsaAuth(string json) => Execute<string>("Kingdee.BOS.WebApi.ServicesStub.AuthService.LoginByRSAAuth", json);
+		public string LoginByRsaAuth(string json) => Execute<string>("Kingdee.BOS.WebApi.ServicesStub.AuthService.LoginByRSAAuth", new object[] {json});
 		#endregion
 
 		#region Logout
@@ -175,17 +164,16 @@ namespace Kingdee {
 
 		#region Execute
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public TResponse ValidateAndExecute<TResponse, TForm>(string serviceName, RequestBase request) where TForm : ErpModelBase => ValidateAndExecute<TResponse>(serviceName, FormMeta<TForm>.Name, JsonConvert.SerializeObject(request));
+		protected TResponse ValidateAndExecute<TRequest, TResponse, TModel>(TRequest request) where TRequest : RequestBase where TModel : ErpModelBase => ValidateAndExecute<TRequest, TResponse>(FormMeta<TModel>.Name, JsonConvert.SerializeObject(request));
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public T ValidateAndExecute<T>(string serviceName, params object[] parameters) => ValidateAndExecute<T>(serviceName, parameters, timeout: _defaultTimeout);
+		protected T ValidateAndExecute<TRequest, T>(params object[] parameters) where TRequest : RequestBase => ValidateAndExecute<TRequest, T>(parameters, timeout: _defaultTimeout);
 
-		public T ValidateAndExecute<T>(
-			string serviceName,
+		protected T ValidateAndExecute<TRequest, T>(
 			object[] parameters = null,
 			FailCallbackHandler onFail = null,
 			int timeout = 1000000
-		) {
+		) where TRequest : RequestBase {
 			var now = DateTime.Now;
 			if (!LastLoginTime.HasValue || now - LastLoginTime.Value >= LoginInterval) {
 				var loginResp = ValidateLogin();
@@ -193,16 +181,16 @@ namespace Kingdee {
 					throw new LoginFailedException(loginResp);
 				LastLoginTime = now;
 			}
-			return Execute<T>(serviceName, parameters, onFail, timeout);
+			return Execute<T>(typeof(TRequest).GetServiceName(), parameters, onFail, timeout);
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public TResponse Execute<TResponse, TForm>(string serviceName, RequestBase request) where TForm : ErpModelBase => Execute<TResponse>(serviceName, FormMeta<TForm>.Name, JsonConvert.SerializeObject(request));
+		protected TResponse Execute<TRequest, TResponse, TModel>(TRequest request) where TRequest : RequestBase where TModel : ErpModelBase => Execute<TRequest, TResponse>(FormMeta<TModel>.Name, JsonConvert.SerializeObject(request));
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public T Execute<T>(string serviceName, params object[] parameters) => Execute<T>(serviceName, parameters, timeout: _defaultTimeout);
+		protected T Execute<TRequest, T>(params object[] parameters) where TRequest : RequestBase => Execute<T>(typeof(TRequest).GetServiceName(), parameters, timeout: _defaultTimeout);
 
-		public T Execute<T>(
+		protected T Execute<T>(
 			string serviceName,
 			object[] parameters = null,
 			FailCallbackHandler onFail = null,
@@ -214,48 +202,30 @@ namespace Kingdee {
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public Task<TResponse> ValidateAndExecuteAsync<TResponse, TForm>(
-			string serviceName,
-			RequestBase request
-		) where TForm : ErpModelBase
-			=> ValidateAndExecuteAsync<TResponse>(
-				serviceName,
-				FormMeta<TForm>.Name,
-				JsonConvert.SerializeObject(request)
-			);
+		protected Task<TResponse> ValidateAndExecuteAsync<TRequest, TResponse, TModel>(TRequest request) where TRequest : RequestBase where TModel : ErpModelBase => ValidateAndExecuteAsync<TRequest, TResponse>(FormMeta<TModel>.Name, JsonConvert.SerializeObject(request));
 
-		public async Task<T> ValidateAndExecuteAsync<T>(
-			string serviceName,
-			params object[] parameters
-		) {
-			var loginResp = await ValidateLoginAsync();
-			if (!loginResp)
-				throw new LoginFailedException(loginResp);
-			return await ExecuteAsync<T>(serviceName, parameters);
+		protected async Task<TResponse> ValidateAndExecuteAsync<TRequest, TResponse>(params object[] parameters) where TRequest : RequestBase {
+			var now = DateTime.Now;
+			if (!LastLoginTime.HasValue || now - LastLoginTime.Value >= LoginInterval) {
+				var loginResp = await ValidateLoginAsync();
+				if (!loginResp)
+					throw new LoginFailedException(loginResp);
+				LastLoginTime = now;
+			}
+			return await ExecuteAsync<TRequest, TResponse>(parameters);
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public Task<TResponse> ExecuteAsync<TResponse, TForm>(
-			string serviceName,
-			RequestBase request
-		) where TForm : ErpModelBase
-			=> ExecuteAsync<TResponse>(
-				serviceName,
-				FormMeta<TForm>.Name,
-				JsonConvert.SerializeObject(request)
-			);
+		protected Task<TResponse> ExecuteAsync<TRequest, TResponse, TModel>(TRequest request) where TRequest : RequestBase where TModel : ErpModelBase => ExecuteAsync<TRequest, TResponse>(FormMeta<TModel>.Name, JsonConvert.SerializeObject(request));
 
-		public Task<T> ExecuteAsync<T>(
-			string serviceName,
-			params object[] parameters
-		) {
-			var asyncRequest = CreateAsyncRequest(serviceName, parameters);
+		protected Task<T> ExecuteAsync<TRequest, T>(params object[] parameters) where TRequest : RequestBase {
+			var asyncRequest = CreateAsyncRequest(typeof(TRequest).GetServiceName(), parameters);
 			asyncRequest.HttpRequest.Timeout = _defaultTimeout;
 			return CallAsync<T>(asyncRequest);
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public ApiRequest ExecuteAsync<TResponse, TForm>(
+		protected ApiRequest ExecuteAsync<TResponse, TModel>(
 			string serviceName,
 			RequestBase request,
 			Action<TResponse> onSucceed,
@@ -263,18 +233,18 @@ namespace Kingdee {
 			FailCallbackHandler onFail = null,
 			int timeout = Timeout.Infinite,
 			int reportInterval = 5
-		) where TForm : ErpModelBase
+		) where TModel : ErpModelBase
 			=> ExecuteAsync(
 				serviceName,
 				onSucceed,
-				new object[] {FormMeta<TForm>.Name, JsonConvert.SerializeObject(request)},
+				new object[] {FormMeta<TModel>.Name, JsonConvert.SerializeObject(request)},
 				onProgressChange,
 				onFail,
 				timeout,
 				reportInterval
 			);
 
-		public ApiRequest ExecuteAsync<T>(
+		protected ApiRequest ExecuteAsync<T>(
 			string serviceName,
 			Action<T> onSucceed,
 			object[] parameters = null,

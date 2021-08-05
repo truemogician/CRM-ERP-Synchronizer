@@ -4,6 +4,7 @@ using Kingdee.Forms;
 using Newtonsoft.Json;
 
 namespace Kingdee.Requests {
+	[Request("Kingdee.BOS.WebApi.ServicesStub.DynamicFormService.BatchSave")]
 	public class BatchSaveRequest<T> : CreationRequest<List<T>> where T : ErpModelBase {
 		public BatchSaveRequest() { }
 
