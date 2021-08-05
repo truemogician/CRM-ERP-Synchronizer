@@ -6,11 +6,9 @@ using TheFirstFarm.Models.Common;
 
 namespace TheFirstFarm.Models.Kingdee {
 	[Form("BD_MATERIAL")]
-	public class Material : ErpModelBase {
+	public class Material : AuditableErpModel {
 		[JsonProperty("FMaterialId")]
-		[Key]
-		[Required]
-		public int Id { get; set; }
+		public override int Id { get; set; }
 
 		/// <summary>
 		///     名称

@@ -9,7 +9,7 @@ namespace Kingdee.Forms {
 	public static class FormMeta<T> where T : ErpModelBase {
 		public static string Name => typeof(T).GetFormName();
 
-		public static MemberInfo Key => typeof(T).GetMemberWithAttribute<KeyAttribute>();
+		public static PropertyInfo Key => typeof(T).GetMostDerivedProperty(nameof(ErpModelBase.Id));
 
 		public static List<Field<T>> QueryFields => typeof(T).GetQueryFields(false).Select(field => new Field<T>(field)).ToList();
 

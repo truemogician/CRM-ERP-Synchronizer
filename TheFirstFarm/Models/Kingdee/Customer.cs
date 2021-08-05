@@ -1,21 +1,21 @@
 ﻿// ReSharper disable StringLiteralTypo
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using Kingdee.Forms;
 using Newtonsoft.Json;
 using Shared.Serialization;
+using Shared.Validation;
 using TheFirstFarm.Models.Common;
 
 namespace TheFirstFarm.Models.Kingdee {
 	[Form("BD_Customer")]
-	public class Customer : ErpModelBase {
+	public class Customer : AuditableErpModel {
 		/// <summary>
 		///     客户Id
 		/// </summary>
 		[JsonProperty("FCustId")]
-		[Key]
-		[Required]
-		public int Id { get; set; }
+		public override int Id { get; set; }
 
 		/// <summary>
 		///     客户名称
@@ -35,6 +35,7 @@ namespace TheFirstFarm.Models.Kingdee {
 		///     销售员#名称
 		/// </summary>
 		[JsonProperty("FSeller")]
+		[MemberRequired(nameof(NumberWrapper.Number))]
 		public NumberWrapper SalesmanNumber { get; set; }
 
 		/// <summary>
@@ -42,7 +43,7 @@ namespace TheFirstFarm.Models.Kingdee {
 		/// </summary>
 		[JsonProperty("FReceiveCurrId")]
 		[Required]
-		public CurrencyWrapper CurrencyNumber { get; set; }
+		public CurrencyWrapper CurrencyNumber { get; set; } = Currency.CNY;
 
 		/// <summary>
 		///     创建组织#编码
@@ -98,9 +99,9 @@ namespace TheFirstFarm.Models.Kingdee {
 		[SubForm]
 		public List<CustomerAddress> Addresses { get; set; }
 
-		public class CurrencyWrapper : NumberWrapper<Currency> {
-			[JsonConverter(typeof(EnumValueConverter), Platform.Kingdee)]
-			public override Currency Number {
+		public class CurrencyWrapper : NumberWrapper<Currency?> {
+			[JsonConverter(typeof(NullableEnumValueConverter), Platform.Kingdee)]
+			public override Currency? Number {
 				get => base.Number;
 				set => base.Number = value;
 			}
@@ -116,11 +117,6 @@ namespace TheFirstFarm.Models.Kingdee {
 			}
 
 			public static implicit operator OrganizationWrapper(Organization value) => new() {Number = value};
-		}
-
-		public class ContactRef {
-			[JsonProperty("FContactId")]
-			public NumberWrapper Number { get; set; }
 		}
 	}
 }

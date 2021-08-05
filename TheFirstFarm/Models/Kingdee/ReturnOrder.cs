@@ -7,14 +7,14 @@ using System.ComponentModel.DataAnnotations;
 using Kingdee.Forms;
 using Kingdee.Forms.Enums;
 using Newtonsoft.Json;
+using Shared.Validation;
 using TheFirstFarm.Models.Common;
 
 namespace TheFirstFarm.Models.Kingdee {
 	[Form("SAL_RETURNSTOCK")]
-	public class ReturnOrder : ErpModelBase {
-		[JsonProperty("FID")]
-		[Key]
-		public int Id { get; set; }
+	public class ReturnOrder : AuditableErpModel {
+		[JsonProperty("FId")]
+		public override int Id { get; set; }
 
 		[JsonProperty("FBillNo")]
 		public string Number { get; set; }
@@ -26,11 +26,11 @@ namespace TheFirstFarm.Models.Kingdee {
 		public DateTime? Date { get; set; }
 
 		[JsonProperty("FRetcustId")]
-		[Required]
+		[MemberRequired(nameof(NumberWrapper.Number))]
 		public NumberWrapper CustomerNumber { get; set; }
 
 		[JsonProperty("FSalesManId")]
-		[Required]
+		[MemberRequired(nameof(NumberWrapper.Number))]
 		public NumberWrapper SalesmanNumber { get; set; }
 
 		[JsonProperty("FReturnReason")]

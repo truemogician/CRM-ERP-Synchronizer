@@ -1,6 +1,5 @@
 ﻿// ReSharper disable StringLiteralTypo
 using System.ComponentModel.DataAnnotations;
-using FXiaoKe.Models;
 using Kingdee.Forms;
 using Newtonsoft.Json;
 
@@ -8,8 +7,7 @@ namespace TheFirstFarm.Models.Kingdee {
 	[Form("BD_COMMONCONTACT")]
 	public class Contact : ErpModelBase {
 		[JsonProperty("FContactId")]
-		[Key]
-		public int Id { get; set; }
+		public override int Id { get; set; }
 
 		/// <summary>
 		///     联系人编码
@@ -20,14 +18,13 @@ namespace TheFirstFarm.Models.Kingdee {
 		/// <summary>
 		///		客户Id
 		/// </summary>
-		[JsonProperty("FCustId")]
-		public int CustomerId { get; set; }
+		//[JsonProperty("FCustId")]
+		//public int CustomerId { get; set; }
 
 		/// <summary>
 		///     姓名
 		/// </summary>
 		[JsonProperty("FName")]
-		[MainField(Unique = false)]
 		[Required]
 		public string Name { get; set; }
 
