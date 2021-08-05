@@ -4,12 +4,14 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.Serialization;
 using FXiaoKe.Models;
 using FXiaoKe.Responses;
 using FXiaoKe.Utilities;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
+using Newtonsoft.Json.Serialization;
 using Shared;
 using Shared.Exceptions;
 using Shared.Serialization;
@@ -267,6 +269,7 @@ namespace FXiaoKe.Requests {
 		#nullable disable
 	}
 
+	[JsonConverter(typeof(ModelFilterConverter))]
 	public class ModelFilter : IType {
 		/// <summary>
 		/// </summary>
@@ -294,7 +297,7 @@ namespace FXiaoKe.Requests {
 		/// <summary>
 		///     取值范围
 		/// </summary>
-		[JsonProperty("field_values", ItemConverterType = typeof(FilterValueConverter))]
+		[JsonProperty("field_values")]
 		[Required]
 		public List<object> Values { get; set; }
 
@@ -330,6 +333,10 @@ namespace FXiaoKe.Requests {
 			if (source.Type != typeof(T))
 				throw new TypeNotMatchException(typeof(T), source.Type);
 		}
+
+		public static ModelOrder<T> Asc(string propertyName) => new(propertyName, true);
+
+		public static ModelOrder<T> Desc(string propertyName) => new(propertyName, false);
 	}
 
 	public class ModelOrder : IType {
@@ -367,154 +374,151 @@ namespace FXiaoKe.Requests {
 		}
 	}
 
-	public class AscendingModelOrder<T> : ModelOrder<T> where T : CrmModelBase {
-		public AscendingModelOrder(string propertyName) : base(propertyName, true) { }
-	}
-
-	public class AscendingModelOrder : ModelOrder {
-		public AscendingModelOrder(Type type, string propertyName) : base(type, propertyName, true) { }
-	}
-
-	public class DescendingModelOrder<T> : ModelOrder<T> where T : CrmModelBase {
-		public DescendingModelOrder(string propertyName) : base(propertyName, false) { }
-	}
-
-	public class DescendingModelOrder : ModelOrder {
-		public DescendingModelOrder(Type type, string propertyName) : base(type, propertyName, false) { }
-	}
-
 	internal interface IType {
 		[JsonIgnore]
 		public Type Type { get; }
 	}
 
 	#nullable enable
-	internal class FilterValueConverter : JsonConverter {
-		public static readonly TimestampConverter TimestampConverter = new(TimestampPrecision.Millisecond);
+	internal class ModelFilterConverter : JsonConverter {
+		public override bool CanRead => false;
 
 		public override void WriteJson(JsonWriter writer, object? value, JsonSerializer serializer) {
-			if (value is null)
+			if (value is not ModelFilter filter) {
 				writer.WriteNull();
-			else {
-				serializer.Converters.Add(TimestampConverter);
-				writer.WriteValue(value);
-				serializer.Converters.Remove(TimestampConverter);
+				return;
 			}
+			var contract = serializer.ContractResolver.ResolveContract(filter.GetType()) as JsonObjectContract;
+			writer.WriteStartObject();
+			foreach (var prop in contract!.Properties.Where(p => !p.Ignored)) {
+				writer.WritePropertyName(prop.PropertyName!);
+				if (prop.UnderlyingName != nameof(ModelFilter.Values))
+					writer.WriteValue(prop.ValueProvider!.GetValue(filter), serializer);
+				else {
+					writer.WriteStartArray();
+					var attr = filter.Property.StartingInfo.GetCustomAttribute<JsonConverterAttribute>();
+					if (attr is not null) {
+						var converter = (attr.ConverterType.Construct(attr.ConverterParameters) as JsonConverter)!;
+						foreach (var v in filter.Values)
+							converter.WriteJson(writer, v, serializer);
+					}
+					else
+						foreach (var v in filter.Values)
+							writer.WriteValue(v, serializer);
+					writer.WriteEndArray();
+				}
+			}
+			writer.WriteEndObject();
 		}
 
-		public override object? ReadJson(JsonReader reader, Type objectType, object? existingValue, JsonSerializer serializer) {
-			serializer.Converters.Add(TimestampConverter);
-			object? result = serializer.Deserialize(reader);
-			serializer.Converters.Remove(TimestampConverter);
-			return result;
-		}
+		public override object? ReadJson(JsonReader reader, Type objectType, object? existingValue, JsonSerializer serializer) => throw new NotSupportedException();
 
-		public override bool CanConvert(Type objectType) => Type.GetTypeCode(objectType) is not TypeCode.Object or TypeCode.DBNull;
+		public override bool CanConvert(Type objectType) => objectType.IsAssignableTo(typeof(ModelFilter));
 	}
 	#nullable disable
 
-	[JsonConverter(typeof(StringEnumConverter))]
+	[JsonConverter(typeof(EnumValueConverter))]
 	public enum QueryOperator {
 		/// <summary>
 		///     =
 		/// </summary>
-		[EnumMember(Value = "EQ")]
+		[EnumValue("EQ")]
 		Equal,
 
 		/// <summary>
 		///     >
 		/// </summary>
-		[EnumMember(Value = "GT")]
+		[EnumValue("GT")]
 		Greater,
 
 		/// <summary>
 		///     <
 		/// </summary>
-		[EnumMember(Value = "LT")]
+		[EnumValue("LT")]
 		Less,
 
 		/// <summary>
 		///     >=
 		/// </summary>
-		[EnumMember(Value = "GTE")]
+		[EnumValue("GTE")]
 		GreaterEqual,
 
 		/// <summary>
 		///     <=
 		/// </summary>
-		[EnumMember(Value = "LTE")]
+		[EnumValue("LTE")]
 		LessEqual,
 
 		/// <summary>
 		///     !=
 		/// </summary>
-		[EnumMember(Value = "N")]
+		[EnumValue("N")]
 		NotEqual,
 
 		/// <summary>
 		///     LIKE
 		/// </summary>
-		[EnumMember(Value = "LIKE")]
+		[EnumValue("LIKE")]
 		Like,
 
 		/// <summary>
 		///     NOT LIKE
 		/// </summary>
-		[EnumMember(Value = "NLIKE")]
+		[EnumValue("NLIKE")]
 		NotLike,
 
 		/// <summary>
 		///     IS
 		/// </summary>
-		[EnumMember(Value = "IS")]
+		[EnumValue("IS")]
 		Is,
 
 		/// <summary>
 		///     IS NOT
 		/// </summary>
-		[EnumMember(Value = "ISN")]
+		[EnumValue("ISN")]
 		IsNot,
 
 		/// <summary>
 		///     IN
 		/// </summary>
-		[EnumMember(Value = "IN")]
+		[EnumValue("IN")]
 		In,
 
 		/// <summary>
 		///     NOT IN
 		/// </summary>
-		[EnumMember(Value = "NIN")]
+		[EnumValue("NIN")]
 		NotIn,
 
 		/// <summary>
 		///     BETWEEN
 		/// </summary>
-		[EnumMember(Value = "BETWEEN")]
+		[EnumValue("BETWEEN")]
 		Between,
 
 		/// <summary>
 		///     NOT BETWEEN
 		/// </summary>
-		[EnumMember(Value = "NBETWEEN")]
+		[EnumValue("NBETWEEN")]
 		NotBetween,
 
 		/// <summary>
 		///     LIKE%
 		/// </summary>
-		[EnumMember(Value = "STARTWITH")]
+		[EnumValue("STARTWITH")]
 		StartWith,
 
 		/// <summary>
 		///     %LIKE
 		/// </summary>
-		[EnumMember(Value = "ENDWITH")]
+		[EnumValue("ENDWITH")]
 		EndWith,
 
 		/// <summary>
 		///     Array包含
 		/// </summary>
-		[EnumMember(Value = "CONTAINS")]
+		[EnumValue("CONTAINS")]
 		Contains
 	}
 }
