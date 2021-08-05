@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reflection;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using Newtonsoft.Json.Serialization;
 using Shared.Exceptions;
 
 namespace Shared.Serialization {
@@ -105,6 +106,14 @@ namespace Shared.Serialization {
 	}
 
 	public abstract class ObjectWrapperConverterBase<T> : JsonConverter<T> {
+		private static Type JsonSerializerInternalReader { get; } = typeof(JsonSerializer).Assembly.GetType("Newtonsoft.Json.Serialization.JsonSerializerInternalReader");
+
+		private static Type JsonSerializerInternalWriter { get; } = typeof(JsonSerializer).Assembly.GetType("Newtonsoft.Json.Serialization.JsonSerializerInternalWriter");
+
+		private static MethodInfo CreateValueInternal { get; } = JsonSerializerInternalReader.GetMethod("CreateValueInternal", BindingFlags.NonPublic | BindingFlags.Instance);
+
+		private static MethodInfo SerializeValue { get; } = JsonSerializerInternalWriter.GetMethod("SerializeValue", BindingFlags.NonPublic | BindingFlags.Instance);
+
 		public abstract string PropertyName { get; }
 
 		public abstract JsonConverter[] Converters { get; }
@@ -113,7 +122,11 @@ namespace Shared.Serialization {
 			writer.WriteStartObject();
 			writer.WritePropertyName(PropertyName);
 			serializer.Converters.AddRange(Converters);
-			writer.WriteValue(value, serializer);
+			var contract = serializer.ContractResolver.ResolveContract(value.GetType());
+			if (contract.Converter?.GetType().IsAssignableTo(GetType()) == true)
+				SerializeWithoutContractConverter(writer, value, contract, serializer);
+			else
+				writer.WriteValue(value, serializer);
 			serializer.Converters.RemoveRange(Converters);
 			writer.WriteEndObject();
 		}
@@ -127,9 +140,34 @@ namespace Shared.Serialization {
 			if (prop is null)
 				throw new JTokenException(token, $"Property \"{PropertyName}\" not found");
 			serializer.Converters.AddRange(Converters);
-			var result = prop.Value.ToObject<T>(serializer);//BUG: self recurse when applying JsonConverterAttribute to a class
+			T result;
+			var contract = serializer.ContractResolver.ResolveContract(objectType);
+			if (contract.Converter?.GetType().IsAssignableTo(GetType()) == true) {
+				var newReader = new JTokenReader(prop.Value);
+				newReader.Read();
+				result = DeserializeWithoutContractConverter(newReader, objectType, contract, serializer);
+			}
+			else
+				result = prop.Value.ToObject<T>(serializer);
 			serializer.Converters.RemoveRange(Converters);
 			return result;
+		}
+
+		protected T DeserializeWithoutContractConverter(JsonReader reader, Type objectType, JsonContract contract, JsonSerializer serializer) {
+			var converter = contract.Converter;
+			contract.Converter = null;
+			object internalReader = JsonSerializerInternalReader.Construct(serializer);
+			object result = CreateValueInternal.Invoke(internalReader, reader, objectType, contract, null, null, null, null);
+			contract.Converter = converter;
+			return (T)result;
+		}
+
+		protected void SerializeWithoutContractConverter(JsonWriter writer, object value, JsonContract contract, JsonSerializer serializer) {
+			var converter = contract.Converter;
+			contract.Converter = null;
+			object internalWriter = JsonSerializerInternalWriter.Construct(serializer);
+			SerializeValue.Invoke(internalWriter, writer, value, contract, null, null, null);
+			contract.Converter = converter;
 		}
 	}
 

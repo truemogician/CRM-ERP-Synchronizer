@@ -5,9 +5,9 @@ using Newtonsoft.Json;
 using Shared.Serialization;
 
 namespace Kingdee.Responses {
+	[JsonConverter(typeof(ObjectWrapperConverter<BasicResponse>), "Result")]
 	public class BasicResponse : ResponseBase {
-		[JsonProperty("Result")]
-		[JsonConverter(typeof(ObjectWrapperConverter<ResponseStatus>), "ResponseStatus")]
+		[JsonProperty("ResponseStatus")]
 		public ResponseStatus ResponseStatus { get; set; }
 
 		public static implicit operator bool(BasicResponse resp) => resp.ResponseStatus;
@@ -52,7 +52,7 @@ namespace Kingdee.Responses {
 
 	public class SuccessEntity {
 		[JsonProperty("Id")]
-		public string Id { get; set; }
+		public int? Id { get; set; }
 
 		[JsonProperty("Number")]
 		public string Number { get; set; }

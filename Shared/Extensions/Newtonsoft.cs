@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using System.Text;
 using Newtonsoft.Json.Serialization;
 using Shared.Exceptions;
 
@@ -55,6 +57,26 @@ namespace Newtonsoft.Json {
 		public static bool IsDefined(this JsonProperty property, Type attributeType) {
 			var attrs = property.AttributeProvider!.GetAttributes(attributeType, true);
 			return attrs.Count > 0;
+		}
+	}
+
+	#nullable enable
+	public static class JsonSerializerExtensions {
+		public static string Serialize(this JsonSerializer serializer, object? value) {
+			var builder = new StringBuilder();
+			var stringWriter = new StringWriter(builder);
+			serializer.Serialize(stringWriter, value);
+			return builder.ToString();
+		}
+
+		public static T? Deserialize<T>(this JsonSerializer serializer, string json) {
+			var stringReader = new StringReader(json);
+			return serializer.Deserialize<T>(new JsonTextReader(stringReader));
+		}
+
+		public static object? Deserialize(this JsonSerializer serializer, Type objectType, string json) {
+			var stringReader = new StringReader(json);
+			return serializer.Deserialize(new JsonTextReader(stringReader), objectType);
 		}
 	}
 }
