@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using Newtonsoft.Json;
 
 namespace Kingdee.Responses {
-	public class LoginResponse {
+	public class LoginResponse : ResponseBase {
 		[JsonProperty("Message")]
 		public object Message { get; set; }
 
