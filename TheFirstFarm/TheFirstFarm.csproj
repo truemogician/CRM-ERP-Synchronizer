@@ -8,16 +8,17 @@
 		<ApplicationIcon>icon.ico</ApplicationIcon>
 	</PropertyGroup>
 
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+	  <WarningLevel>4</WarningLevel>
+	</PropertyGroup>
+
 	<ItemGroup>
 		<Compile Remove="Libs\**" />
 		<Compile Remove="Requirement\**" />
-		<Compile Remove="SQLite\**" />
 		<EmbeddedResource Remove="Libs\**" />
 		<EmbeddedResource Remove="Requirement\**" />
-		<EmbeddedResource Remove="SQLite\**" />
 		<None Remove="Libs\**" />
 		<None Remove="Requirement\**" />
-		<None Remove="SQLite\**" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -63,6 +64,12 @@
 	    <Generator>ResXFileCodeGenerator</Generator>
 	    <LastGenOutput>Resource.Designer.cs</LastGenOutput>
 	  </EmbeddedResource>
+	</ItemGroup>
+
+	<ItemGroup>
+	  <None Update="SQLite\map.db">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </None>
 	</ItemGroup>
 
 </Project>

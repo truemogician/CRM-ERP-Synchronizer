@@ -15,7 +15,7 @@ namespace TheFirstFarm.Transform {
 	public class MapContext : DbContext {
 		public MapContext() {
 			var builder = new DbConnectionStringBuilder();
-			var folder = @"D:\Code\Work\企荫信息兼职\Synchronizer\TheFirstFarm\SQLite";
+			var folder = @"SQLite";
 			builder.Add("Data Source", Path.Combine(folder, "map.db"));
 			ConnectionString = builder.ToString();
 		}
