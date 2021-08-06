@@ -40,9 +40,9 @@ namespace TheFirstFarm.Models.FXiaoKe {
 		/// </summary>
 
 		[JsonProperty("field_Nx4Oo__c")]
-		[JsonConverter(typeof(EnumValueConverter), Platform.FXiaoKe)]
+		[JsonConverter(typeof(NullableEnumValueConverter), Platform.FXiaoKe)]
 		[Required]
-		public Currency SettlementCurrency { get; set; } = Currency.CNY;
+		public Currency? Currency { get; set; } = Common.Currency.CNY;
 
 		/// <summary>
 		///     创建组织编码

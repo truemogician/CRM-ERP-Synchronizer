@@ -42,7 +42,6 @@ namespace TheFirstFarm.Models.FXiaoKe {
 		///     地址
 		/// </summary>
 		[JsonProperty("add")]
-		[Required]
 		public string Address { get; set; }
 	}
 }
