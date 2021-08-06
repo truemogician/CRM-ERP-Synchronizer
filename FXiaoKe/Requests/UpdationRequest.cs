@@ -7,8 +7,8 @@ using FXiaoKe.Models;
 using FXiaoKe.Responses;
 using FXiaoKe.Utilities;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using Shared.Exceptions;
-using Shared.Serialization;
 
 namespace FXiaoKe.Requests {
 	[Request("/cgi/crm/custom/v2/data/update")]
@@ -32,16 +32,13 @@ namespace FXiaoKe.Requests {
 		///     主对象数据map(和对象描述中字段一一对应)
 		/// </summary>
 		[JsonProperty("object_data")]
-		[JsonConverter(typeof(UpdationDataModelConverter))]
 		[Required]
 		public IUpdater<T> Model { get; set; }
 	}
 
+	[JsonConverter(typeof(UpdaterConverter))]
 	public class Updater<T> : IUpdater<T> where T : CrmModelBase {
-		public Updater(T model) {
-			Model = model;
-			UpdationCollection.Add(nameof(CrmModelBase.DataId));
-		}
+		public Updater(T model) => Model = model;
 
 		public T Model { get; }
 
@@ -67,20 +64,27 @@ namespace FXiaoKe.Requests {
 
 	public class UpdaterConverter : JsonConverter<IUpdater<CrmModelBase>> {
 		public override void WriteJson(JsonWriter writer, IUpdater<CrmModelBase> value, JsonSerializer serializer) {
-			if (value is null)
+			if (value is null) {
 				writer.WriteNull();
-			else if (serializer.ContractResolver is ContractResolver resolver) {
+				return;
+			}
+			string json;
+			if (serializer.ContractResolver is ContractResolver resolver) {
 				var list = resolver.UpdationList;
 				resolver.UpdationList = value.UpdationCollection.ToList();
-				serializer.Serialize(writer, value.Model);
+				json = serializer.Serialize(value.Model);
 				resolver.UpdationList = list;
 			}
 			else {
 				var originalResolver = serializer.ContractResolver;
 				serializer.ContractResolver = new ContractResolver {UpdationList = value.UpdationCollection.ToList()};
-				serializer.Serialize(writer, value.Model);
+				json = serializer.Serialize(value.Model);
 				serializer.ContractResolver = originalResolver;
 			}
+			var obj = JToken.Parse(json) as JObject;
+			obj!.Add("_id", value.Model.DataId);
+			obj.Add("dataObjectApiName", value.Model.GetType().GetModelName());
+			writer.WriteValue(obj, serializer);
 		}
 
 		public override IUpdater<CrmModelBase> ReadJson(JsonReader reader, Type objectType, IUpdater<CrmModelBase> existingValue, bool hasExistingValue, JsonSerializer serializer) {
@@ -88,15 +92,6 @@ namespace FXiaoKe.Requests {
 				throw new TypeNotMatchException(typeof(Updater<>), objectType);
 			var modelType = objectType.GetGenericArguments()[0];
 			return objectType.Construct(serializer.Deserialize(reader, modelType)) as IUpdater<CrmModelBase>;
-		}
-	}
-
-	public class UpdationDataModelConverter : AdditionalPropertyConverter<IUpdater<CrmModelBase>> {
-		public static readonly UpdaterConverter UpdaterConverter = new();
-
-		public UpdationDataModelConverter() {
-			AdditionalProperties.Add("dataObjectApiName", value => value.Model.GetType().GetModelName());
-			Converters.Add(UpdaterConverter);
 		}
 	}
 }
