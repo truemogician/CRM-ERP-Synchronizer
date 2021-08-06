@@ -5,6 +5,7 @@
 
 /Try
 *.dgml
+*.txt
 
 *[Ee]xample*/
 
