@@ -3,9 +3,10 @@ using System.ComponentModel.DataAnnotations;
 using FXiaoKe.Models;
 using Newtonsoft.Json;
 using Shared.Serialization;
+using TheFirstFarm.Models.Common;
 
 namespace TheFirstFarm.Models.FXiaoKe {
-	[Model("object_TBoMu__c")]
+	[Model("object_TBoMu__c", Custom = true)]
 	public class Invoice : CrmModelBase {
 		/// <summary>
 		///     单据编号
@@ -25,6 +26,7 @@ namespace TheFirstFarm.Models.FXiaoKe {
 		///     开票日期
 		/// </summary>
 		[JsonProperty("field_l20lY__c")]
+		[JsonConverter(typeof(NullableConverter<TimestampConverter>))]
 		public DateTime? Date { get; set; }
 
 		/// <summary>
@@ -45,7 +47,8 @@ namespace TheFirstFarm.Models.FXiaoKe {
 		///     单据类型
 		/// </summary>
 		[JsonProperty("field_PzFui__c")]
-		public InvoiceType? InvoiceType { get; set; }
+		[JsonConverter(typeof(EnumValueConverter), Platform.FXiaoKe)]
+		public InvoiceType BillType { get; set; }
 
 		/// <summary>
 		///     销售订单
@@ -60,38 +63,5 @@ namespace TheFirstFarm.Models.FXiaoKe {
 		[JsonProperty("field_s15bl__c")]
 		[ForeignKey(typeof(Customer))]
 		public string CustomerId { get; set; }
-	}
-
-	[JsonConverter(typeof(EnumValueConverter))]
-	public enum InvoiceType {
-		/// <summary>
-		///     标准应收单
-		/// </summary>
-		[EnumValue("Qj5d85aHB")]
-		Standard,
-
-		/// <summary>
-		///     费用应收单
-		/// </summary>
-		[EnumValue("C57227swl")]
-		Expense,
-
-		/// <summary>
-		///     资产应收单
-		/// </summary>
-		[EnumValue("aZD7X8z02")]
-		Asset,
-
-		/// <summary>
-		///     转销应收单
-		/// </summary>
-		[EnumValue("0QY84t0z9")]
-		Resale,
-
-		/// <summary>
-		///     其他
-		/// </summary>
-		[EnumValue("other")]
-		Other
 	}
 }
