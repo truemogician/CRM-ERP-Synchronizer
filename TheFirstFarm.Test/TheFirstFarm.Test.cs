@@ -11,6 +11,7 @@ using FXiaoKe.Utilities;
 using Kingdee.Forms;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 using NUnit.Framework;
 using TheFirstFarm.Transform;
 using TheFirstFarm.Transform.Entities;
@@ -30,35 +31,34 @@ namespace TheFirstFarm.Test {
 			return fields.Count;
 		}
 
-		[TestCaseGeneric(GenericArgument = typeof(KModels.ReturnOrder))]
-		[TestCaseGeneric(GenericArgument = typeof(KModels.Material))]
 		[TestCaseGeneric(GenericArgument = typeof(KModels.Customer))]
+		[TestCaseGeneric(GenericArgument = typeof(KModels.Material))]
+		[TestCaseGeneric(GenericArgument = typeof(KModels.SalesOrder))]
+		[TestCaseGeneric(GenericArgument = typeof(KModels.OutboundOrder))]
+		[TestCaseGeneric(GenericArgument = typeof(KModels.ReceivableBill))]
+		[TestCaseGeneric(GenericArgument = typeof(KModels.ReturnOrder))]
 		public void KingdeeQueryTest<T>() where T : ErpModelBase {
 			var response = KClient.Query(new KRequests.QueryRequest<T>());
 			Assert.IsTrue(response.IsT1);
-			foreach (var resp in response.AsT1)
-				Console.WriteLine(JsonConvert.SerializeObject(resp, Formatting.Indented));
+			var result = response.AsT1;
+			Console.WriteLine($@"{result?.Count} {typeof(T).Name}s found");
 		}
 
-		[TestCaseGeneric(GenericArgument = typeof(FModels.ReturnOrder))]
 		[TestCaseGeneric(GenericArgument = typeof(FModels.Customer))]
 		[TestCaseGeneric(GenericArgument = typeof(FModels.Product))]
+		[TestCaseGeneric(GenericArgument = typeof(FModels.SalesOrder))]
+		[TestCaseGeneric(GenericArgument = typeof(FModels.DeliveryOrder))]
+		[TestCaseGeneric(GenericArgument = typeof(FModels.Invoice))]
+		[TestCaseGeneric(GenericArgument = typeof(FModels.ReturnOrder))]
 		public async Task FXiaoKeQueryTest<T>(params FRequests.ModelFilter<T>[] filters) where T : CrmModelBase {
 			FClient.Operator = await FClient.GetStaffByPhoneNumber("18118359138");
 			var result = await FClient.QueryByCondition(filters);
 			Console.WriteLine($@"{result?.Count} {typeof(T).Name}s found");
 		}
 
-		[TestCaseGeneric(132005, GenericArgument = typeof(KModels.Contact))]
-		public async Task KingdeeUnauditTest<T>(params int[] ids) where T : ErpModelBase {
-			var resp = await KClient.UnauditAsync(new KRequests.AuditRequest<T>(ids));
-			Console.WriteLine(JsonConvert.SerializeObject(resp));
-			Assert.IsTrue(resp);
-		}
-
-		[TestCaseGeneric(132005, GenericArgument = typeof(KModels.Contact))]
-		public async Task KingdeeDeleteTest<T>(params int[] ids) where T : ErpModelBase {
-			var resp = await KClient.DeleteAsync(new KRequests.DeleteRequest<T>(ids));
+		[TestCaseGeneric(132349, GenericArgument = typeof(KModels.Customer))]
+		public async Task KingdeeUnauditAndDeleteTest<T>(params int[] ids) where T : ErpModelBase {
+			var resp = await KClient.UnauditAndDeleteAsync(new KRequests.DeleteRequest<T>(ids));
 			Console.WriteLine(JsonConvert.SerializeObject(resp));
 			Assert.IsTrue(resp);
 		}
