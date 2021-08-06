@@ -6,6 +6,7 @@ using System.Reflection;
 using System.Threading.Tasks;
 using FXiaoKe.Models;
 using FXiaoKe.Requests;
+using Kingdee.Exceptions;
 using Kingdee.Forms;
 using Kingdee.Requests;
 using Kingdee.Requests.Query;
@@ -73,7 +74,7 @@ namespace TheFirstFarm.Transform {
 			var keyInfo = FormMeta<TForm>.Key;
 			var resp = await KClient.QueryAsync(new QueryRequest<TForm>((Field)keyInfo == id));
 			if (resp.IsT0)
-				return null;
+				throw new RequestFailedException(resp.AsT0);
 			var form = resp.AsT1.SingleOrDefault();
 			if (form is null)
 				return null;
@@ -150,7 +151,7 @@ namespace TheFirstFarm.Transform {
 			return map;
 		}
 		#nullable enable
-		public TMap? GetByFXiaoKeId<TMap>(string? id) where TMap : class, IIdMap => GetByFXiaoKeId(Context.GetDbSet<TMap>(), id);
+		public TMap? GetByFXiaoKeId<TMap>(string? id) where TMap : class, IIdMap => GetByFXiaoKeId(Context.GetDbSet<TMap>()!, id);
 
 		public static TMap? GetByFXiaoKeId<TMap>(DbSet<TMap> dbSet, string? id) where TMap : class, IIdMap {
 			if (string.IsNullOrEmpty(id))
@@ -159,14 +160,14 @@ namespace TheFirstFarm.Transform {
 				return dbSet.Find(id);
 		}
 
-		public TMap? GetByKingdeeId<TMap>(int id) where TMap : class, IIdMap => GetByKingdeeId(Context.GetDbSet<TMap>(), id);
+		public TMap? GetByKingdeeId<TMap>(int id) where TMap : class, IIdMap => GetByKingdeeId(Context.GetDbSet<TMap>()!, id);
 
 		public static TMap? GetByKingdeeId<TMap>(DbSet<TMap> dbSet, int id) where TMap : class, IIdMap {
 			lock (dbSet)
 				return dbSet.SingleOrDefault(map => id.Equals(map.KingdeeId));
 		}
 
-		public TMap? GetByMapProperty<TMap>([NotNull] string propName, object? value) where TMap : class, IIdMap => GetByMapProperty(Context.GetDbSet<TMap>(), propName, value);
+		public TMap? GetByMapProperty<TMap>([NotNull] string propName, object? value) where TMap : class, IIdMap => GetByMapProperty(Context.GetDbSet<TMap>()!, propName, value);
 
 		public static TMap? GetByMapProperty<TMap>(DbSet<TMap> dbSet, [NotNull] string propName, object? value) where TMap : class, IIdMap {
 			if (value is null)
@@ -185,7 +186,7 @@ namespace TheFirstFarm.Transform {
 			}
 		}
 
-		public TMap? GetByMapProperty<TMap, TProperty>([NotNull] string propName, TProperty? value) where TMap : class, IIdMap => GetByMapProperty(Context.GetDbSet<TMap>(), propName, value);
+		public TMap? GetByMapProperty<TMap, TProperty>([NotNull] string propName, TProperty? value) where TMap : class, IIdMap => GetByMapProperty(Context.GetDbSet<TMap>()!, propName, value);
 
 		public static TMap? GetByMapProperty<TMap, TProperty>(DbSet<TMap> dbSet, [NotNull] string propName, TProperty? value) where TMap : class, IIdMap {
 			if (value is null)
@@ -213,7 +214,13 @@ namespace TheFirstFarm.Transform {
 				return map;
 			var mapInfo = GetMapInfo(typeof(TMap));
 			var modelType = mapInfo.MapAttribute!.FModel;
-			return await (dynamic)QueryByFXiaoKeIdMethod.MakeGenericMethod(mapInfo.MapType, modelType).Invoke(this, id, true);
+			map = await (dynamic)QueryByFXiaoKeIdMethod.MakeGenericMethod(mapInfo.MapType, modelType).Invoke(this, id, true);
+			if (map is not null)
+				lock (Context) {
+					Context.AddOrUpdate(map);
+					Context.SaveChanges();
+				}
+			return map;
 		}
 
 		public async Task<bool> HasKingdeeId<TMap>(int id) where TMap : class, IIdMap, new() => await FromKingdeeId<TMap>(id) is not null;
@@ -223,7 +230,13 @@ namespace TheFirstFarm.Transform {
 				return map;
 			var mapInfo = GetMapInfo(typeof(TMap));
 			var formType = mapInfo.MapAttribute!.KModel;
-			return await (dynamic)QueryByKingdeeIdMethod.MakeGenericMethod(mapInfo.MapType, formType).Invoke(this, id, true);
+			map = await (dynamic)QueryByKingdeeIdMethod.MakeGenericMethod(mapInfo.MapType, formType).Invoke(this, id, true);
+			if (map is not null)
+				lock (Context) {
+					Context.AddOrUpdate(map);
+					Context.SaveChanges();
+				}
+			return map;
 		}
 
 		public async Task<bool> HasMapProperty<TMap>(string propName, object? value) where TMap : class, IIdMap, new() => await FromMapProperty<TMap>(propName, value) is not null;
@@ -262,10 +275,11 @@ namespace TheFirstFarm.Transform {
 							prop.SetValue(map, kValue);
 				}
 			}
-			lock (Context) {
-				Context.AddOrUpdate(map);
-				Context.SaveChanges();
-			}
+			if (map is not null)
+				lock (Context) {
+					Context.AddOrUpdate(map);
+					Context.SaveChanges();
+				}
 			return map;
 		}
 	}
