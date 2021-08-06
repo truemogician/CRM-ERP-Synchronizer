@@ -1,9 +1,9 @@
-﻿using System;
+﻿#nullable enable
+using System;
 using Kingdee.Responses;
 using Shared.Exceptions;
 
 namespace Kingdee.Exceptions {
-	#nullable enable
 	public class LoginFailedException : ExceptionWithDefaultMessage {
 		public LoginFailedException(string? message = null, Exception? innerException = null) : base(message, innerException) { }
 

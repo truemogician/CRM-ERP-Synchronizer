@@ -1,14 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
+using System.ComponentModel.DataAnnotations;
 using System.Configuration;
 using System.Drawing;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.CompilerServices;
+using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using FXiaoKe.Models;
 using FXiaoKe.Requests;
+using FXiaoKe.Requests.Message;
 using Kingdee;
 using Kingdee.Forms;
 using Kingdee.Requests;
@@ -18,6 +22,8 @@ using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Newtonsoft.Json;
 using Shared.Exceptions;
 using Shared.Extensions;
+using Shared.Serialization;
+using TheFirstFarm.Models.Common;
 using TheFirstFarm.Transform;
 using TheFirstFarm.Transform.Entities;
 using TheFirstFarm.Utilities;
@@ -33,8 +39,14 @@ namespace TheFirstFarm {
 	using FCustomer = FModels.Customer;
 	using KCustomer = KModels.Customer;
 	using KContact = KModels.Contact;
+	using FSalesOrder = FModels.SalesOrder;
+	using KSalesOrder = KModels.SalesOrder;
+	using FDeliveryOrder = FModels.DeliveryOrder;
+	using KDeliveryOrder = KModels.OutboundOrder;
 	using FReturnOrder = FModels.ReturnOrder;
 	using KReturnOrder = KModels.ReturnOrder;
+	using FInvoice = FModels.Invoice;
+	using KInvoice = KModels.ReceivableBill;
 	using FBasicResponse = FResponses.BasicResponse;
 	using KBasicResponse = BasicResponse;
 
@@ -55,7 +67,7 @@ namespace TheFirstFarm {
 		public MapManager MapManager { get; }
 
 		internal void UpdateTimeLeft() {
-			var activeSync = Synchronizers.FirstOrDefault(sync => sync.Page.TabIndex == TabControl.SelectedIndex);
+			var activeSync = Synchronizers.FirstOrDefault(sync => sync.Page == TabControl.SelectedTab);
 			if (activeSync is not null && activeSync.SyncTimer.Enabled && activeSync.LastSyncTime.HasValue) {
 				var span = activeSync.LastSyncTime.Value + TimeSpan.FromMilliseconds(activeSync.SyncTimer.Interval) - DateTime.Now;
 				activeSync.TimeLeftBox.Text = (span.TotalSeconds >= 0 ? Convert.ToInt32(span.TotalSeconds) : activeSync.SyncTimer.Interval).ToString();
@@ -69,6 +81,8 @@ namespace TheFirstFarm {
 
 			internal readonly Queue<Task> Tasks = new();
 
+			internal readonly HashSet<LogLevel> MessageLevels = new();
+
 			private bool _synchronizing;
 
 			internal Synchronizer(SyncModel model, MainForm container) {
@@ -77,6 +91,7 @@ namespace TheFirstFarm {
 				SyncTimer = new Timer {Enabled = false};
 				SyncTimer.Tick += (_, _) => AutoSync();
 				InitializeComponent();
+				var _ = LoadStaffs();
 			}
 
 			internal FClient FClient => _container.FClient;
@@ -158,9 +173,10 @@ namespace TheFirstFarm {
 				}
 			}
 
-			internal Task Synchronize(DateTime? start, DateTime? end = null) {
+			internal async Task Synchronize(DateTime? start, DateTime? end = null) {
 				end ??= DateTime.Now;
-				return Model switch {
+				Information($"开始同步{(start.HasValue ? $"{start.Value:yyyy-MM-dd HH:mm:ss}到{end.Value:yyyy-MM-dd HH:mm:ss}之间" : $"{end.Value:yyyy-MM-dd HH:mm:ss}之前")}的{Model.GetValue()}数据");
+				await (Model switch {
 					SyncModel.Customer      => SyncCustomer(start, end.Value),
 					SyncModel.SalesOrder    => SyncSalesOrder(start, end.Value),
 					SyncModel.DeliveryOrder => SyncDeliveryOrder(start, end.Value),
@@ -168,14 +184,61 @@ namespace TheFirstFarm {
 					SyncModel.Invoice       => SyncInvoice(start, end.Value),
 					SyncModel.Product       => SyncProduct(start, end.Value),
 					_                       => throw new EnumValueOutOfRangeException()
-				};
+				});
+				NewLine();
+			}
+
+			private async Task LoadStaffs() {
+				var apartment = await FClient.GetDepartmentDetailTree();
+				var staffs = await FClient.GetStaffs(apartment);
+				MapManager.Context.StaffMaps.AddOrUpdateRange(staffs.Select(staff => new StaffMap(staff.Id, staff.Number)));
+				await MapManager.Context.SaveChangesAsync();
+			}
+
+			private void LogValidationResults(string title, IList<ValidationResult> results) {
+				var builder = new StringBuilder();
+				builder.AppendLine(title);
+				for (var i = 0; i < results.Count; ++i) {
+					var content = $"{string.Join(", ", results[i].MemberNames)}: {results[i].ErrorMessage}";
+					if (i == results.Count - 1)
+						builder.Append(content);
+					else
+						builder.AppendLine(content);
+				}
+				Warning(builder.ToString());
+			}
+
+			private async Task<List<T>> GetFromKingdee<T>(DateTime? start, DateTime end, Func<T, string> getEntityName) where T : AuditableErpModel {
+				var sentence = (new Field<T>(nameof(AuditableErpModel.LifeStatus)) == (Literal)Kingdee.Forms.LifeStatus.Audited) &
+					(new Field<T>(nameof(AuditableErpModel.AuditionTime)) <= (Literal)end);
+				if (start.HasValue)
+					sentence &= new Field<T>(nameof(AuditableErpModel.AuditionTime)) >= (Literal)start.Value;
+				var request = new QueryRequest<T>(new Sentence<T>(sentence));
+				var result = await KClient.QueryAsync(request);
+				if (result.IsT0) {
+					var resp = result.AsT0;
+					Error($"{resp.ResponseStatus}");
+					return null;
+				}
+				string modelName = Model.GetValue();
+				Information(result.AsT1.Count == 0 ? $"没有需要同步的{modelName}" : $"获取到{result.AsT1.Count}条{modelName}数据，开始同步");
+				var validated = result.AsT1.Where(
+						m => {
+							var validationResults = m.Validate(true);
+							if (validationResults.Count > 0)
+								LogValidationResults($"{modelName}{getEntityName(m)}验证失败：", validationResults);
+							return validationResults.Count == 0;
+						}
+					)
+					.ToList();
+				return validated;
 			}
 
 			internal async Task SyncCustomer(DateTime? start, DateTime end) {
 				var filters = new List<ModelFilter<FCustomer>> {
-					ModelFilter<FCustomer>.NotEqual(nameof(FCustomer.NeedSync), true),
+					ModelFilter<FCustomer>.Equal(nameof(FCustomer.NeedSync), true),
 					ModelFilter<FCustomer>.Is(nameof(FCustomer.KingdeeId), null),
-					ModelFilter<FCustomer>.Equal(nameof(FCustomer.LifeStatus), LifeStatus.Normal),
+					ModelFilter<FCustomer>.Equal(nameof(FCustomer.LifeStatus), FXiaoKe.Models.LifeStatus.Normal),
 					ModelFilter<FCustomer>.LessEqual(nameof(FCustomer.CreationTime), end)
 				};
 				if (start.HasValue)
@@ -192,15 +255,14 @@ namespace TheFirstFarm {
 					Information("没有需要同步的客户");
 					return;
 				}
+				int totalCount = customers.Count;
 				var successCount = 0;
 				customers = customers.Where(
 						cust => {
 							var results = cust.Validate(true);
 							if (results.Count == 0)
 								return true;
-							Warning($"客户{cust.Name}验证失败");
-							foreach (var result in results)
-								Warning($"{string.Join(", ", result.MemberNames)}: {result.ErrorMessage}");
+							LogValidationResults($"客户{cust.Name}验证失败：", results);
 							return false;
 						}
 					)
@@ -209,7 +271,7 @@ namespace TheFirstFarm {
 					var cust = new KCustomer {
 						Name = c.Name,
 						Number = c.Number,
-						CurrencyNumber = c.SettlementCurrency,
+						CurrencyNumber = c.Currency,
 						CreatorOrgNumber = c.CreatorOrgId,
 						UserOrgNumber = c.UserOrgId,
 						InvoiceTitle = c.InvoiceTitle,
@@ -220,19 +282,38 @@ namespace TheFirstFarm {
 						PhoneNumber = c.InvoicePhoneNumber,
 						Addresses = new List<KModels.CustomerAddress>()
 					};
+					if (cust.CurrencyNumber?.Number is null)
+						cust.CurrencyNumber = Currency.CNY;
 					var contact = new KContact {
 						Name = c.Contact.Name,
 						Number = c.Contact.Number,
 						PhoneNumber = c.Contact.PhoneNumber,
 						Address = c.Contact.Address
 					};
-					var contactSaveResp = await KClient.SaveAsync(new SaveRequest<KContact>(contact));
-					if (!contactSaveResp) {
-						Error($"保存联系人{contact.Name}时发生错误：{contactSaveResp.ResponseStatus}");
+					var hasContact = false;
+					try {
+						var mp = await MapManager.FromMapProperty<ContactMap>(nameof(ContactMap.Number), c.Contact.Number);
+						if (mp?.KingdeeId is not null) {
+							hasContact = true;
+							contact.Id = mp.KingdeeId.Value;
+						}
+					}
+					catch (Exception ex) {
+						Error($"查询联系人{contact.Name}时发生错误：{ex.Message}");
 						continue;
 					}
-					contact.Id = contactSaveResp.Id;
-					//result.Contacts = new List<KCustomer.ContactRef> {new() {Number = contactSaveResp.Number}};
+					if (!hasContact)
+						try {
+							var contactSaveResp = await KClient.SaveAsync(new SaveRequest<KContact>(contact));
+							if (!contactSaveResp)
+								throw new Exception(contactSaveResp.ResponseStatus.ToString());
+							contact.Id = contactSaveResp.Id!.Value;
+							MapManager.Context.ContactMaps.AddOrUpdate(new ContactMap(c.Contact.DataId, contact.Number, contact.Id));
+						}
+						catch (Exception ex) {
+							Error($"保存联系人{contact.Name}时发生错误：{ex.Message}");
+							continue;
+						}
 					foreach (var addr in c.Addresses)
 						cust.Addresses.Add(
 							new KModels.CustomerAddress {
@@ -240,7 +321,7 @@ namespace TheFirstFarm {
 								Location = addr.Address,
 								IsShippingAddress = addr.IsShippingAddress,
 								ContactWay = addr.ContactWay,
-								ContactId = contact.Id
+								ContactNumber = contact.Number
 							}
 						);
 					if (c.Addresses.Count == 0)
@@ -249,23 +330,26 @@ namespace TheFirstFarm {
 					SaveResponse saveResp;
 					try {
 						saveResp = await KClient.SaveAsync(new SaveRequest<KCustomer>(cust));
+						if (!saveResp)
+							throw new Exception(saveResp.ResponseStatus.ToString());
 						map.KingdeeId = saveResp.Id;
-						MapManager.Context.AddOrUpdate(map);
+						MapManager.Context.CustomerMaps.AddOrUpdate(map);
 						Debug($"客户\"{c.Name}\"同步成功，Id为{saveResp.Id}");
-						++successCount;
+						cust.Id = saveResp.Id.Value;
 					}
 					catch (Exception ex) {
 						Error($"同步客户\"{c.Name}\"时发生错误，错误信息：{ex.Message}");
-						try {
-							var deleteResp = await KClient.UnauditAndDeleteAsync(new DeleteRequest<KContact>(contact));
-							if (deleteResp)
-								Debug($"成功删除同步失败客户对应的联系人{contact.Name}");
-							else
-								throw new Exception(deleteResp.ResponseStatus.ToString());
-						}
-						catch (Exception exception) {
-							Critical($"删除同步失败客户对应的联系人{contact.Name}失败：{exception.Message}");
-						}
+						if (!hasContact)
+							try {
+								var deleteResp = await KClient.UnauditAndDeleteAsync(new DeleteRequest<KContact>(contact));
+								if (deleteResp)
+									Debug($"成功删除同步失败客户对应的联系人{contact.Name}");
+								else
+									throw new Exception(deleteResp.ResponseStatus.ToString());
+							}
+							catch (Exception exception) {
+								Critical($"删除同步失败客户对应的联系人{contact.Name}失败：{exception.Message}");
+							}
 						continue;
 					}
 					var updater = new Updater<FCustomer>(c);
@@ -277,6 +361,7 @@ namespace TheFirstFarm {
 						var updationResp = await FClient.Update(updater);
 						if (updationResp) {
 							Debug($"反写CRM成功，客户{c.Name}同步结束");
+							++successCount;
 							continue;
 						}
 						Error($"同步结果反写失败：{updationResp.ErrorMessage}");
@@ -285,9 +370,12 @@ namespace TheFirstFarm {
 						Error($"同步结果反写CRM发生错误：{ex.Message}");
 					}
 					try {
-						var deleteResp = await KClient.UnauditAndDeleteAsync(new DeleteRequest<KContact>(contact));
-						if (!deleteResp)
-							throw new Exception(deleteResp.ResponseStatus.ToString());
+						KBasicResponse deleteResp;
+						if (!hasContact) {
+							deleteResp = await KClient.UnauditAndDeleteAsync(new DeleteRequest<KContact>(contact));
+							if (!deleteResp)
+								throw new Exception(deleteResp.ResponseStatus.ToString());
+						}
 						deleteResp = await KClient.UnauditAndDeleteAsync(new DeleteRequest<KCustomer>(cust));
 						if (!deleteResp)
 							throw new Exception(deleteResp.ResponseStatus.ToString());
@@ -297,68 +385,183 @@ namespace TheFirstFarm {
 					}
 				}
 				await MapManager.Context.SaveChangesAsync();
-				Information($"同步完成，总计获取{customers.Count}条客户数据，成功{successCount}条");
+				Information($"同步完成，总计获取{totalCount}条客户数据，成功{successCount}条");
 			}
 
-			private async Task<List<T>> GetFromKingdee<T>(DateTime? start, DateTime end, SyncModel model, Func<T, string> getEntityName) where T : ErpModelBase {
-				var sentence = (new Field<T>(nameof(ErpModelBase.Status)) == (Literal)Status.Audited) &
-					(new Field<T>(nameof(ErpModelBase.AuditionTime)) <= (Literal)end);
-				if (start.HasValue)
-					sentence &= new Field<T>(nameof(ErpModelBase.AuditionTime)) >= (Literal)start.Value;
-				var request = new QueryRequest<T>(new Sentence<T>(sentence));
-				var result = await KClient.QueryAsync(request);
-				if (result.IsT0) {
-					var resp = result.AsT0;
-					Error($"{resp.ResponseStatus}");
-					return null;
-				}
-				Information(result.AsT1.Count == 0 ? $"没有需要同步的{model}" : $"获取到{result.AsT1.Count}条{model}数据，开始同步");
-				var validated = result.AsT1.Where(
-						m => {
-							var validationResults = m.Validate(true);
-							if (validationResults.Count > 0) {
-								Warning($"{model}{getEntityName(m)}验证失败");
-								foreach (var v in validationResults)
-									Warning($"{string.Join(", ", v.MemberNames)}: {v.ErrorMessage}");
-							}
-							return validationResults.Count == 0;
-						}
-					)
-					.ToList();
-				return validated;
-			}
-
-			internal async Task SyncSalesOrder(DateTime? start, DateTime end) { }
-
-			internal async Task SyncDeliveryOrder(DateTime? start, DateTime end) { }
-
-			internal async Task SyncReturnOrder(DateTime? start, DateTime end) {
-				var returnOrders = await GetFromKingdee<KReturnOrder>(start, end, SyncModel.ReturnOrder, x => x.Number);
-				if (returnOrders is null)
+			internal async Task SyncSalesOrder(DateTime? start, DateTime end) {
+				var orders = await GetFromKingdee<KSalesOrder>(start, end, x => x.Number);
+				if (orders is null)
 					return;
 				var successCount = 0;
-				foreach (var returnOrder in returnOrders) {
-					string ownerId = (await MapManager.FromMapProperty<StaffMap>(nameof(StaffMap.Number), (string)returnOrder.SalesmanNumber))?.FXiaoKeId;
+				foreach (var order in orders) {
+					string ownerId = MapManager.GetByMapProperty<StaffMap>(nameof(StaffMap.Number), (string)order.SalesmanNumber)?.FXiaoKeId;
 					if (string.IsNullOrEmpty(ownerId)) {
-						Warning($"CRM中不存在编号为{returnOrder.SalesmanNumber}的员工");
+						Warning($"CRM中不存在编号为{order.SalesmanNumber}的员工");
 						continue;
 					}
-					string customerId = (await MapManager.FromMapProperty<CustomerMap>(nameof(CustomerMap.Number), (string)returnOrder.CustomerNumber))?.FXiaoKeId;
+					string customerId = (await MapManager.FromMapProperty<CustomerMap>(nameof(CustomerMap.Number), (string)order.CustomerNumber))?.FXiaoKeId;
 					if (string.IsNullOrEmpty(customerId)) {
-						Warning($"CRM中不存在编号为{returnOrder.CustomerNumber}的客户，请检查数据或手动同步客户");
+						Warning($"CRM中不存在编号为{order.CustomerNumber}的客户，请检查数据或手动同步客户");
+						continue;
+					}
+					var result = new FSalesOrder {
+						OwnerId = ownerId,
+						CustomerId = customerId,
+						CreationTime = order.CreationTime,
+						Date = order.Date,
+						KingdeeNumber = order.Number,
+						OrderType = order.BillType,
+						BusinessType = order.BusinessType,
+						ShippingAddress = order.DeliveryAddressNumber,
+						Products = new List<FModels.SalesOrderProduct>()
+					};
+					var success = true;
+					foreach (var material in order.Materials) {
+						string productId = (await MapManager.FromMapProperty<ProductMap>(nameof(ProductMap.Number), (string)material.MaterialNumber))?.FXiaoKeId;
+						if (string.IsNullOrEmpty(productId)) {
+							Warning($"CRM中不存在编号为{material.MaterialNumber}的产品，请检查数据或手动同步产品");
+							success = false;
+							break;
+						}
+						result.Products.Add(
+							new FModels.SalesOrderProduct {
+								ProductId = productId,
+								OwnerId = ownerId,
+								CreationTime = order.CreationTime,
+								Quantity = material.Quantity,
+								Price = material.UnitPrice,
+								TaxRate = material.TaxRate,
+								Money = material.Money,
+								RequestDate = material.RequestDate,
+								Remark = material.Remark
+							}
+						);
+					}
+					if (!success)
+						continue;
+					var map = new SalesOrderMap(order.Id, order.Number);
+					try {
+						var creationResp = await FClient.Create(result);
+						map.FXiaoKeId = creationResp.DataId;
+						MapManager.Context.SalesOrderMaps.AddOrUpdate(map);
+						Debug($"销售订单\"{result.KingdeeNumber}\"同步成功，Id为{creationResp.DataId}");
+						++successCount;
+					}
+					catch (Exception ex) {
+						Error($"同步销售订单\"{result.KingdeeNumber}\"时发生错误，错误信息：{ex.Message}");
+					}
+				}
+				await MapManager.Context.SaveChangesAsync();
+				Information($"同步完成，总计获取{orders.Count}条销售订单数据，成功{successCount}条");
+			}
+
+			internal async Task SyncDeliveryOrder(DateTime? start, DateTime end) {
+				var orders = await GetFromKingdee<KDeliveryOrder>(start, end, x => x.Number);
+				if (orders is null)
+					return;
+				var successCount = 0;
+				foreach (var order in orders) {
+					string ownerId = MapManager.GetByMapProperty<StaffMap>(nameof(StaffMap.Number), (string)order.SalesmanNumber)?.FXiaoKeId;
+					if (string.IsNullOrEmpty(ownerId)) {
+						Warning($"CRM中不存在编号为{order.SalesmanNumber}的员工");
+						continue;
+					}
+					string customerId = (await MapManager.FromMapProperty<CustomerMap>(nameof(CustomerMap.Number), (string)order.CustomerNumber))?.FXiaoKeId;
+					if (string.IsNullOrEmpty(customerId)) {
+						Warning($"CRM中不存在编号为{order.CustomerNumber}的客户，请检查数据或手动同步客户");
+						continue;
+					}
+					string salesOrderId = (await MapManager.FromMapProperty<SalesOrderMap>(nameof(SalesOrderMap.Number), order.SalesOrderNumber))?.FXiaoKeId;
+					if (string.IsNullOrEmpty(customerId)) {
+						Warning($"CRM中不存在编号为{order.SalesOrderNumber}的销售订单，请检查数据或手动同步销售订单");
+						continue;
+					}
+					var result = new FDeliveryOrder {
+						OwnerId = ownerId,
+						CustomerId = customerId,
+						SalesOrderId = salesOrderId,
+						CreationTime = order.CreationTime,
+						Date = order.Date,
+						Number = order.Number,
+						KingdeeNumber = order.Number,
+						OrderType = order.BillType,
+						Logistics = new List<FModels.LogisticsInfo>(),
+						Details = new List<FModels.DeliveryOrderDetail>()
+					};
+					var success = true;
+					foreach (var detail in order.Details) {
+						string productId = (await MapManager.FromMapProperty<ProductMap>(nameof(ProductMap.Number), (string)detail.MaterialNumber))?.FXiaoKeId;
+						if (string.IsNullOrEmpty(productId)) {
+							Warning($"CRM中不存在编号为{detail.MaterialNumber}的产品，请检查数据或手动同步产品");
+							success = false;
+							break;
+						}
+						result.Details.Add(
+							new FModels.DeliveryOrderDetail {
+								ProductId = productId,
+								OwnerId = ownerId,
+								CreationTime = order.CreationTime,
+								KingdeeId = order.Id,
+								ExpectedAmount = detail.ExpectedAmount,
+								ActualAmount = detail.ActualAmount
+							}
+						);
+					}
+					if (!success)
+						continue;
+					//foreach (var logistics in order.Logistics)
+					//	result.Logistics.Add(
+					//		new FModels.LogisticsInfo {
+					//			CreationTime = order.CreationTime,
+					//			DeliveryTime = logistics.DeliveryTime,
+					//			Company = logistics.CompanyCode,
+					//			WaybillNumber = logistics.WaybillNumber,
+					//			Status = logistics.Status
+					//		}
+					//	);
+					var map = new DeliveryOrderMap(order.Id, order.Number);
+					try {
+						var creationResp = await FClient.Create(result);
+						map.FXiaoKeId = creationResp.DataId;
+						MapManager.Context.DeliveryOrderMaps.AddOrUpdate(map);
+						Debug($"销售出库单\"{result.Number}\"同步成功，Id为{creationResp.DataId}");
+						++successCount;
+					}
+					catch (Exception ex) {
+						Error($"同步销售出库单\"{result.Number}\"时发生错误，错误信息：{ex.Message}");
+					}
+				}
+				await MapManager.Context.SaveChangesAsync();
+				Information($"同步完成，总计获取{orders.Count}条销售出库单数据，成功{successCount}条");
+			}
+
+			internal async Task SyncReturnOrder(DateTime? start, DateTime end) {
+				var orders = await GetFromKingdee<KReturnOrder>(start, end, x => x.Number);
+				if (orders is null)
+					return;
+				var successCount = 0;
+				foreach (var order in orders) {
+					string ownerId = MapManager.GetByMapProperty<StaffMap>(nameof(StaffMap.Number), (string)order.SalesmanNumber)?.FXiaoKeId;
+					if (string.IsNullOrEmpty(ownerId)) {
+						Warning($"CRM中不存在编号为{order.SalesmanNumber}的员工");
+						continue;
+					}
+					string customerId = (await MapManager.FromMapProperty<CustomerMap>(nameof(CustomerMap.Number), (string)order.CustomerNumber))?.FXiaoKeId;
+					if (string.IsNullOrEmpty(customerId)) {
+						Warning($"CRM中不存在编号为{order.CustomerNumber}的产品，请检查数据或手动同步产品");
 						continue;
 					}
 					var result = new FReturnOrder {
 						OwnerId = ownerId,
 						CustomerId = customerId,
-						Date = returnOrder.Date,
-						Reason = returnOrder.ReturnReason,
-						Number = returnOrder.Number,
-						BusinessType = returnOrder.BusinessType,
+						Date = order.Date,
+						Reason = order.ReturnReason,
+						Number = order.Number,
+						BusinessType = order.BusinessType,
 						Details = new List<FModels.ReturnOrderDetail>()
 					};
 					var success = true;
-					foreach (var detail in returnOrder.Details) {
+					foreach (var detail in order.Details) {
 						string productId = (await MapManager.FromMapProperty<ProductMap>(nameof(ProductMap.Number), (string)detail.MaterialNumber))?.FXiaoKeId;
 						if (string.IsNullOrEmpty(productId)) {
 							Warning($"CRM中不存在编号为{detail.MaterialNumber}的客户，请检查数据或手动同步客户");
@@ -379,33 +582,86 @@ namespace TheFirstFarm {
 					}
 					if (!success)
 						continue;
-					var map = new ReturnOrderMap(returnOrder.Id, returnOrder.Number);
+					var map = new ReturnOrderMap(order.Id, order.Number);
 					try {
 						var creationResp = await FClient.Create(result, false);
 						map.FXiaoKeId = creationResp.DataId;
-						MapManager.Context.AddOrUpdate(map);
-						Debug($"销售退货单\"{result.Number}\"同步成功，Id为{creationResp.DataId}");
+						MapManager.Context.ReturnOrderMaps.AddOrUpdate(map);
+						Debug($"销售订单\"{result.Number}\"同步成功，Id为{creationResp.DataId}");
 						++successCount;
 					}
 					catch (Exception ex) {
-						Error($"同步销售退货单\"{result.Number}\"时发生错误，错误信息：{ex.Message}");
+						Error($"同步销售订单\"{result.Number}\"时发生错误，错误信息：{ex.Message}");
 					}
 				}
 				await MapManager.Context.SaveChangesAsync();
-				Information($"同步完成，总计获取{returnOrders.Count}条销售退货单数据，成功{successCount}条");
+				Information($"同步完成，总计获取{orders.Count}条销售订单数据，成功{successCount}条");
 			}
 
-			internal async Task SyncInvoice(DateTime? start, DateTime end) { }
+			internal async Task SyncInvoice(DateTime? start, DateTime end) {
+				var invoices = await GetFromKingdee<KInvoice>(start, end, x => x.Number);
+				if (invoices is null)
+					return;
+				var successCount = 0;
+				foreach (var invoice in invoices) {
+					string ownerId = MapManager.GetByMapProperty<StaffMap>(nameof(StaffMap.Number), (string)invoice.SalesmanNumber)?.FXiaoKeId;
+					if (string.IsNullOrEmpty(ownerId)) {
+						Warning($"CRM中不存在编号为{invoice.SalesmanNumber}的员工");
+						continue;
+					}
+					string customerId = (await MapManager.FromMapProperty<CustomerMap>(nameof(CustomerMap.Number), (string)invoice.CustomerNumber))?.FXiaoKeId;
+					if (string.IsNullOrEmpty(customerId)) {
+						Warning($"CRM中不存在编号为{invoice.CustomerNumber}的客户，请检查数据或手动同步客户");
+						continue;
+					}
+					var set = invoice.Details.Select(x => x.SalesOrderNumber).Where(x => !string.IsNullOrEmpty(x)).ToHashSet();
+					switch (set.Count) {
+						case 0:
+							Warning($"应收单{invoice.Number}缺少销售订单关联，请检查数据");
+							continue;
+						case > 1:
+							Warning($"应收单{invoice.Number}关联了多个不相同的销售订单，请检查数据");
+							continue;
+					}
+					string salesOrderNumber = set.First();
+					string salesOrderId = (await MapManager.FromMapProperty<SalesOrderMap>(nameof(SalesOrderMap.Number), salesOrderNumber))?.FXiaoKeId;
+					if (string.IsNullOrEmpty(customerId)) {
+						Warning($"CRM中不存在编号为{salesOrderNumber}的销售订单，请检查数据或手动同步销售订单");
+						continue;
+					}
+					var result = new FInvoice {
+						OwnerId = ownerId,
+						CustomerId = customerId,
+						SalesOrderId = salesOrderId,
+						CreationTime = invoice.CreationTime,
+						Number = invoice.Number,
+						Money = invoice.ExpectedMoney,
+						BillType = invoice.BillTypeNumber
+					};
+					var map = new InvoiceMap(invoice.Id, invoice.Number);
+					try {
+						var creationResp = await FClient.Create(result);
+						map.FXiaoKeId = creationResp.DataId;
+						MapManager.Context.InvoiceMaps.AddOrUpdate(map);
+						Debug($"应收单\"{result.Number}\"同步成功，Id为{creationResp.DataId}");
+						++successCount;
+					}
+					catch (Exception ex) {
+						Error($"同步应收单\"{result.Number}\"时发生错误，错误信息：{ex.Message}");
+					}
+				}
+				await MapManager.Context.SaveChangesAsync();
+				Information($"同步完成，总计获取{invoices.Count}条应收单数据，成功{successCount}条");
+			}
 
 			internal async Task SyncProduct(DateTime? start, DateTime end) {
-				var materials = await GetFromKingdee<KModels.Material>(start, end, SyncModel.Product, x => x.Name);
+				var materials = await GetFromKingdee<KModels.Material>(start, end, x => x.Name);
 				if (materials is null)
 					return;
 				if (materials.Count == 0) {
 					Information("没有需要同步的物料");
 					return;
 				}
-				Information($"获取到{materials.Count}条物料数据，开始同步");
 				var successCount = 0;
 				foreach (var m in materials) {
 					var map = new ProductMap(m.Id, m.Number);
@@ -423,7 +679,8 @@ namespace TheFirstFarm {
 						MeasurementUnit = m.Unit,
 						ShelfLifeUnit = m.ShelfLifeUnit,
 						ShelfLife = m.ShelfLife,
-						MinOrderQuantity = m.MinOrderQuantity
+						MinOrderQuantity = m.MinOrderQuantity,
+						CreationTime = m.CreationTime
 					};
 					try {
 						var creationResp = await FClient.Create(product, false);
@@ -458,34 +715,55 @@ namespace TheFirstFarm {
 			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			internal void Critical(string message, bool logTime = true) => Log(message, LogLevel.Critical, logTime);
 
-			internal void Log(string message, LogLevel logLevel, bool logTime = true) {
-				(var color, string levelText) = logLevel switch {
-					LogLevel.Trace       => (Color.DimGray, "踪迹"),
-					LogLevel.Debug       => (Color.DodgerBlue, "调试"),
-					LogLevel.Information => (Color.MediumSpringGreen, "信息"),
-					LogLevel.Warning     => (Color.Gold, "警告"),
-					LogLevel.Error       => (Color.Red, "错误"),
-					LogLevel.Critical    => (Color.Magenta, "严重错误"),
+			internal void Log(string message, LogLevel logLevel, bool showTime = true, bool showLogLevel = true) {
+				var color = logLevel switch {
+					LogLevel.Trace       => Color.DimGray,
+					LogLevel.Debug       => Color.DodgerBlue,
+					LogLevel.Information => Color.MediumSpringGreen,
+					LogLevel.Warning     => Color.Gold,
+					LogLevel.Error       => Color.Red,
+					LogLevel.Critical    => Color.Magenta,
 					_                    => throw new EnumValueOutOfRangeException()
 				};
-				if (logTime)
-					LogTextBox.AppendText(DateTime.Now.ToString("HH:mm:ss.fff "), Color.Black);
-				LogTextBox.AppendLine($"[{levelText}] {message}", color);
+				var now = DateTime.Now;
+				if (showTime)
+					LogTextBox.AppendText(now.ToString("HH:mm:ss.fff "), Color.Black);
+				LogTextBox.AppendLine($"{(showLogLevel ? $"[{logLevel.GetValue()}] " : "")}{message}", color);
+				if (MessageLevels.Contains(logLevel)) {
+					var _ = FClient.SendCompositeMessage(
+						new CompositeMessage("数据同步出现问题", "http://120.27.55.22/k3cloud/html5/index.aspx") {
+							Form = {
+								("级别", logLevel.GetValue()),
+								("日期", now.ToString("yyyy年MM月dd日")),
+								("时间", now.ToString("HH时mm分ss秒"))
+							},
+							Tail = message
+						}
+					);
+				}
 			}
+
+			internal void NewLine() => LogTextBox.AppendLine("");
 		}
 	}
 
 	public enum LogLevel : byte {
+		[EnumValue("痕迹")]
 		Trace,
 
+		[EnumValue("调试")]
 		Debug,
 
+		[EnumValue("信息")]
 		Information,
 
+		[EnumValue("警告")]
 		Warning,
 
+		[EnumValue("错误")]
 		Error,
 
+		[EnumValue("严重错误")]
 		Critical
 	}
 }
