@@ -3,6 +3,7 @@ using System;
 using System.ComponentModel.DataAnnotations;
 using FXiaoKe.Models;
 using Newtonsoft.Json;
+using Shared.Serialization;
 
 namespace TheFirstFarm.Models.FXiaoKe {
 	/// <summary>
@@ -11,13 +12,21 @@ namespace TheFirstFarm.Models.FXiaoKe {
 	[Model("SalesOrderProductObj")]
 	public class SalesOrderProduct : CrmModelBase {
 		/// <summary>
+		///		订单产品编号
+		/// </summary>
+		[JsonProperty("name")]
+		[MainField]
+		[RegularExpression(@"\d{12,}")]
+		[Required]
+		public string Number { get; set; }
+
+		/// <summary>
 		///     物料编码
 		/// </summary>
 		[JsonProperty("product_id")]
-		[MainField]
 		[ForeignKey(typeof(Product))]
 		[Required]
-		public string Number { get; set; }
+		public string ProductId { get; set; }
 
 		[JsonProperty("order_id")]
 		[MasterKey(typeof(SalesOrder))]
@@ -46,12 +55,13 @@ namespace TheFirstFarm.Models.FXiaoKe {
 		///     金额
 		/// </summary>
 		[JsonProperty("field_y66kY__c")]
-		public decimal Volume { get; set; }
+		public decimal Money { get; set; }
 
 		/// <summary>
 		///     要货日期
 		/// </summary>
 		[JsonProperty("field_hvdcm__c")]
+		[JsonConverter(typeof(NullableConverter<TimestampConverter>))]
 		public DateTime? RequestDate { get; set; }
 
 		/// <summary>

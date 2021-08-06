@@ -5,6 +5,7 @@ using System.ComponentModel.DataAnnotations;
 using FXiaoKe.Models;
 using Newtonsoft.Json;
 using Shared.Serialization;
+using Shared.Validation;
 using TheFirstFarm.Models.Common;
 
 namespace TheFirstFarm.Models.FXiaoKe {
@@ -13,19 +14,24 @@ namespace TheFirstFarm.Models.FXiaoKe {
 	/// </summary>
 	[Model("SalesOrderObj")]
 	public class SalesOrder : CrmModelBase {
+		[JsonProperty("name")]
+		[MainField]
+		[Generated]
+		[RegularExpression(@"DD-\d{12,}")]
+		public string Number { get; set; }
+
 		/// <summary>
 		///     订单号
 		/// </summary>
 		[JsonProperty("field_D1Q3T__c")]
-		[MainField]
-		[RegularExpression(@"DD-\d{12,}")]
 		[Required]
-		public string Number { get; set; }
+		public string KingdeeNumber { get; set; }
 
 		/// <summary>
 		///     单据类型
 		/// </summary>
 		[JsonProperty("field_6Xyq0__c")]
+		[JsonConverter(typeof(EnumValueConverter), Platform.FXiaoKe)]
 		public SalesOrderType OrderType { get; set; }
 
 		/// <summary>
@@ -38,6 +44,7 @@ namespace TheFirstFarm.Models.FXiaoKe {
 		///     订单日期
 		/// </summary>
 		[JsonProperty("order_time")]
+		[JsonConverter(typeof(NullableConverter<TimestampConverter>))]
 		public DateTime? Date { get; set; }
 
 		/// <summary>
@@ -69,6 +76,7 @@ namespace TheFirstFarm.Models.FXiaoKe {
 		///     发货时间
 		/// </summary>
 		[JsonProperty("delivery_date")]
+		[JsonConverter(typeof(NullableConverter<TimestampConverter>))]
 		public DateTime? DeliveryTime { get; set; }
 
 		/// <summary>
@@ -80,71 +88,8 @@ namespace TheFirstFarm.Models.FXiaoKe {
 		/// <summary>
 		///     订单产品
 		/// </summary>
-		[JsonIgnore]
-		[SubModel(Eager = true, Cascade = true)]
+		[SubModel]
+		[CollectionMinCount(1)]
 		public List<SalesOrderProduct> Products { get; set; }
-	}
-
-	[JsonConverter(typeof(EnumValueConverter))]
-	public enum SalesOrderType {
-		/// <summary>
-		///     标准销售订单
-		/// </summary>
-		[EnumValue("m45a848H2")]
-		Standard,
-
-		/// <summary>
-		///     寄售销售订单
-		/// </summary>
-		[EnumValue("DoB9s22iK")]
-		Consignment,
-
-		/// <summary>
-		///     受拖销售订单
-		/// </summary>
-		[EnumValue("Cyj781h4i")]
-		Commissioned,
-
-		/// <summary>
-		///     直运销售订单
-		/// </summary>
-		[EnumValue("3Isyf25u3")]
-		DirectShipment,
-
-		/// <summary>
-		///     退货订单
-		/// </summary>
-		[EnumValue("Xf5f90jGJ")]
-		Return,
-
-		/// <summary>
-		///     分销调拨订单
-		/// </summary>
-		[EnumValue("l4YLa197k")]
-		DistributionTransfer,
-
-		/// <summary>
-		///     分销购销订单
-		/// </summary>
-		[EnumValue("860L0Uolk")]
-		Distribution,
-
-		/// <summary>
-		///     VMI销售订单
-		/// </summary>
-		[EnumValue("bTg34g7n5")]
-		Vmi,
-
-		/// <summary>
-		///     现销订单
-		/// </summary>
-		[EnumValue("g9pCW5lM1")]
-		Cash,
-
-		/// <summary>
-		///     其他
-		/// </summary>
-		[EnumValue("other")]
-		Other
 	}
 }
