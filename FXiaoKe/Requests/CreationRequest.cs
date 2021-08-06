@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using FXiaoKe.Models;
 using FXiaoKe.Responses;
 using FXiaoKe.Utilities;
@@ -9,14 +10,8 @@ namespace FXiaoKe.Requests {
 	[Request("/cgi/crm/custom/v2/data/create")]
 	public class CustomCreationRequest<T> : CreationRequest<T> where T : CrmModelBase { }
 
-	[Request("/cgi/crm/custom/v2/data/create")]
-	public class CustomCreationRequest<T, TDetail> : CreationRequest<T, TDetail> where T : CrmModelBase where TDetail : CrmModelBase { }
-
 	[Request("/cgi/crm/v2/data/create")]
 	public class CreationRequest<T> : CreationRequestBase<CreationData<T>> where T : CrmModelBase { }
-
-	[Request("/cgi/crm/v2/data/create")]
-	public class CreationRequest<T, TDetail> : CreationRequestBase<CreationData<T, TDetail>> where T : CrmModelBase where TDetail : CrmModelBase { }
 
 	[Request(null, typeof(CreationResponse), ErrorMessage = "创建对象时发生错误")]
 	public abstract class CreationRequestBase<T> : CrmRequest<T> {
@@ -58,17 +53,15 @@ namespace FXiaoKe.Requests {
 		[Required]
 		public T Model { get; set; }
 
-		public static implicit operator CreationData<T>(T model) => new(model);
-
-		public static implicit operator T(CreationData<T> data) => data.Model;
-	}
-
-	public class CreationData<T, TDetail> : CreationData<T> where T : CrmModelBase where TDetail : CrmModelBase {
 		/// <summary>
 		///     明细对象数据map(和对象描述中字段一一对应)
 		/// </summary>
 		[JsonProperty("details")]
-		public TDetail Detail { get; set; }
+		public Dictionary<string, IEnumerable<CrmModelBase>> Details { get; } = new();
+
+		public static implicit operator CreationData<T>(T model) => new(model);
+
+		public static implicit operator T(CreationData<T> data) => data.Model;
 	}
 
 	public class CreationDataModelConverter : AdditionalPropertyConverter<CrmModelBase> {

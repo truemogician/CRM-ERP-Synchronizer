@@ -188,36 +188,50 @@ namespace FXiaoKe {
 		}
 
 		private async Task<CreationResponse> Create(CrmModelBase model, bool? cascade = null) {
+			var request = model.GetType().IsCustomModel() ? new CustomCreationRequest<CrmModelBase> {Data = model} : new CreationRequest<CrmModelBase> {Data = model};
+			if (model.CreationTime.HasValue)
+				request.SpecifyCreationTime = true;
+			var cascades = new List<(MemberInfo RefKey, IEnumerable<CrmModelBase> SubModels)>();
+			if (cascade != false) {
+				var modelType = model.GetType();
+				var subModelMembers = modelType.GetSubModelMembers(cascade: cascade);
+				foreach (var subModelMember in subModelMembers) {
+					var rawType = subModelMember.GetValueType();
+					bool many = rawType.Implements(typeof(ICollection<>));
+					var subModelType = many ? rawType.GetItemType(typeof(ICollection<>)) : rawType;
+					MemberInfo refKey;
+					var isMaster = false;
+					if (subModelMember.GetCustomAttribute<SubModelAttribute>() is var subModelAttr && !string.IsNullOrEmpty(subModelAttr!.ReverseKeyName)) {
+						refKey = subModelType.GetMember(subModelAttr.ReverseKeyName, MemberTypes.Property | MemberTypes.Field);
+						if (refKey is null)
+							throw new MemberNotFoundException(subModelType, subModelAttr.ReverseKeyName);
+						if (refKey.GetCustomAttribute<ReferenceAttributeBase>() is var refAttr && refAttr is null)
+							throw new AttributeNotFoundException(typeof(ReferenceAttributeBase));
+						if (refAttr.ReferenceType != modelType)
+							throw new TypeNotMatchException(modelType, refAttr.ReferenceType);
+					}
+					else {
+						MasterKeyAttribute masterKeyAttr;
+						(refKey, masterKeyAttr) = subModelType.GetMemberAndAttribute<MasterKeyAttribute>();
+						if (masterKeyAttr is null)
+							throw new AttributeNotFoundException(typeof(MasterKeyAttribute));
+						if (masterKeyAttr.MasterType != modelType)
+							throw new TypeNotMatchException(modelType, masterKeyAttr.MasterType);
+						isMaster = true;
+					}
+					var subModels = many ? subModelMember.GetValue(model) as IEnumerable<CrmModelBase> : new[] {subModelMember.GetValue(model) as CrmModelBase};
+					if (isMaster)
+						request.Data.Details.Add(subModelType.GetModelName(), subModels);
+					else
+						cascades.Add((refKey, subModels));
+				}
+			}
 			var response = await (model.GetType().IsCustomModel()
-				? ReceiveResponse<CreationResponse, CustomCreationRequest<CrmModelBase>>(new CustomCreationRequest<CrmModelBase> {Data = model})
-				: ReceiveResponse<CreationResponse, CreationRequest<CrmModelBase>>(new CreationRequest<CrmModelBase> {Data = model}));
+				? ReceiveResponse<CreationResponse, CustomCreationRequest<CrmModelBase>>(request as CustomCreationRequest<CrmModelBase>)
+				: ReceiveResponse<CreationResponse, CreationRequest<CrmModelBase>>(request));
 			if (!response || cascade == false)
 				return response;
-			var modelType = model.GetType();
-			var subModelMembers = modelType.GetSubModelMembers(cascade: cascade);
-			foreach (var subModelMember in subModelMembers) {
-				var rawType = subModelMember.GetValueType();
-				bool many = rawType.Implements(typeof(ICollection<>));
-				var subModelType = many ? rawType.GetItemType(typeof(ICollection<>)) : rawType;
-				MemberInfo refKey;
-				if (subModelMember.GetCustomAttribute<SubModelAttribute>() is var subModelAttr && !string.IsNullOrEmpty(subModelAttr!.ReverseKeyName)) {
-					refKey = subModelType.GetMember(subModelAttr.ReverseKeyName, MemberTypes.Property | MemberTypes.Field);
-					if (refKey is null)
-						throw new MemberNotFoundException(subModelType, subModelAttr.ReverseKeyName);
-					if (refKey.GetCustomAttribute<ReferenceAttributeBase>() is var refAttr && refAttr is null)
-						throw new AttributeNotFoundException(typeof(ReferenceAttributeBase));
-					if (refAttr.ReferenceType != modelType)
-						throw new TypeNotMatchException(modelType, refAttr.ReferenceType);
-				}
-				else {
-					MasterKeyAttribute masterKeyAttr;
-					(refKey, masterKeyAttr) = subModelType.GetMemberAndAttribute<MasterKeyAttribute>();
-					if (masterKeyAttr is null)
-						throw new AttributeNotFoundException(typeof(MasterKeyAttribute));
-					if (masterKeyAttr.MasterType != modelType)
-						throw new TypeNotMatchException(modelType, masterKeyAttr.MasterType);
-				}
-				var subModels = many ? subModelMember.GetValue(model) as IEnumerable<CrmModelBase> : new[] {subModelMember.GetValue(model) as CrmModelBase};
+			foreach (var (refKey, subModels) in cascades) {
 				foreach (var subModel in subModels!) {
 					refKey.SetValue(subModel, response.DataId);
 					if (await Create(subModel, cascade) is var resp && !resp)
