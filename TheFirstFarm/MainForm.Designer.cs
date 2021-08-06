@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
+using System.IO;
 using System.Reflection;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -94,6 +95,10 @@ namespace TheFirstFarm {
 			internal DateTimePicker StartDatePicker = new();
 
 			internal TextBox TimeLeftBox = new();
+
+			internal ContextMenuStrip LogTextBoxMenu = new();
+
+			internal SaveFileDialog SaveDialog = new();
 
 			#endregion
 			internal SyncModel Model;
@@ -265,6 +270,42 @@ namespace TheFirstFarm {
 				LogTextBox.Text = "";
 				LogTextBox.ReadOnly = true;
 				LogTextBox.Font = new Font("微软雅黑", 9);
+				LogTextBox.ContextMenuStrip = LogTextBoxMenu;
+				//
+				// LogTextBoxMenu
+				//
+				LogTextBoxMenu.Items.Add("清空", null, (sender, e) => LogTextBox.Text = "");
+				LogTextBoxMenu.Items.Add(
+					"导出到文件",
+					null,
+					(sender, e) => {
+						SaveDialog.Title = "保存日志文件";
+						SaveDialog.Filter = "文本文件|*.txt|日志文件|*.log";
+						SaveDialog.FileName = $"{Model.GetValue()}同步日志";
+						if (SaveDialog.ShowDialog() == DialogResult.OK) {
+							var writer = new StreamWriter(SaveDialog.OpenFile());
+							writer.WriteLine(LogTextBox.Text);
+							writer.Close();
+						}
+					}
+				);
+				var item = new ToolStripMenuItem("消息发送级别");
+				foreach (var level in Enum.GetValues<LogLevel>()) {
+					var checkItem = new ToolStripMenuItem(level.GetValue());
+					checkItem.CheckOnClick = true;
+					checkItem.Checked = (byte)level >= (byte)LogLevel.Warning;
+					var lv = level;
+					if (checkItem.Checked)
+						MessageLevels.Add(lv);
+					checkItem.CheckedChanged += (sender, e) => {
+						if (checkItem.Checked)
+							MessageLevels.Add(lv);
+						else
+							MessageLevels.Remove(lv);
+					};
+					item.DropDownItems.Add(checkItem);
+				}
+				LogTextBoxMenu.Items.Add(item);
 			}
 		}
 	}
