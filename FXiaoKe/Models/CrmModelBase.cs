@@ -15,20 +15,36 @@ namespace FXiaoKe.Models {
 		public virtual string DataId { get; set; }
 
 		/// <summary>
-		///     最后修改时间
+		///     创建人
 		/// </summary>
-		[JsonProperty("last_modified_time")]
-		[JsonConverter(typeof(NullableConverter<TimestampConverter>))]
-		[Generated]
-		public DateTime? LastModifiedTime { get; set; }
+		[JsonProperty("created_by")]
+		[JsonConverter(typeof(ArrayWrapperConverter))]
+		[ForeignKey(typeof(Staff))]
+		public string CreatorId { get; set; }
 
 		/// <summary>
 		///     创建时间
 		/// </summary>
 		[JsonProperty("create_time")]
 		[JsonConverter(typeof(NullableConverter<TimestampConverter>))]
-		[Generated]
 		public DateTime? CreationTime { get; set; }
+
+		/// <summary>
+		///     最后修改人
+		/// </summary>
+		[JsonProperty("last_modified_by")]
+		[JsonConverter(typeof(ArrayWrapperConverter))]
+		[ForeignKey(typeof(Staff))]
+		[Generated]
+		public string LastModifierId { get; set; }
+
+		/// <summary>
+		///     最后修改时间
+		/// </summary>
+		[JsonProperty("last_modified_time")]
+		[JsonConverter(typeof(NullableConverter<TimestampConverter>))]
+		[Generated]
+		public DateTime? LastModifiedTime { get; set; }
 
 		/// <summary>
 		///     生命状态
@@ -42,24 +58,6 @@ namespace FXiaoKe.Models {
 		[JsonProperty("lock_status")]
 		[JsonConverter(typeof(BoolConverter), "1", "0")]
 		public bool Locked { get; set; }
-
-		/// <summary>
-		///     最后修改人
-		/// </summary>
-		[JsonProperty("last_modified_by")]
-		[JsonConverter(typeof(ArrayWrapperConverter))]
-		[ForeignKey(typeof(Staff))]
-		[Generated]
-		public string LastModifierId { get; set; }
-
-		/// <summary>
-		///     创建人
-		/// </summary>
-		[JsonProperty("created_by")]
-		[JsonConverter(typeof(ArrayWrapperConverter))]
-		[ForeignKey(typeof(Staff))]
-		[Generated]
-		public string CreatorId { get; set; }
 
 		/// <summary>
 		///     负责人

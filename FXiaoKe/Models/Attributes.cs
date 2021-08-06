@@ -8,7 +8,7 @@ namespace FXiaoKe.Models {
 	public class ModelAttribute : FXiaoKeAttribute {
 		public ModelAttribute(string name = null) => Name = name;
 
-		public string Name { get; init; }
+		public string Name { get; }
 
 		public bool Custom { get; init; }
 	}
