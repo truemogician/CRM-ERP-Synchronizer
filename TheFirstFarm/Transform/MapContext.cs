@@ -22,13 +22,21 @@ namespace TheFirstFarm.Transform {
 
 		public string ConnectionString { get; }
 
+		public DbSet<ContactMap> ContactMaps { get; set; }
+
 		public DbSet<CustomerMap> CustomerMaps { get; set; }
 
 		public DbSet<StaffMap> StaffMaps { get; set; }
 
 		public DbSet<ProductMap> ProductMaps { get; set; }
 
-		public DbSet<ReturnOrderMap> ReturnOrderMap { get; set; }
+		public DbSet<ReturnOrderMap> ReturnOrderMaps { get; set; }
+
+		public DbSet<SalesOrderMap> SalesOrderMaps { get; set; }
+
+		public DbSet<DeliveryOrderMap> DeliveryOrderMaps { get; set; }
+
+		public DbSet<InvoiceMap> InvoiceMaps { get; set; }
 
 		public static IEnumerable<PropertyInfo> MapInfos {
 			get {
