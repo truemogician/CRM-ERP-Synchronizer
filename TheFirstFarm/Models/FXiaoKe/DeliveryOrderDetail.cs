@@ -7,7 +7,7 @@ namespace TheFirstFarm.Models.FXiaoKe {
 	/// <summary>
 	///     发货单明细
 	/// </summary>
-	[Model("object_y7oXT__c")]
+	[Model("object_y7oXT__c", Custom = true)]
 	public class DeliveryOrderDetail : CrmModelBase {
 		/// <summary>
 		///     发货单明细号
@@ -15,14 +15,14 @@ namespace TheFirstFarm.Models.FXiaoKe {
 		[JsonProperty("name")]
 		[MainField]
 		[RegularExpression(@"FHMX-\d{8}-\d{3,}")]
-		[Required]
+		[Generated]
 		public string Number { get; set; }
 
 		/// <summary>
 		///     金蝶分录ID
 		/// </summary>
 		[JsonProperty("field_flnm__c")]
-		public string KingdeeId { get; set; }
+		public int? KingdeeId { get; set; }
 
 		/// <summary>
 		///     物料编码
